@@ -1,0 +1,15 @@
+html {
+    display: table;
+    margin: auto;
+    background-repeat: no-repeat;
+    background-position: center top;
+}
+
+body {
+    margin-left: 30px;
+    margin-right: 30px;
+    width: 800px;
+    display: table-cell;
+    vertical-align: middle;
+    overflow: scroll
+}
