@@ -8,7 +8,10 @@ import Network.Wai.Middleware.Static (staticPolicy, noDots, addBase, (>->))
 import Controllers
 
 
-main = scotty 3000 $ do
+main = do
+  svg <- readFile "./static/header.svg"
+  scotty 3000 $ do
   middleware $ staticPolicy (noDots >-> addBase "static")
-  home
-  error404
+  home svg
+  elfeck
+  error404 svg
