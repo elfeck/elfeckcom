@@ -17,17 +17,21 @@ siteHead = docTypeHtml $ do
     title "elfeck"
     meta ! charset "utf-8"
     link ! href "/index.css" ! rel "stylesheet" ! type_ "text/css"
+    link ! href "icon.png" ! rel "icon" ! type_ "image/png"
 
 siteHeader :: String -> Html
 siteHeader headerSvg = do
   div ! class_ "header" $ do
-    preEscapedString headerSvg
-    ul ! class_ "headerleft" $ do
-      headerEntry "elfeck"
-      headerEntry "whyiliketrees"
-    ul ! class_ "headerright" $ do
-      headerEntry "math and stuff"
-      headerEntry "drivel"
+    div ! class_ "headercontainer" $ do
+      ul ! class_ "headerleft" $ do
+        headerEntry "elfeck"
+        headerEntry "whyiliketrees"
+    div ! class_ "headercontainer" $ do
+      preEscapedString headerSvg
+    div ! class_ "headercontainer" $ do
+      ul ! class_ "headerright" $ do
+        headerEntry "math and stuff"
+        headerEntry "drivel"
 
 headerEntry :: String -> Html
 headerEntry name = do
@@ -40,5 +44,4 @@ testBody = div "" ! (class_ "testbody")
 
 site404 :: Html
 site404 = do
-  body $ do
-    div "Sorry nothing to see here. Try a different URL"
+  div "Sorry nothing to see here. Try a different URL"

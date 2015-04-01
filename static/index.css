@@ -3,7 +3,7 @@ html {
     margin: auto;
     background-repeat: no-repeat;
     background-position: center top;
-    background-color: #dddddd;
+    background-color: #eeeeee;
 }
 
 body {
@@ -14,30 +14,28 @@ body {
     display: table-cell;
     vertical-align: middle;
     overflow: scroll;
-    border-style: solid;
-    border-color: black;
-    border-width: 0px;
-    border-left-width: 2px;
-    border-right-width: 2px;
     padding: 0px;
-}
-
-div.header {
-    position: relative;
-    height: 150px;
 }
 
 div.testbody {
     width: auto;
-    height: 1000px;
-    background-color: #ffb9d2;
+    height: 600px;
+    margin-top: 0px;
+    background-color: #d4d4d4;
+}
+
+div.header {
+    margin-top: 5px;
+    height: 125px;
+}
+
+div.headercontainer {
+    display: inline-block;
+    width: auto;
 }
 
 ul.headerleft {
     display: table;
-    position: absolute;
-    bottom: 15px;
-    left: 0px;
     width: 300px;
     margin: 0px;
     padding: 0px;
@@ -45,9 +43,6 @@ ul.headerleft {
 
 ul.headerright {
     display: table;
-    position: absolute;
-    bottom: 15px;
-    left: 500px;
     width: 300px;
     margin: 0px;
     padding: 0px;
@@ -60,7 +55,7 @@ li.headerentry {
 }
 
 a.headerlink {
-    color: #ffc6dd;
+    color: #d27b63;
     text-decoration: none;
     font-size: 20px;
 }
