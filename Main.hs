@@ -13,5 +13,7 @@ main = do
   scotty 3000 $ do
   middleware $ staticPolicy (noDots >-> addBase "static")
   home svg
+  edit svg
+  editsubmit
   elfeck
   error404 svg

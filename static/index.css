@@ -18,7 +18,7 @@ body {
 }
 
 div.testbody {
-    width: auto;
+    width: 800px;
     height: 600px;
     margin-top: 0px;
     background-color: #d4d4d4;
@@ -57,5 +57,24 @@ li.headerentry {
 a.headerlink {
     color: #d27b63;
     text-decoration: none;
+    font-family: sans-serif;
     font-size: 20px;
+}
+
+textarea.editarea {
+    width: 700px;
+    resize: none;
+    margin-top: 20px;
+    margin-left: 49px;
+    margin-right: 49px;
+    border-width: 1px;
+}
+
+div.editpreview {
+    width: 700px;
+    height: 30px;
+    margin-top: 20px;
+    margin-left: 50px;
+    margin-right: 50px;
+    background-color: white;
 }

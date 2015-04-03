@@ -1,4 +1,24 @@
 elfeckcom
-================================================================================
+===============================================================================
 (*) This is the source for my new website. You might visit it at elfeck.com
 (*) I'm not good at haskell and/or scotty so don't expect much
+
+
+content format
+===============================================================================
+(*) Meta
+    > Creation Time Stamp
+    > Modify Time Stamp
+    > Access level
+    > Type
+    > Categories
+
+(*) Content
+    > Title
+    > Subtitle
+    > Body
+
+(*) Elements
+    > Link, Image, inline-HTML
+    > Newline, Paragraph-Space
+    > Caption

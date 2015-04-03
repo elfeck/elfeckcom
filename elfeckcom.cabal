@@ -16,4 +16,4 @@ executable elfeckcom
                        , scotty
                        , blaze-html
                        , wai-middleware-static
-                       , xml
+                       , split
