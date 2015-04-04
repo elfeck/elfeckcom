@@ -17,13 +17,6 @@ body {
     padding: 0px;
 }
 
-div.testbody {
-    width: 800px;
-    height: 600px;
-    margin-top: 0px;
-    background-color: #d4d4d4;
-}
-
 div.header {
     margin-top: 5px;
     height: 125px;
@@ -61,20 +54,22 @@ a.headerlink {
     font-size: 20px;
 }
 
-textarea.editarea {
-    width: 700px;
-    resize: none;
-    margin-top: 20px;
-    margin-left: 49px;
-    margin-right: 49px;
-    border-width: 1px;
+div.testbody {
+    width: 800px;
+    height: 600px;
+    margin-top: 0px;
+    background-color: #d4d4d4;
+    text-align: justify;
 }
 
-div.editpreview {
-    width: 700px;
-    height: 30px;
-    margin-top: 20px;
-    margin-left: 50px;
-    margin-right: 50px;
-    background-color: white;
+div.headline {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+div.parag {
+    font-size: 14px;
+    margin: 0px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }

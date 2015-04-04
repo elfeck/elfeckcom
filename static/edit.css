@@ -1,0 +1,52 @@
+div.editbody {
+    width: 800px;
+    height: auto;
+    margin-top: 0px;
+    padding-bottom: 20px;
+    background-color: #d4d4d4;
+    text-align: justify;
+}
+
+input.editin {
+    height: 18px;
+    margin-top: 20px;
+    border-width: 1px;
+    padding: 0px;
+}
+
+input#edittitle {
+    width: 200px;
+    margin-left: 49px;
+}
+
+input#editcategories {
+    width: 288px;
+    margin-left: 10px;
+}
+
+textarea#editarea {
+    width: 500px;
+    height: 200px;
+    resize: none;
+    padding: 0px;
+    margin: 0px;
+    margin-top: 10px;
+    margin-left: 49px;
+    margin-right: 49px;
+    border-width: 1px;
+}
+
+div#editpreview {
+    width: 700px;
+    height: auto;
+    min-height: 100px;
+    margin: 0px;
+    margin-top: 10px;
+    margin-left: 49px;
+    margin-right: 49px;
+    border-width: 1px;
+    border-color: grey;
+    border-style: dashed;
+    background-color: white;
+    word-wrap:break-word;
+}

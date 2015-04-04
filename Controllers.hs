@@ -8,6 +8,7 @@ import Text.Blaze.Html5 (Html)
 import Text.Blaze.Html.Renderer.Text (renderHtml)
 
 import View
+import EditParser
 
 
 home :: String -> ScottyM()
@@ -20,15 +21,18 @@ elfeck :: ScottyM()
 elfeck = get "/elfeck" $ redirect "/"
 
 edit :: String -> ScottyM()
-edit svg = get "/edit" $ blaze $ do
+edit svg = get "/edit/" $ blaze $ do
   siteHead
   siteHeader svg False
   siteEdit
 
 editsubmit :: ScottyM()
 editsubmit = post "/edit/submit" $ do
-  editContent <- param "content" `rescue` (\msg -> return msg)
-  json ("okay" :: String)
+  editTitle <- param "dat[title]" `rescue` m
+  editCategories <- param "dat[categories]" `rescue` m
+  editContent <- param "dat[content]" `rescue` m
+  json $ parseEdit [editTitle, editCategories, editContent]
+  where m = (\msg -> return msg)
 
 error404 :: String -> ScottyM()
 error404 svg = notFound $ blaze $ do

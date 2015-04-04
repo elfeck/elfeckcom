@@ -7,7 +7,7 @@ import Text.Blaze.Html (preEscapedString, string, stringValue)
 import Text.Blaze.Html5 (Html, (!), docTypeHtml,
                          head, meta, title, link, script,
                          body, div, img, ul, li, a,
-                         textarea)
+                         textarea, input)
 import Text.Blaze.Html5.Attributes (charset,
                                     href, rel, src, type_, class_, id)
 
@@ -17,8 +17,9 @@ siteHead = docTypeHtml $ do
   head $ do
     title "elfeck"
     meta ! charset "utf-8"
-    link ! href "index.css" ! rel "stylesheet" ! type_ "text/css"
-    link ! href "icon.png" ! rel "icon" ! type_ "image/png"
+    link ! href "/index.css" ! rel "stylesheet" ! type_ "text/css"
+    link ! href "/edit.css" ! rel "stylesheet" ! type_ "text/css"
+    link ! href "/icon.png" ! rel "icon" ! type_ "image/png"
 
 siteHeader :: String -> Bool -> Html
 siteHeader headerSvg True = do
@@ -57,8 +58,10 @@ site404 = do
 
 siteEdit :: Html
 siteEdit = do
-  script "" ! src "jquery-2.1.3.min.js"
-  script "" ! src "edit.js"
-  div ! class_ "testbody" $ do
-    textarea "" ! class_ "editarea" ! id "editarea"
-    div "" ! class_ "editpreview"
+  script "" ! src "/jquery-2.1.3.min.js"
+  script "" ! src "/edit.js"
+  div ! class_ "editbody" $ do
+    input ! class_ "editin" ! id "edittitle"
+    input ! class_ "editin" ! id "editcategories"
+    textarea "" ! id "editarea"
+    div "" ! id "editpreview"

@@ -1,22 +1,32 @@
 $(function() {
-    var ta = $("#editarea");
-    ta.on("keyup", function() {
+    var tit = $("#edittitle");
+    var cat = $("#editcategories");
+    var cont = $("#editarea");
+    var preview = $("#editpreview");
+
+    submitFun = function() {
 	var dataObj = {
-	    content: ta.val()
+	    title: tit.val(),
+	    categories: cat.val(),
+	    content: cont.val()
 	};
 	$.ajax({
 	    type: "POST",
 	    url: "/edit/submit",
 	    dataType: "json",
 	    data: {
-		o: dataObj
+		dat: dataObj
 	    },
 	    success: function(data) {
-		console.log("yey success " + data);
+		console.log("Got json!");
+		preview.html(data);
 	    },
 	    error: function() {
 		console.log("nooo error");
 	    }
 	});
-    });
+    };
+    tit.on("keyup", submitFun);
+    cat.on("keyup", submitFun);
+    cont.on("keyup", submitFun);
 });

@@ -15,10 +15,22 @@ content format
 
 (*) Content
     > Title
-    > Subtitle
-    > Body
+    > Categories
+    > Content
 
 (*) Elements
     > Link, Image, inline-HTML
     > Newline, Paragraph-Space
     > Caption
+
+(*) To Handle
+    > Headline		==
+    > Linebreaks	double space
+    > New paragraph	empty line
+    > i	  		* *
+    > b			** **
+    > link		[name](url)
+    > img		![name](url)
+
+    1. Lines the text
+    2. Seperate on == and empty line
