@@ -8,10 +8,9 @@ import Text.Blaze.Html.Renderer.Text (renderHtml)
 import Data.Text.Lazy (toStrict)
 import Network.Wai.Middleware.Static (staticPolicy, addBase)
 import Web.Spock.Safe hiding (head)
-import Web.Spock.Shared
-
 
 import View
+
 
 main :: IO ()
 main = do
@@ -28,15 +27,19 @@ handleRoutes :: MonadIO m => [String] -> SpockT m ()
 handleRoutes files = do
   get root $ blaze $ do
     siteHead
-    siteHeader (head files) True
+    siteHeader (head files)
     testBody
   get "edit" $ blaze $ do
     siteHead
-    siteHeader (head files) False
+    infBackHeader (head files) "edit"
     siteEdit
+  get "login" $ blaze $ do
+    siteHead
+    infBackHeader (head files) "login"
+    siteLogin
   hookAny GET $ \_ -> blaze $ do
     siteHead
-    siteHeader (head files) False
+    emptyHeader (head files)
     site404
 
 blaze :: MonadIO m => Html -> ActionT m a
