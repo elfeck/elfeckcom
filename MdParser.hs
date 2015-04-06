@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module EditParser where
+module MdParser where
 
 import Prelude hiding (div, id)
 import Data.Maybe
