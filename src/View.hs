@@ -11,7 +11,6 @@ import Text.Blaze.Html5 (Html, (!), docTypeHtml,
 import Text.Blaze.Html5.Attributes (charset,
                                     href, rel, src, type_, class_, id)
 
-
 siteHead :: Html
 siteHead = docTypeHtml $ head $ do
   title "elfeck"
