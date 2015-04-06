@@ -22,7 +22,7 @@ parseCategories "" = Nothing
 parseCategories cat = Just $ div (toHtml cat)
 
 parseContent :: L.Text -> Maybe Html
-parseContent cont = case docToHtml $ parseToDoc cont of
+parseContent cont = case docToHtml $ parseMd cont of
   Nothing -> Nothing
   Just xs -> Just (toHtml $ xs)
 
@@ -34,10 +34,9 @@ parseEdit content = renderHtml $ do
   where putHtml (Just h) = h
         putHtml Nothing = return ()
 
-docToHtml :: Docum -> Maybe [Html]
+docToHtml :: Doc -> Maybe [Html]
 docToHtml [] = Nothing
 docToHtml doc = Just $ map secToHtml doc
 
-secToHtml :: Section -> Html
-secToHtml (Headl t) = div (toHtml t) ! class_ "headline"
-secToHtml (Parag t) = div (toHtml t) ! class_ "parag"
+secToHtml :: Block -> Html
+secToHtml b = undefined
