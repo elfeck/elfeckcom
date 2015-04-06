@@ -23,6 +23,7 @@ type Doc = [Block]
 data Block = Par [Ele]
            | Hdl [Ele]
            deriving Show
+
 data Ele = Plain L.Text
          | Italic L.Text
          deriving Show
@@ -36,7 +37,6 @@ main = do
 {-
  Docum to the real stuff
 -}
---bla :: Section -> Block
 docToReal :: Docum -> Doc
 docToReal doc = map bla doc
 
@@ -45,7 +45,7 @@ bla (Parag t) = Par $ kla t False []
 
 kla :: L.Text -> Bool -> [Ele] -> [Ele]
 kla "" _ acc = reverse acc
-kla t False []
+kla t _ []
   | c == "*" && lookahead (L.tail t) = kla (L.tail t) True [Italic ""]
   | otherwise = kla (L.tail t) False [Plain c]
   where c = L.singleton $ L.head t
@@ -60,6 +60,7 @@ kla t True (h : acc)
   where c = L.singleton $ L.head t
 
 lookahead = L.isInfixOf "*"
+
 concatEle (Plain t) tn = Plain $ L.append t tn
 concatEle (Italic t) tn = Italic $ L.append t tn
 
