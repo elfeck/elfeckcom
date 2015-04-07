@@ -75,11 +75,13 @@ siteEdit = do
 siteLogin :: Html
 siteLogin = do
   script "" ! src "/jquery-2.1.3.min.js"
-  script "" ! src "/edit.js"
+  script "" ! src "/login.js"
   div ! class_ "logbody" $ do
     div "name ~"! class_ "loginfo"
     input ! class_ "login" ! id "logname" ! type_ "text"
     div "" ! class_ "loginspacer"
     div "pass ~"! class_ "loginfo"
     input ! class_ "login" ! id "logpw" ! type_ "password"
-    div "login" ! id "logbut"
+    div ! class_ "logrespcont" $ do
+      div "login" ! id "logbut" ! class_ "logbutidle"
+      div "" ! id "logresponse"

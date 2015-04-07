@@ -1,1 +1,42 @@
- 
+$(function() {
+    var logname = $("#logname");
+    var logpw = $("#logpw");
+    var logbut = $("#logbut");
+    var logresponse = $("#logresponse");
+    logbut.attr("unselectable", "on");
+
+    function doLogin() {
+	if(logpw.val() == "" && logname.val() == "") {
+	    logresponse.html("tell me your login info");
+	} else if(logname.val() == "") {
+	    logresponse.html("tell me your name");
+	} else if(logpw.val() == "") {
+	    logresponse.html("tell me your password (shh)");
+	} else {
+	    logresponse.html("trying to log you in");
+	    // do json
+	}
+    };
+
+    logbut.on("mouseenter", function() {
+	logbut.removeClass("logbutidle");
+	logbut.addClass("logbuthover");
+    });
+    logbut.on("mouseout", function() {
+	logbut.removeClass("logbutpress");
+	logbut.removeClass("logbuthover");
+	logbut.addClass("logbutidle");
+    });
+    logbut.on("mousedown", function() {
+	logbut.removeClass("logbuthover");
+	logbut.addClass("logbutpress");
+    });
+    logbut.on("mouseup", function() {
+	logbut.removeClass("logbutpress");
+	logbut.addClass("logbuthover");
+	doLogin();
+    });
+    $(document).keypress(function(event) {
+	if(event.keyCode == 13) doLogin();
+    });
+});
