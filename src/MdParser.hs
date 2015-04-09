@@ -26,7 +26,7 @@ data PState = SItalic
             deriving (Eq, Show)
 
 main = do
-  f <- readFile "test.txt"
+  f <- readFile "src/test.txt"
   --print $ parseToDoc $ L.pack f
   print $ parseMd $ L.pack f
 

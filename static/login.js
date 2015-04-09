@@ -14,7 +14,24 @@ $(function() {
 	    logresponse.html("tell me your password (shh)");
 	} else {
 	    logresponse.html("trying to log you in");
-	    // do json
+	    var dataObj = {
+		name: logname.val(),
+		pass: logpw.val()
+	    };
+	    $.ajax({
+		type: "POST",
+		url: "/login/submit",
+		dataType: "json",
+		data: {
+		    dat: dataObj
+		},
+		success: function(data) {
+		    logresponse.html(data);
+		},
+		error: function() {
+		    console.log("nooo error");
+		}
+	    });
 	}
     };
 
