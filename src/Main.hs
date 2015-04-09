@@ -3,22 +3,34 @@
 module Main where
 
 import Control.Monad.IO.Class
+import Control.Monad.Logger
 import Text.Blaze.Html (Html)
 import Text.Blaze.Html.Renderer.Text (renderHtml)
+import Data.Maybe
 import Data.Text.Lazy (toStrict, fromStrict)
 import qualified Data.Text as T
 import Network.Wai.Middleware.Static (staticPolicy, addBase)
 import Web.Spock.Safe hiding (head)
-import Data.Maybe
+import Web.Spock.Shared
+import Database.Persist.Sqlite hiding (get)
 
 import View
 import EntryParser
+import Model
 
 main :: IO ()
 main = do
   svg <- readFile "static/header.svg"
   let files = [svg]
-  runSpock 3000 $ spockT id $ app files
+  pool <- runNoLoggingT $ createSqlitePool "elfeck.db" 5
+  runNoLoggingT $ runSqlPool (runMigration migrateCore) pool
+  runSpock 3000 $ spock sessConfig (PCPool pool) Nothing (app files)
+    where sessConfig = SessionCfg { sc_cookieName = "elfeckcom"
+                                  , sc_sessionTTL = 60 * 5 * 50
+                                  , sc_sessionIdEntropy = 40
+                                  , sc_emptySession = Nothing
+                                  , sc_persistCfg = Nothing
+                                  }
 
 app :: MonadIO m => [String] -> SpockT m ()
 app files = do
@@ -31,6 +43,7 @@ handleRoutes files = do
     siteHead
     siteHeader (head files)
     testBody
+  get "elfeck" $ redirect "/"
   get "edit" $ blaze $ do
     siteHead
     infBackHeader (head files) "edit"
