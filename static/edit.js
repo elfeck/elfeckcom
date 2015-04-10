@@ -12,7 +12,7 @@ $(function() {
 	};
 	$.ajax({
 	    type: "POST",
-	    url: "/edit/submit",
+	    url: "/edit/preview",
 	    dataType: "json",
 	    data: {
 		dat: dataObj
