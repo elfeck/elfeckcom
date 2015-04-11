@@ -52,6 +52,21 @@ loginUser name pass = do
    Nothing ->
      return Nothing
 
+logoutUser :: UserId -> SqlPersistM ()
+logoutUser userId = deleteWhere [SessionUserId ==. userId]
+
+loadUser :: SessionId -> SqlPersistM (Maybe (UserId, User))
+loadUser sessId = do
+  mSess <- get sessId
+  now <- liftIO getCurrentTime
+  case mSess of
+   Just sess ->
+     if sessionValidUntil sess > now
+     then do mUser <- get (sessionUserId sess)
+             return $ fmap (\user -> (sessionUserId sess, user)) mUser
+     else return Nothing
+   Nothing -> return Nothing
+
 createSession :: UserId -> SqlPersistM SessionId
 createSession userId = do
   now <- liftIO getCurrentTime
@@ -63,7 +78,7 @@ createUser name pass access = do
   case mName of
    Just _ -> return "Username taken"
    Nothing -> do
-     _ <- insert (User name pass access)
+     insert (User name pass access)
      return "User created"
 
 runSQL :: (HasSpock m, SpockConn m ~ SqlBackend) =>

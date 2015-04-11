@@ -15,10 +15,10 @@ siteHead :: Html
 siteHead = docTypeHtml $ head $ do
   title "elfeck"
   meta ! charset "utf-8"
-  link ! href "/index.css" ! rel "stylesheet" ! type_ "text/css"
-  link ! href "/edit.css" ! rel "stylesheet" ! type_ "text/css"
-  link ! href "/login.css" ! rel "stylesheet" ! type_ "text/css"
-  link ! href "/icon.png" ! rel "icon" ! type_ "image/png"
+  link ! href "/css/index.css" ! rel "stylesheet" ! type_ "text/css"
+  link ! href "/css/edit.css" ! rel "stylesheet" ! type_ "text/css"
+  link ! href "/css/login.css" ! rel "stylesheet" ! type_ "text/css"
+  link ! href "/img/icon.png" ! rel "icon" ! type_ "image/png"
 
 siteHeader :: String -> Html
 siteHeader headerSvg = do
@@ -64,8 +64,8 @@ site404 = div "Sorry nothing to see here" ! class_ "testbody"
 
 siteEdit :: Html
 siteEdit = do
-  script "" ! src "/jquery-2.1.3.min.js"
-  script "" ! src "/edit.js"
+  script "" ! src "/js/jquery-2.1.3.min.js"
+  script "" ! src "/js/edit.js"
   div ! class_ "editbody" $ do
     input ! class_ "editin" ! id "edittitle"
     input ! class_ "editin" ! id "editcategories"
@@ -74,8 +74,8 @@ siteEdit = do
 
 siteLogin :: Html
 siteLogin = do
-  script "" ! src "/jquery-2.1.3.min.js"
-  script "" ! src "/login.js"
+  script "" ! src "/js/jquery-2.1.3.min.js"
+  script "" ! src "/js/login.js"
   div ! class_ "logbody" $ do
     div "name ~"! class_ "loginfo"
     input ! class_ "login" ! id "logname" ! type_ "text"

@@ -25,7 +25,7 @@ type BlogAction a = SpockAction SqlBackend SessionVal BlogState a
 
 main :: IO ()
 main = do
-  svg <- readFile "static/header.svg"
+  svg <- readFile "static/img/header.svg"
   let files = [svg]
   pool <- runNoLoggingT $ createSqlitePool "elfeck.db" 5
   runNoLoggingT $ runSqlPool (runMigration migrateCore) pool
@@ -40,16 +40,17 @@ main = do
 app :: [String] -> BlogApp
 app files = do
   middleware (staticPolicy (addBase "static"))
-  handleRoutes files
+  handleGets files
+  handlePosts
 
-handleRoutes ::[String] -> BlogApp
-handleRoutes files = do
+handleGets ::[String] -> BlogApp
+handleGets files = do
   get root $ blaze $ do
     siteHead
     siteHeader (head files)
     testBody
   get "elfeck" $ redirect "/"
-  get "edit" $ blaze $ do
+  get "edit" $ requireUserRight 5 $ blaze $ do
     siteHead
     infBackHeader (head files) "edit"
     siteEdit
@@ -57,7 +58,14 @@ handleRoutes files = do
     siteHead
     infBackHeader (head files) "login"
     siteLogin
-  handlePosts
+  get "logout" $ do
+    user <- loadUserSession
+    case user of
+     Nothing -> redirect "/"
+     Just (userId, _) -> do
+       runSQL $ logoutUser userId
+       writeSession Nothing
+       redirect "/"
   hookAny GET $ \_ -> blaze $ do
     siteHead
     emptyHeader (head files)
@@ -86,9 +94,6 @@ handlePosts = do
           sessId <- runSQL $ createSession userId
           writeSession (Just sessId)
           loginResponse True
-  post "logout/submit" $ do
-    -- destroy session of whatever
-    return ()
   where errorJson = json $ ("error in sent json" :: T.Text)
 
 editResponse xs = json $ parseEdit (map fromStrict xs)
@@ -108,6 +113,34 @@ findParams xs names = map (findParam xs) names
 checkJson :: [Maybe T.Text] -> Maybe [T.Text]
 checkJson xs | null $ filter isNothing xs = Just (map fromJust xs)
              | otherwise = Nothing
+
+requireLogin :: BlogAction a -> BlogAction a
+requireLogin action = do
+  user <- loadUserSession
+  case user of
+   Nothing -> redirect "/login"
+   Just _ -> action
+
+requireUserRight :: Int -> BlogAction a -> BlogAction a
+requireUserRight reqAccess action = do
+  user <- loadUserSession
+  case user of
+   Nothing -> redirect "/login"
+   Just user ->
+     case checkUserRight user reqAccess of
+      False -> redirect "/accessDenied"
+      True -> action
+
+loadUserSession :: BlogAction (Maybe (UserId, User))
+loadUserSession = do
+  sess <- readSession
+  case sess of
+   Nothing -> return Nothing
+   Just sid -> do mUser <- runSQL $ loadUser sid
+                  return mUser
+
+checkUserRight :: (UserId, User) -> Int -> Bool
+checkUserRight (_, user) reqAccess = userAccess user >= reqAccess
 
 blaze :: MonadIO m => Html -> ActionT m a
 blaze = html . toStrict . renderHtml
