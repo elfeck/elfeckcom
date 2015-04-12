@@ -7,6 +7,18 @@ div.editbody {
     text-align: justify;
 }
 
+div.editleft {
+    display: inline-block;
+    width: 550px;
+}
+
+div.editright {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 10px;
+    width: 240px;
+}
+
 input.editin {
     height: 18px;
     margin-top: 20px;
@@ -16,12 +28,29 @@ input.editin {
 
 input#edittitle {
     width: 200px;
-    margin-left: 49px;
+    margin-left: 48px;
 }
 
 input#editcategories {
-    width: 288px;
+    width: 200px;
     margin-left: 10px;
+}
+
+input#edittype {
+    width: 32px;
+    margin-left: 10px;
+    text-align: center;
+}
+
+input#editaccess {
+    width: 32px;
+    margin-left: 10px;
+    text-align: center;
+}
+
+input#editid {
+    width: 32px;
+    text-align: center;
 }
 
 textarea#editarea {
@@ -31,8 +60,7 @@ textarea#editarea {
     padding: 0px;
     margin: 0px;
     margin-top: 10px;
-    margin-left: 49px;
-    margin-right: 49px;
+    margin-left: 48px;
     border-width: 1px;
 }
 
@@ -48,4 +76,26 @@ div#editpreview {
     border-color: grey;
     border-style: dashed;
     word-wrap:break-word;
+}
+
+select.editselect {
+    width: 188px;
+    height: 202px;
+    margin-top: 10px;
+}
+
+div#submitbutton {
+    margin-left: 10px;
+    display: inline-block;
+    vertical-align: bottom;
+    width: 67px;
+    height: 18px;
+}
+
+div#deletebutton {
+    margin-left: 6px;
+    display: inline-block;
+    vertical-align: bottom;
+    width: 67px;
+    height: 18px;
 }

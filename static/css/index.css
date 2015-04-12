@@ -72,7 +72,7 @@ div.testbody {
 }
 
 div.footer {
-    height: 16px;
+    height: 18px;
     background-color: #d4d4d4;
     text-align: center;
     font-size: 12px;
@@ -107,4 +107,34 @@ div.usersep {
     display: inline-block;
     margin-left: 3px;
     margin-right: 3px;
+}
+
+div.button {
+    display: inline-block;
+    text-align: center;
+    border-style: solid;
+    border-width: 1px;
+    cursor: pointer;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+div.buttonidle {
+    background-color: white;
+    border-width: 1px;
+    border-color: grey;
+}
+
+div.buttonhover {
+    background-color: white;
+    border-width: 1px;
+    border-color: black;
+}
+
+div.buttonpress {
+    border-color: black;
+    border-width: 1px;
+    background: #eeeeee;
 }

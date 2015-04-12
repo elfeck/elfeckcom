@@ -10,7 +10,9 @@ div.logbody {
 div.loginfo {
     display: inline-block;
     width: 50px;
-    margin-left: 274px;
+    margin-left: 269px;
+    text-align: right;
+    margin-right: 5px;
 }
 
 div.loginspacer {
@@ -19,7 +21,6 @@ div.loginspacer {
 }
 
 div#logbut {
-    display: inline-block;
     vertical-align: bottom;
     width: 60px;
     height: 20px;
@@ -27,32 +28,8 @@ div#logbut {
     margin-top: 10px;
     margin-left: 274px;
     text-align: center;
-    border-style: solid;
-    border-width: 1px;
-    cursor: pointer;
-    -moz-user-select: -moz-none;
-    -khtml-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
 }
 
-div.logbutidle {
-    background-color: white;
-    border-width: 1px;
-    border-color: grey;
-}
-
-div.logbuthover {
-    background-color: white;
-    border-width: 2px;
-    border-color: black;
-}
-
-div.logbutpress {
-    border-color: black;
-    border-width: 2px;
-    background: #eeeeee;
-}
 
 div#logresponse {
     display: inline-block;
@@ -68,4 +45,5 @@ input.login {
     height: 18px;
     border-width: 1px;
     padding: 0px;
+    text-align: center;
 }

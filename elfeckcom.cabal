@@ -23,6 +23,7 @@ executable elfeckcom
                        , persistent-template == 2.1.*
                        , persistent-sqlite == 2.1.*
                        , time
+                       , old-locale
                        , monad-logger
                        , resourcet
   hs-source-dirs:      src

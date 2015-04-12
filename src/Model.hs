@@ -16,6 +16,7 @@ import Control.Monad.Trans.Resource
 import Database.Persist.TH
 import qualified Data.Text as T
 import Data.Time
+import System.Locale
 import Web.Spock.Shared hiding (SessionId)
 
 import Database.Persist.Sql
@@ -31,6 +32,7 @@ User
   pass T.Text
   access Int
   UniqueUsername name
+  deriving Show
 Post
   title T.Text Maybe
   categories [T.Text] Maybe
@@ -39,6 +41,7 @@ Post
   crtDate UTCTime
   ptype Int
   access Int
+  deriving Show
 |]
 
 loginUser :: T.Text -> T.Text -> SqlPersistM (Maybe UserId)
@@ -80,6 +83,16 @@ createUser name pass access = do
    Nothing -> do
      insert (User name pass access)
      return "User created"
+
+createPost :: [T.Text] -> SqlPersistM T.Text
+createPost postParam = do
+  
+  return "Post created"
+
+queryAllPosts :: SqlPersistM ([(PostId, Post)])
+queryAllPosts = do
+  rows <- selectList [] [Desc PostModDate]
+  return $ map (\r -> (entityKey r, entityVal r)) rows
 
 runSQL :: (HasSpock m, SpockConn m ~ SqlBackend) =>
           SqlPersistT (NoLoggingT (ResourceT IO)) a -> m a

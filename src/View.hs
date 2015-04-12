@@ -4,16 +4,19 @@ module View where
 
 import Prelude hiding (div, head, id)
 import Data.Maybe
+import System.Locale (defaultTimeLocale)
+import Data.Time.Format
 import qualified Data.Text as T
 import Text.Blaze.Html (preEscapedString, string, stringValue, toHtml)
 import Text.Blaze.Html5 (Html, (!), docTypeHtml,
                          head, meta, title, link, script,
                          body, div, img, ul, li, a,
-                         textarea, input)
+                         textarea, input, select, option)
 import Text.Blaze.Html5.Attributes (charset,
-                                    href, rel, src, type_, class_, id, style)
+                                    href, rel, src, type_, class_, id, style,
+                                    multiple, readonly)
 
-import Model (User, UserId, userName)
+import Model
 
 siteHead :: Html
 siteHead = docTypeHtml $ head $ do
@@ -53,14 +56,21 @@ infBackHeader headerSvg inf = do
       li ! class_ "headerentry" $ ""
       li ! class_ "headerentry" $ a "home" ! href "/" ! class_ "headerlink"
 
-siteFooter :: Maybe (UserId, User) -> Html
+
+headerEntry :: String -> Html
+headerEntry name =
+  li ! class_ "headerentry" $
+  a (toHtml name) ! href (stringValue ("/" ++ [a | a <- name, a /= ' '])) !
+  class_ "headerlink"
+
+siteFooter :: Maybe User -> Html
 siteFooter muser = do
   div ! class_ "footer" $ do
     div ! class_ "userinfo" $ "["
     wrapContainer $ do
       div "built with" ! class_ "footerinfo"
       a " Spock " ! class_ "footerlink" ! href "http://www.spock.li/"
-      div "written in haskell" ! class_ "footerinfo"
+      div "& written in haskell" ! class_ "footerinfo"
     div ! class_ "usersep" $ "|"
     wrapContainer $ a "impressum" ! class_ "footerlink" ! href "/impressum"
     if isNothing muser
@@ -71,7 +81,7 @@ siteFooter muser = do
               spacer
     case muser of
      Nothing -> return ()
-     Just (_, user) -> do
+     Just user -> do
        wrapContainer $ a "edit" ! class_ "userlink" ! href "/edit"
        div ! class_ "usersep" $ "|"
        wrapContainer $ a "users" ! class_ "userlink" ! href "/manage"
@@ -84,38 +94,50 @@ siteFooter muser = do
 wrapContainer a = div ! class_ "footercont" $ a
 spacer = div "[" ! class_ "footerspacer"
 
-headerEntry :: String -> Html
-headerEntry name =
-  li ! class_ "headerentry" $
-  a (toHtml name) ! href (stringValue ("/" ++ [a | a <- name, a /= ' '])) !
-  class_ "headerlink"
-
 testBody :: Html
 testBody = div "" ! class_ "testbody"
 
 site404 :: Html
 site404 = div "Sorry nothing to see here" ! class_ "testbody"
 
-siteEdit :: Html
-siteEdit = do
+siteEdit :: [(PostId, Post)] -> Html
+siteEdit posts = do
   script "" ! src "/js/jquery-2.1.3.min.js"
+  script "" ! src "/js/button.js"
   script "" ! src "/js/edit.js"
   div ! class_ "editbody" $ do
-    input ! class_ "editin" ! id "edittitle"
-    input ! class_ "editin" ! id "editcategories"
-    textarea "" ! id "editarea"
+    div ! class_ "editleft" $ do
+      input ! class_ "editin" ! id "edittitle"
+      input ! class_ "editin" ! id "editcategories"
+      input ! class_ "editin" ! id "edittype"
+      input ! class_ "editin" ! id "editaccess"
+      textarea "" ! id "editarea"
+    div ! class_ "editright" $ do
+      input ! class_ "editin" ! id "editid" ! readonly "readonly"
+      div ! id "submitbutton" ! class_ "button buttonidle" $ "submit"
+      div ! id "deletebutton" ! class_ "button buttonidle" $ "delete"
+      select ! class_ "editselect" ! multiple "multiple" $ do
+        option "[new post]"
+        toHtml $ map postToSelect posts
     div "" ! id "editpreview"
+
+postToSelect :: (PostId, Post) -> Html
+postToSelect (id, post) = case postTitle post of
+  Nothing -> option $ toHtml (T.append "post modf=" (form (postModDate post)))
+  Just title -> option $ toHtml title
+  where form date = T.pack $ formatTime defaultTimeLocale "%F %R" date
 
 siteLogin :: Html
 siteLogin = do
   script "" ! src "/js/jquery-2.1.3.min.js"
+  script "" ! src "/js/button.js"
   script "" ! src "/js/login.js"
   div ! class_ "logbody" $ do
-    div "name ~"! class_ "loginfo"
+    div "name"! class_ "loginfo"
     input ! class_ "login" ! id "logname" ! type_ "text"
     div "" ! class_ "loginspacer"
-    div "pass ~"! class_ "loginfo"
+    div "pass"! class_ "loginfo"
     input ! class_ "login" ! id "logpw" ! type_ "password"
     div ! class_ "logrespcont" $ do
-      div "login" ! id "logbut" ! class_ "logbutidle"
+      div "login" ! id "logbut" ! class_ "button buttonidle"
       div "" ! id "logresponse"

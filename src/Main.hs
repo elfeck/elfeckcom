@@ -30,12 +30,13 @@ main = do
   pool <- runNoLoggingT $ createSqlitePool "elfeck.db" 5
   runNoLoggingT $ runSqlPool (runMigration migrateCore) pool
   runSpock 3000 $ spock sessConfig (PCPool pool) BlogState (app files)
-    where sessConfig = SessionCfg { sc_cookieName = "elfeckcom"
-                                  , sc_sessionTTL = 60 * 5 * 50
-                                  , sc_sessionIdEntropy = 40
-                                  , sc_emptySession = Nothing
-                                  , sc_persistCfg = Nothing
-                                  }
+    where sessConfig =
+            SessionCfg { sc_cookieName = "elfeckcom"
+                       , sc_sessionTTL = 60 * 5 * 50
+                       , sc_sessionIdEntropy = 40
+                       , sc_emptySession = Nothing
+                       , sc_persistCfg = Nothing
+                       }
 
 app :: [String] -> BlogApp
 app files = do
@@ -51,14 +52,16 @@ handleGets files = do
       siteHead
       siteHeader (head files)
       testBody
-      siteFooter muser
+      siteFooter $ fmap snd muser
   get "elfeck" $ redirect "/"
   get "edit" $ do
     muser <- loadUserSession
-    reqRight muser 5 $ blaze $ do
+    posts <- runSQL $ queryAllPosts
+    --reqRight muser 5 $
+    blaze $ do
       siteHead
       infBackHeader (head files) "edit"
-      siteEdit
+      siteEdit posts
   get "login" $ blaze $ do
     siteHead
     infBackHeader (head files) "login"
@@ -80,7 +83,8 @@ handlePosts :: BlogApp
 handlePosts = do
   post "edit/preview" $ do
     muser <- loadUserSession
-    reqRight muser 5 $ do
+    --reqRight' muser 5 $
+    do
       dat <- params
       let chkp = checkJson $ findParams dat ["title", "categories", "content"]
       case chkp of
@@ -88,8 +92,16 @@ handlePosts = do
        Just par -> editResponse par
   post "edit/submit" $ do
     muser <- loadUserSession
-    reqRight muser 5 $ do
-      return ()
+    --reqRight' muser 5 $
+    do
+      dat <- params
+      let chkp = checkJson $ findParams dat ["title", "categories", "content",
+                                             "type", "access"]
+      case chkp of
+       Nothing -> errorJson
+       Just par -> do
+         resp <- runSQL $ createPost par
+         createResponse resp
   post "login/submit" $ do
     dat <- params
     let chkp = checkJson $ findParams dat ["name", "pass"]
@@ -109,6 +121,8 @@ editResponse xs = json $ parseEdit (map fromStrict xs)
 
 loginResponse True =  json (("login success. yey" :: T.Text), True)
 loginResponse False =  json (("wrong login data, try again" :: T.Text), False)
+
+createResponse resp = json resp
 
 findParam :: [(T.Text, T.Text)] -> T.Text -> Maybe T.Text
 findParam [] _ = Nothing
@@ -133,6 +147,13 @@ reqRight (Just (_, user)) reqAccess action =
   if checkUserRight user reqAccess
   then action
   else redirect "/accessDenied"
+
+reqRight' :: Maybe (UserId, User) -> Int -> BlogAction a -> BlogAction a
+reqRight' Nothing _ _ = json ("post error: user not logged in" :: T.Text)
+reqRight' (Just (_, user)) reqAccess action =
+  if checkUserRight user reqAccess
+  then action
+  else json ("post error: user access denied" :: T.Text)
 
 loadUserSession :: BlogAction (Maybe (UserId, User))
 loadUserSession = do
