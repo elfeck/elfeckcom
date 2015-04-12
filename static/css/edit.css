@@ -37,16 +37,15 @@ textarea#editarea {
 }
 
 div#editpreview {
-    width: 700px;
+    width: 800px;
     height: auto;
     min-height: 100px;
     margin: 0px;
     margin-top: 10px;
-    margin-left: 49px;
-    margin-right: 49px;
-    border-width: 1px;
+    border-width: 0px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
     border-color: grey;
     border-style: dashed;
-    background-color: white;
     word-wrap:break-word;
 }

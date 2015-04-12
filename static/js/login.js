@@ -1,6 +1,7 @@
 $(function() {
     var logname = $("#logname");
     logname.val("");
+    logname.focus();
     var logpw = $("#logpw");
     var logbut = $("#logbut");
     var logresponse = $("#logresponse");
@@ -27,7 +28,7 @@ $(function() {
 		    dat: dataObj
 		},
 		success: function(data) {
-		    logresponse.html(data);
+		    logresponse.html(data[0]);
 		    if(data[1] == true)	{
 			window.location.href = "/";
 		    }

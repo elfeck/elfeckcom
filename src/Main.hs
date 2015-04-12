@@ -43,24 +43,29 @@ app files = do
   handleGets files
   handlePosts
 
-handleGets ::[String] -> BlogApp
+handleGets :: [String] -> BlogApp
 handleGets files = do
-  get root $ blaze $ do
-    siteHead
-    siteHeader (head files)
-    testBody
+  get root $ do
+    muser <- loadUserSession
+    blaze $ do
+      siteHead
+      siteHeader (head files)
+      testBody
+      siteFooter muser
   get "elfeck" $ redirect "/"
-  get "edit" $ requireUserRight 5 $ blaze $ do
-    siteHead
-    infBackHeader (head files) "edit"
-    siteEdit
+  get "edit" $ do
+    muser <- loadUserSession
+    reqRight muser 5 $ blaze $ do
+      siteHead
+      infBackHeader (head files) "edit"
+      siteEdit
   get "login" $ blaze $ do
     siteHead
     infBackHeader (head files) "login"
     siteLogin
   get "logout" $ do
-    user <- loadUserSession
-    case user of
+    muser <- loadUserSession
+    case muser of
      Nothing -> redirect "/"
      Just (userId, _) -> do
        runSQL $ logoutUser userId
@@ -74,13 +79,17 @@ handleGets files = do
 handlePosts :: BlogApp
 handlePosts = do
   post "edit/preview" $ do
-    dat <- params
-    let chkp = checkJson $ findParams dat ["title", "categories", "content"]
-    case chkp of
-     Nothing -> errorJson
-     Just par -> editResponse par
+    muser <- loadUserSession
+    reqRight muser 5 $ do
+      dat <- params
+      let chkp = checkJson $ findParams dat ["title", "categories", "content"]
+      case chkp of
+       Nothing -> errorJson
+       Just par -> editResponse par
   post "edit/submit" $ do
-    return ()
+    muser <- loadUserSession
+    reqRight muser 5 $ do
+      return ()
   post "login/submit" $ do
     dat <- params
     let chkp = checkJson $ findParams dat ["name", "pass"]
@@ -114,22 +123,16 @@ checkJson :: [Maybe T.Text] -> Maybe [T.Text]
 checkJson xs | null $ filter isNothing xs = Just (map fromJust xs)
              | otherwise = Nothing
 
-requireLogin :: BlogAction a -> BlogAction a
-requireLogin action = do
-  user <- loadUserSession
-  case user of
-   Nothing -> redirect "/login"
-   Just _ -> action
+reqLogin :: Maybe (UserId, User) -> BlogAction a -> BlogAction a
+reqLogin Nothing _ = redirect "/login"
+reqLogin _ action = action
 
-requireUserRight :: Int -> BlogAction a -> BlogAction a
-requireUserRight reqAccess action = do
-  user <- loadUserSession
-  case user of
-   Nothing -> redirect "/login"
-   Just user ->
-     case checkUserRight user reqAccess of
-      False -> redirect "/accessDenied"
-      True -> action
+reqRight :: Maybe (UserId, User) -> Int -> BlogAction a -> BlogAction a
+reqRight Nothing _ _ = redirect "/login"
+reqRight (Just (_, user)) reqAccess action =
+  if checkUserRight user reqAccess
+  then action
+  else redirect "/accessDenied"
 
 loadUserSession :: BlogAction (Maybe (UserId, User))
 loadUserSession = do
@@ -139,8 +142,8 @@ loadUserSession = do
    Just sid -> do mUser <- runSQL $ loadUser sid
                   return mUser
 
-checkUserRight :: (UserId, User) -> Int -> Bool
-checkUserRight (_, user) reqAccess = userAccess user >= reqAccess
+checkUserRight :: User -> Int -> Bool
+checkUserRight user reqAccess = userAccess user >= reqAccess
 
 blaze :: MonadIO m => Html -> ActionT m a
 blaze = html . toStrict . renderHtml

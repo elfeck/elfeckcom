@@ -3,6 +3,8 @@
 module View where
 
 import Prelude hiding (div, head, id)
+import Data.Maybe
+import qualified Data.Text as T
 import Text.Blaze.Html (preEscapedString, string, stringValue, toHtml)
 import Text.Blaze.Html5 (Html, (!), docTypeHtml,
                          head, meta, title, link, script,
@@ -10,6 +12,8 @@ import Text.Blaze.Html5 (Html, (!), docTypeHtml,
                          textarea, input)
 import Text.Blaze.Html5.Attributes (charset,
                                     href, rel, src, type_, class_, id, style)
+
+import Model (User, UserId, userName)
 
 siteHead :: Html
 siteHead = docTypeHtml $ head $ do
@@ -47,8 +51,38 @@ infBackHeader headerSvg inf = do
     div ! class_ "headercontainer" $ preEscapedString headerSvg
     div ! class_ "headercontainer" $ ul ! class_ "headerright" $ do
       li ! class_ "headerentry" $ ""
-      li ! class_ "headerentry" $ a "back" ! href "/" ! class_ "headerlink"
+      li ! class_ "headerentry" $ a "home" ! href "/" ! class_ "headerlink"
 
+siteFooter :: Maybe (UserId, User) -> Html
+siteFooter muser = do
+  div ! class_ "footer" $ do
+    div ! class_ "userinfo" $ "["
+    wrapContainer $ do
+      div "built with" ! class_ "footerinfo"
+      a " Spock " ! class_ "footerlink" ! href "http://www.spock.li/"
+      div "written in haskell" ! class_ "footerinfo"
+    div ! class_ "usersep" $ "|"
+    wrapContainer $ a "impressum" ! class_ "footerlink" ! href "/impressum"
+    if isNothing muser
+      then do div ! class_ "usersep" $ "|"
+              wrapContainer $ a "login" ! class_ "footerlink" ! href "/login"
+              div ! class_ "userinfo" $ "]"
+      else do div ! class_ "userinfo " $ "]"
+              spacer
+    case muser of
+     Nothing -> return ()
+     Just (_, user) -> do
+       wrapContainer $ a "edit" ! class_ "userlink" ! href "/edit"
+       div ! class_ "usersep" $ "|"
+       wrapContainer $ a "users" ! class_ "userlink" ! href "/manage"
+       div ! class_ "usersep" $ "|"
+       wrapContainer $ a "evexpl" ! class_ "userlink" ! href "/evexpl"
+       div ! class_ "usersep" $ "|"
+       wrapContainer $ a "logout" ! class_ "userlink" ! href "/logout"
+       div ! class_ "userinfo" $ "]"
+
+wrapContainer a = div ! class_ "footercont" $ a
+spacer = div "[" ! class_ "footerspacer"
 
 headerEntry :: String -> Html
 headerEntry name =

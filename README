@@ -11,18 +11,15 @@ content format
     > Modify Time Stamp
     > Access level
     > Type
-    > Categories
 
 (*) Content
     > Title
     > Categories
     > Content
 
-(*) Elements
-    > Link, Image, inline-HTML
-    > Newline, Paragraph-Space
-    > Caption
 
+MD to html parsing
+===============================================================================
 (*) To Handle
     > Headline		==
     > Linebreaks	double space
@@ -31,6 +28,3 @@ content format
     > b			** **
     > link		[name](url)
     > img		![name](url)
-
-    1. Lines the text
-    2. Seperate on == and empty line
