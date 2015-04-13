@@ -7,15 +7,19 @@
 {-# LANGUAGE QuasiQuotes                #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
+{-# LANGUAGE FlexibleInstances          #-}
 
 module Model where
 
+import Data.Aeson.Types
 import Control.Monad.IO.Class
 import Control.Monad.Logger
 import Control.Monad.Trans.Resource
 import Database.Persist.TH
 import qualified Data.Text as T
+import Data.Text.Read
 import Data.Time
+import Data.Maybe
 import System.Locale
 import Web.Spock.Shared hiding (SessionId)
 
@@ -33,7 +37,7 @@ User
   access Int
   UniqueUsername name
   deriving Show
-Post
+Post json
   title T.Text Maybe
   categories [T.Text] Maybe
   content T.Text
@@ -86,13 +90,43 @@ createUser name pass access = do
 
 createPost :: [T.Text] -> SqlPersistM T.Text
 createPost postParam = do
-  
-  return "Post created"
+  let ty = (procInt $ postParam !! 3)
+  let ac = (procInt $ postParam !! 4)
+  now <- liftIO $ getCurrentTime
+  if isNothing ty || isNothing ac
+    then return "Invalid postsubmit"
+    else do let post = Post (procTitle $ postParam !! 0)
+                       (procCategories $ postParam !! 1)
+                       (postParam !! 2)
+                       now
+                       now
+                       (fromJust ty)
+                       (fromJust ac)
+            insert post
+            return "Post successful created"
+  where procTitle "" = Nothing
+        procTitle text = Just text
+        procCategories "" = Nothing
+        procCategories text = Just $ T.splitOn ", " text
+
+procInt text = case decimal text of
+                Left _ -> Nothing
+                Right (val, "") -> Just val
+                Right (val, _) -> Nothing
 
 queryAllPosts :: SqlPersistM ([(PostId, Post)])
 queryAllPosts = do
   rows <- selectList [] [Desc PostModDate]
   return $ map (\r -> (entityKey r, entityVal r)) rows
+
+queryPost :: [T.Text] -> SqlPersistM (Maybe (PostId, Post))
+queryPost (textpid : _) = case procInt textpid of
+  Nothing -> return Nothing
+  Just pid -> do
+    mpost <- get $ toSqlKey pid
+    case mpost of
+     Nothing -> return Nothing
+     Just post -> return $ Just (toSqlKey pid, post)
 
 runSQL :: (HasSpock m, SpockConn m ~ SqlBackend) =>
           SqlPersistT (NoLoggingT (ResourceT IO)) a -> m a

@@ -15,6 +15,7 @@ import Text.Blaze.Html5 (Html, (!), docTypeHtml,
 import Text.Blaze.Html5.Attributes (charset,
                                     href, rel, src, type_, class_, id, style,
                                     multiple, readonly)
+import Database.Persist.Sql
 
 import Model
 
@@ -116,16 +117,18 @@ siteEdit posts = do
       input ! class_ "editin" ! id "editid" ! readonly "readonly"
       div ! id "submitbutton" ! class_ "button buttonidle" $ "submit"
       div ! id "deletebutton" ! class_ "button buttonidle" $ "delete"
-      select ! class_ "editselect" ! multiple "multiple" $ do
-        option "[new post]"
+      select ! class_ "editselect" ! multiple "multiple" ! id "editlist" $ do
+        option ! id "0" $ "[new post]"
         toHtml $ map postToSelect posts
     div "" ! id "editpreview"
 
 postToSelect :: (PostId, Post) -> Html
-postToSelect (id, post) = case postTitle post of
-  Nothing -> option $ toHtml (T.append "post modf=" (form (postModDate post)))
-  Just title -> option $ toHtml title
-  where form date = T.pack $ formatTime defaultTimeLocale "%F %R" date
+postToSelect (pid, post) = case postTitle post of
+  Nothing -> option ! id (keyToId pid) $
+             toHtml (T.concat ["[post from ", form (postModDate post), "]"])
+  Just title -> option ! id (keyToId pid) $ toHtml title
+  where form date = T.pack $ formatTime defaultTimeLocale "%d. %b %R" date
+        keyToId pid = (stringValue (show $ fromSqlKey pid))
 
 siteLogin :: Html
 siteLogin = do

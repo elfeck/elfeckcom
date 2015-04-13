@@ -6,12 +6,14 @@ $(function() {
     access = $("#editaccess");
 
     preview = $("#editpreview");
+    editList = $("#editlist");
     submitBut = $("#submitbutton");
 
     registerButton(submitBut, submit);
     tit.on("keyup", submitEdit);
     cat.on("keyup", submitEdit);
     cont.on("keyup", submitEdit);
+    editList.on("change", loadPost);
 });
 
 submitEdit = function() {
@@ -62,6 +64,30 @@ submit = function() {
 	},
 	error: function() {
 	    console.log("nooo error");
+	}
+    });
+}
+
+loadPost = function(e) {
+    var selected = $(this).find("option:selected");
+    var dataObj = {
+	id: selected.attr("id")
+    }
+    if(dataObj["id"] == 0) {
+	return;
+    }
+    $.ajax({
+	type: "POST",
+	url: "/edit/loadpost",
+	dataType: "json",
+	data: {
+	    dat: dataObj
+	},
+	success: function(data) {
+	    console.log(data);
+	},
+	error: function() {
+	    console.log("nooo error in loadPost json");
 	}
     });
 }

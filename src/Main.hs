@@ -102,6 +102,17 @@ handlePosts = do
        Just par -> do
          resp <- runSQL $ createPost par
          createResponse resp
+  post "edit/loadpost" $ do
+    muser <- loadUserSession
+    --reqRight' muser 5 $
+    do
+      dat <- params
+      let chkp = checkJson $ findParams dat ["id"]
+      case chkp of
+       Nothing -> errorJson
+       Just par -> do
+         resp <- runSQL $ queryPost par
+         loadpostResponse resp
   post "login/submit" $ do
     dat <- params
     let chkp = checkJson $ findParams dat ["name", "pass"]
@@ -123,6 +134,9 @@ loginResponse True =  json (("login success. yey" :: T.Text), True)
 loginResponse False =  json (("wrong login data, try again" :: T.Text), False)
 
 createResponse resp = json resp
+
+loadpostResponse Nothing = json ("could not find post to id" :: T.Text)
+loadpostResponse (Just post) = json $ (snd post)
 
 findParam :: [(T.Text, T.Text)] -> T.Text -> Maybe T.Text
 findParam [] _ = Nothing
