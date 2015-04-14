@@ -14,7 +14,7 @@ import Text.Blaze.Html5 (Html, (!), docTypeHtml,
                          textarea, input, select, option)
 import Text.Blaze.Html5.Attributes (charset,
                                     href, rel, src, type_, class_, id, style,
-                                    multiple, readonly)
+                                    multiple, readonly, selected)
 import Database.Persist.Sql
 
 import Model
@@ -114,12 +114,14 @@ siteEdit posts = do
       input ! class_ "editin" ! id "editaccess"
       textarea "" ! id "editarea"
     div ! class_ "editright" $ do
-      input ! class_ "editin" ! id "editid" ! readonly "readonly"
-      div ! id "submitbutton" ! class_ "button buttonidle" $ "submit"
-      div ! id "deletebutton" ! class_ "button buttonidle" $ "delete"
+      div ! class_ "editinfo" ! id "editid" $ ""
+      div ! class_ "editinfo" ! id "editdc" $ ""
       select ! class_ "editselect" ! multiple "multiple" ! id "editlist" $ do
-        option ! id "0" $ "[new post]"
+        option ! id "0" ! selected "selected" $ "[new post]"
         toHtml $ map postToSelect posts
+      div ! id "editresp" ! class_ "editinfo" $ ""
+      input ! class_ "editin" ! id "editdelete"
+      div ! id "submitbutton" ! class_ "button buttonidle" $ "S"
     div "" ! id "editpreview"
 
 postToSelect :: (PostId, Post) -> Html

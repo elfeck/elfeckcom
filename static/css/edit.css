@@ -16,7 +16,7 @@ div.editright {
     display: inline-block;
     vertical-align: top;
     margin-left: 10px;
-    width: 240px;
+    width: 190px;
 }
 
 input.editin {
@@ -48,18 +48,28 @@ input#editaccess {
     text-align: center;
 }
 
-input#editid {
+div#editid {
+    margin-top: 20px;
     width: 32px;
     text-align: center;
 }
 
+div#editdc {
+    text-align: center;
+    line-height: 20px;
+    font-size: 12px;
+    margin-top: 20px;
+    margin-left: 10px;
+    width: 146px;
+}
+
 textarea#editarea {
     width: 500px;
-    height: 200px;
+    height: 227px;
     resize: none;
     padding: 0px;
     margin: 0px;
-    margin-top: 10px;
+    margin-top: 5px;
     margin-left: 48px;
     border-width: 1px;
 }
@@ -81,21 +91,41 @@ div#editpreview {
 select.editselect {
     width: 188px;
     height: 202px;
-    margin-top: 10px;
+    margin-top: 5px;
 }
 
 div#submitbutton {
-    margin-left: 10px;
+    margin-top: 5px;
     display: inline-block;
     vertical-align: bottom;
-    width: 67px;
+    width: 36px;
     height: 18px;
+    margin-left: 6px;
 }
 
-div#deletebutton {
+input#editdelete {
+    margin-top: 5px;
     margin-left: 6px;
-    display: inline-block;
-    vertical-align: bottom;
-    width: 67px;
+    width: 36px;
     height: 18px;
+    text-align: center;
+}
+
+input.editdeldanger {
+    background-color: #990000;
+    color: #ffffff;
+}
+
+div.editinfo {
+    background-color: white;
+    height: 20px;
+    vertical-align: bottom;
+    display: inline-block;
+}
+
+div#editresp {
+    text-align: center;
+    line-height: 20px;
+    font-size: 12px;
+    width: 100px;
 }

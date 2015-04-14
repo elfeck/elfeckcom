@@ -95,13 +95,12 @@ handlePosts = do
     --reqRight' muser 5 $
     do
       dat <- params
-      let chkp = checkJson $ findParams dat ["title", "categories", "content",
+      let chkp = checkJson $ findParams dat ["submitType", "pid", "title",
+                                             "categories", "content",
                                              "type", "access"]
       case chkp of
        Nothing -> errorJson
-       Just par -> do
-         resp <- runSQL $ createPost par
-         createResponse resp
+       Just par -> submitEdit par
   post "edit/loadpost" $ do
     muser <- loadUserSession
     --reqRight' muser 5 $
@@ -128,15 +127,27 @@ handlePosts = do
           loginResponse True
   where errorJson = json $ ("error in sent json" :: T.Text)
 
+submitEdit xs = do
+  r <- case (head xs) of
+        "0" -> do
+          resp <- runSQL $ createPost (drop 2 xs)
+          return resp
+        "1" -> undefined
+        "2" -> do
+          resp <- runSQL $ deletePost (tail xs)
+          return resp
+        _ -> return ("ney: unkwn stype")
+  submitResponse r
+
 editResponse xs = json $ parseEdit (map fromStrict xs)
 
 loginResponse True =  json (("login success. yey" :: T.Text), True)
 loginResponse False =  json (("wrong login data, try again" :: T.Text), False)
 
-createResponse resp = json resp
+submitResponse resp = json resp
 
 loadpostResponse Nothing = json ("could not find post to id" :: T.Text)
-loadpostResponse (Just post) = json $ (snd post)
+loadpostResponse (Just post) = json $ post
 
 findParam :: [(T.Text, T.Text)] -> T.Text -> Maybe T.Text
 findParam [] _ = Nothing

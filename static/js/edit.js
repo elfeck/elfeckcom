@@ -9,18 +9,36 @@ $(function() {
     editList = $("#editlist");
     submitBut = $("#submitbutton");
 
+    editdel = $("#editdelete");
+
+    editid = $("#editid");
+    editdc = $("#editdc");
+
+    editresp = $("#editresp");
+
     registerButton(submitBut, submit);
-    tit.on("keyup", submitEdit);
-    cat.on("keyup", submitEdit);
-    cont.on("keyup", submitEdit);
+    tit.on("keyup", previewSubmit);
+    cat.on("keyup", previewSubmit);
+    cont.on("keyup", previewSubmit);
+    cont.on("change", previewSubmit);
     editList.on("change", loadPost);
+    editdel.on("keyup", function() {
+	console.log(editdel.val());
+	if(editdel.val() == "DEL") {
+	    editdel.addClass("editdeldanger");
+	} else {
+	    editdel.removeClass("editdeldanger");
+	}
+    });
 });
 
-submitEdit = function() {
+previewSubmit = function() {
     var dataObj = {
 	title: tit.val(),
 	categories: cat.val(),
-	content: cont.val()
+	content: cont.val(),
+	ptype: type.val(),
+	access: access.val()
     };
     $.ajax({
 	type: "POST",
@@ -30,7 +48,6 @@ submitEdit = function() {
 	    dat: dataObj
 	},
 	success: function(data) {
-	    console.log("Got json!");
 	    preview.html(data);
 	},
 	error: function() {
@@ -40,11 +57,22 @@ submitEdit = function() {
 };
 
 submit = function() {
-    if(!validateNew()) {
+    if(!validateMinimal()) {
 	console.log("validateNew not successful");
 	return;
     }
+    selId = getSelectedId();
+    t = -1;
+    if(selId == 0) t = 0;
+    if(selId != 0) t = 1;
+    if(selId != 0 && editdel.val() == "DEL") t = 2;
+    console.log(t);
     var dataObj = {
+	// t=0 create
+	// t=1 update
+	// t=2 delete
+	submitType: t,
+	pid: selId,
 	title: tit.val(),
 	categories: cat.val(),
 	content: cont.val(),
@@ -59,8 +87,8 @@ submit = function() {
 	    dat: dataObj
 	},
 	success: function(data) {
-	    console.log("Got json!");
-	    console.log(data);
+	    editresp.html(data);
+	    editdel.val("");
 	},
 	error: function() {
 	    console.log("nooo error");
@@ -68,13 +96,13 @@ submit = function() {
     });
 }
 
-loadPost = function(e) {
-    var selected = $(this).find("option:selected");
-    var dataObj = {
-	id: selected.attr("id")
-    }
-    if(dataObj["id"] == 0) {
+loadPost = function() {
+    var selId = getSelectedId();
+    if(selId == 0) {
 	return;
+    }
+    var dataObj = {
+	id: selId
     }
     $.ajax({
 	type: "POST",
@@ -84,7 +112,14 @@ loadPost = function(e) {
 	    dat: dataObj
 	},
 	success: function(data) {
-	    console.log(data);
+	    editid.html(data[0]);
+	    editdc.html(procTime(data[1]["crtDate"]));
+	    cont.html(data[1]["content"]);
+	    tit.val(procTitle(data[1]["title"]));
+	    cat.val(procCat(data[1]["categories"]));
+	    type.val(data[1]["ptype"]);
+	    access.val(data[1]["access"]);
+	    cont.change();
 	},
 	error: function() {
 	    console.log("nooo error in loadPost json");
@@ -92,6 +127,31 @@ loadPost = function(e) {
     });
 }
 
-validateNew = function() {
-    return cont.val() != "" && type.val() != "" && access.val() != ""
+getSelectedId = function() {
+    var selected = editList.find("option:selected");
+    return selected.attr("id");
+}
+
+validateMinimal = function() {
+    return cont.val() != "" && isInt(type.val()) && isInt(access.val());
+}
+
+isInt = function(value) {
+    return !isNaN(value) &&
+	parseInt(Number(value)) == value &&
+	!isNaN(parseInt(value, 10));
+}
+
+procTime = function(time) {
+    return time.replace("T", " ").substring(0, 16);
+}
+
+procTitle = function(title) {
+    if(title == null) return "";
+    else return title;
+}
+
+procCat = function(cats) {
+    if(cats == null) return "";
+    else return cats.join(", ");
 }

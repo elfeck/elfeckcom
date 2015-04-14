@@ -94,7 +94,7 @@ createPost postParam = do
   let ac = (procInt $ postParam !! 4)
   now <- liftIO $ getCurrentTime
   if isNothing ty || isNothing ac
-    then return "Invalid postsubmit"
+    then return "ney: misng param"
     else do let post = Post (procTitle $ postParam !! 0)
                        (procCategories $ postParam !! 1)
                        (postParam !! 2)
@@ -103,11 +103,21 @@ createPost postParam = do
                        (fromJust ty)
                        (fromJust ac)
             insert post
-            return "Post successful created"
+            return "yey: created"
   where procTitle "" = Nothing
         procTitle text = Just text
         procCategories "" = Nothing
         procCategories text = Just $ T.splitOn ", " text
+
+deletePost :: [T.Text] -> SqlPersistM T.Text
+deletePost (mpid : postParam) = case procInt mpid of
+  Nothing -> return "ney: invl pid"
+  Just pid ->
+    do mpost <- get $ ((toSqlKey pid) :: PostId)
+       case mpost of
+        Nothing -> return "ney: unkwn pid"
+        Just _ -> do delete $ ((toSqlKey pid) :: PostId)
+                     return "yey: deleted"
 
 procInt text = case decimal text of
                 Left _ -> Nothing
