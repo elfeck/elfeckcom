@@ -48,19 +48,18 @@ input#editaccess {
     text-align: center;
 }
 
-div#editid {
+input#editid {
     margin-top: 20px;
     width: 32px;
     text-align: center;
 }
 
-div#editdc {
+input#editdc {
     text-align: center;
     line-height: 20px;
-    font-size: 12px;
     margin-top: 20px;
     margin-left: 10px;
-    width: 146px;
+    width: 142px;
 }
 
 textarea#editarea {
@@ -92,6 +91,7 @@ select.editselect {
     width: 188px;
     height: 202px;
     margin-top: 5px;
+    font-family: 'Open Sans', sans-serif;
 }
 
 div#submitbutton {
@@ -118,6 +118,9 @@ input.editdeldanger {
 
 div.editinfo {
     background-color: white;
+    font-family: 'Open Sans', sans-serif;
+    line-height: 20px;
+    font-size: 12px;
     height: 20px;
     vertical-align: bottom;
     display: inline-block;
@@ -126,6 +129,14 @@ div.editinfo {
 div#editresp {
     text-align: center;
     line-height: 20px;
-    font-size: 12px;
+    font-weight: bold;
     width: 100px;
+}
+
+div.editrespyey {
+    color: #009900;
+}
+
+div.editrespney {
+    color: #990000;
 }

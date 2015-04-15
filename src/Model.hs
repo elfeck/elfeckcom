@@ -41,12 +41,13 @@ Post json
   title T.Text Maybe
   categories [T.Text] Maybe
   content T.Text
-  modDate UTCTime
   crtDate UTCTime
+  modDate UTCTime
   ptype Int
   access Int
   deriving Show
 |]
+
 
 loginUser :: T.Text -> T.Text -> SqlPersistM (Maybe UserId)
 loginUser name pass = do
@@ -62,8 +63,8 @@ loginUser name pass = do
 logoutUser :: UserId -> SqlPersistM ()
 logoutUser userId = deleteWhere [SessionUserId ==. userId]
 
-loadUser :: SessionId -> SqlPersistM (Maybe (UserId, User))
-loadUser sessId = do
+queryUser :: SessionId -> SqlPersistM (Maybe (UserId, User))
+queryUser sessId = do
   mSess <- get sessId
   now <- liftIO getCurrentTime
   case mSess of
@@ -74,13 +75,13 @@ loadUser sessId = do
      else return Nothing
    Nothing -> return Nothing
 
-createSession :: UserId -> SqlPersistM SessionId
-createSession userId = do
+insertSession :: UserId -> SqlPersistM SessionId
+insertSession userId = do
   now <- liftIO getCurrentTime
   insert (Session (addUTCTime (5 * 3600) now) userId)
 
-createUser :: T.Text -> T.Text -> Int -> SqlPersistM T.Text
-createUser name pass access = do
+insertUser :: T.Text -> T.Text -> Int -> SqlPersistM T.Text
+insertUser name pass access = do
   mName <- getBy (UniqueUsername name)
   case mName of
    Just _ -> return "Username taken"
@@ -88,23 +89,30 @@ createUser name pass access = do
      insert (User name pass access)
      return "User created"
 
-createPost :: [T.Text] -> SqlPersistM T.Text
-createPost postParam = do
+insertPost :: [T.Text] -> SqlPersistM T.Text
+insertPost postParam = do
   let ty = (procInt $ postParam !! 3)
   let ac = (procInt $ postParam !! 4)
   now <- liftIO $ getCurrentTime
-  if isNothing ty || isNothing ac
-    then return "ney: misng param"
-    else do let post = Post (procTitle $ postParam !! 0)
-                       (procCategories $ postParam !! 1)
-                       (postParam !! 2)
-                       now
-                       now
-                       (fromJust ty)
-                       (fromJust ac)
-            insert post
-            return "yey: created"
-  where procTitle "" = Nothing
+  let mpost = createPost postParam now now
+  case mpost of
+   Nothing -> return "ney: invl param"
+   Just post -> do insert post
+                   return "yey: created"
+
+createPost :: [T.Text] -> UTCTime -> UTCTime -> Maybe Post
+createPost postParam crtTime modTime
+  | isNothing ty || isNothing ac = Nothing
+  | otherwise = Just $ Post (procTitle $ postParam !! 0)
+                (procCategories $ postParam !! 1)
+                (postParam !! 2)
+                crtTime
+                modTime
+                (fromJust ty)
+                (fromJust ac)
+  where ty = (procInt $ postParam !! 3)
+        ac = (procInt $ postParam !! 4)
+        procTitle "" = Nothing
         procTitle text = Just text
         procCategories "" = Nothing
         procCategories text = Just $ T.splitOn ", " text
@@ -112,12 +120,28 @@ createPost postParam = do
 deletePost :: [T.Text] -> SqlPersistM T.Text
 deletePost (mpid : postParam) = case procInt mpid of
   Nothing -> return "ney: invl pid"
-  Just pid ->
-    do mpost <- get $ ((toSqlKey pid) :: PostId)
-       case mpost of
-        Nothing -> return "ney: unkwn pid"
-        Just _ -> do delete $ ((toSqlKey pid) :: PostId)
-                     return "yey: deleted"
+  Just pid -> do
+    mpost <- get $ ((toSqlKey pid) :: PostId)
+    case mpost of
+     Nothing -> return "ney: unkwn pid"
+     Just _ -> do delete ((toSqlKey pid) :: PostId)
+                  return "yey: deleted"
+
+updatePost :: [T.Text] -> SqlPersistM T.Text
+updatePost (mpid : postParam) = case procInt mpid of
+  Nothing -> return "ney: invl pid"
+  Just pid -> do
+    mpost <- get $ ((toSqlKey pid) :: PostId)
+    case mpost of
+     Nothing -> return "ney: unkwn pid"
+     Just post -> do
+       let crtTime = postCrtDate post
+       now <- liftIO $ getCurrentTime
+       let nmpost = createPost postParam crtTime now
+       case nmpost of
+        Nothing -> return "ney: invl param"
+        Just npost -> do replace ((toSqlKey pid) :: PostId) npost
+                         return "yey: updated"
 
 procInt text = case decimal text of
                 Left _ -> Nothing

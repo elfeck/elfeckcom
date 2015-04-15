@@ -13,6 +13,7 @@ div.loginfo {
     margin-left: 269px;
     text-align: right;
     margin-right: 5px;
+    --font-family: 'Open Sans', sans-serif;
 }
 
 div.loginspacer {
@@ -33,6 +34,8 @@ div#logbut {
 
 div#logresponse {
     display: inline-block;
+    font-size: 15px;
+    line-height: 20px;
     text-align: right;
     vertical-align: bottom;
     margin-left: 10px;

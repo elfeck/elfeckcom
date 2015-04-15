@@ -27,6 +27,8 @@ siteHead = docTypeHtml $ head $ do
   link ! href "/css/edit.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "/css/login.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "/img/icon.png" ! rel "icon" ! type_ "image/png"
+  link ! href "http://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
+    ! rel "stylesheet" ! type_ "text/css"
 
 siteHeader :: String -> Html
 siteHeader headerSvg = do
@@ -56,7 +58,6 @@ infBackHeader headerSvg inf = do
     div ! class_ "headercontainer" $ ul ! class_ "headerright" $ do
       li ! class_ "headerentry" $ ""
       li ! class_ "headerentry" $ a "home" ! href "/" ! class_ "headerlink"
-
 
 headerEntry :: String -> Html
 headerEntry name =
@@ -114,8 +115,8 @@ siteEdit posts = do
       input ! class_ "editin" ! id "editaccess"
       textarea "" ! id "editarea"
     div ! class_ "editright" $ do
-      div ! class_ "editinfo" ! id "editid" $ ""
-      div ! class_ "editinfo" ! id "editdc" $ ""
+      input ! class_ "editin" ! id "editid" ! readonly "readonly"
+      input ! class_ "editin" ! id "editdc" ! readonly "readonly"
       select ! class_ "editselect" ! multiple "multiple" ! id "editlist" $ do
         option ! id "0" ! selected "selected" $ "[new post]"
         toHtml $ map postToSelect posts

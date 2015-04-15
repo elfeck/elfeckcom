@@ -15,6 +15,15 @@ body {
     vertical-align: middle;
     overflow: scroll;
     padding: 0px;
+    font-family: 'Crimson Text', serif;
+}
+
+input {
+    font-family: 'Open Sans', sans-serif;
+}
+
+textarea {
+    font-family: 'Open Sans', sans-serif;
 }
 
 div.header {
@@ -42,7 +51,6 @@ ul.headerright {
 }
 
 li.headerentry {
-    font-family: serif;
     font-size: 20px;
     display: table-cell;
     width: 150px;
@@ -115,6 +123,9 @@ div.button {
     border-style: solid;
     border-width: 1px;
     cursor: pointer;
+    line-height: 19px;
+    font-size: 14px;
+    font-family: 'Open Sans', sans-serif;
     -moz-user-select: -moz-none;
     -khtml-user-select: none;
     -webkit-user-select: none;

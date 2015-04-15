@@ -122,7 +122,7 @@ handlePosts = do
        case login of
         Nothing -> loginResponse False
         Just userId -> do
-          sessId <- runSQL $ createSession userId
+          sessId <- runSQL $ insertSession userId
           writeSession (Just sessId)
           loginResponse True
   where errorJson = json $ ("error in sent json" :: T.Text)
@@ -130,9 +130,11 @@ handlePosts = do
 submitEdit xs = do
   r <- case (head xs) of
         "0" -> do
-          resp <- runSQL $ createPost (drop 2 xs)
+          resp <- runSQL $ insertPost (drop 2 xs)
           return resp
-        "1" -> undefined
+        "1" -> do
+          resp <- runSQL $ updatePost (tail xs)
+          return resp
         "2" -> do
           resp <- runSQL $ deletePost (tail xs)
           return resp
@@ -185,7 +187,7 @@ loadUserSession = do
   sess <- readSession
   case sess of
    Nothing -> return Nothing
-   Just sid -> do mUser <- runSQL $ loadUser sid
+   Just sid -> do mUser <- runSQL $ queryUser sid
                   return mUser
 
 checkUserRight :: User -> Int -> Bool

@@ -4,16 +4,12 @@ $(function() {
     cont = $("#editarea");
     type = $("#edittype");
     access = $("#editaccess");
-
     preview = $("#editpreview");
     editList = $("#editlist");
     submitBut = $("#submitbutton");
-
     editdel = $("#editdelete");
-
     editid = $("#editid");
     editdc = $("#editdc");
-
     editresp = $("#editresp");
 
     registerButton(submitBut, submit);
@@ -23,42 +19,28 @@ $(function() {
     cont.on("change", previewSubmit);
     editList.on("change", loadPost);
     editdel.on("keyup", function() {
-	console.log(editdel.val());
-	if(editdel.val() == "DEL") {
-	    editdel.addClass("editdeldanger");
-	} else {
-	    editdel.removeClass("editdeldanger");
-	}
+	if(editdel.val() == "DEL") editdel.addClass("editdeldanger");
+	else editdel.removeClass("editdeldanger");
     });
 });
 
 previewSubmit = function() {
-    var dataObj = {
-	title: tit.val(),
-	categories: cat.val(),
-	content: cont.val(),
-	ptype: type.val(),
-	access: access.val()
-    };
+    dataObj = packData();
     $.ajax({
 	type: "POST",
 	url: "/edit/preview",
 	dataType: "json",
-	data: {
-	    dat: dataObj
-	},
+	data: { dat: dataObj },
 	success: function(data) {
 	    preview.html(data);
 	},
-	error: function() {
-	    console.log("nooo error");
-	}
+	error: function() { jsonError("errorJson in previewSubmit"); }
     });
 };
 
 submit = function() {
     if(!validateMinimal()) {
-	console.log("validateNew not successful");
+	responde("ney: misng info");
 	return;
     }
     selId = getSelectedId();
@@ -66,65 +48,60 @@ submit = function() {
     if(selId == 0) t = 0;
     if(selId != 0) t = 1;
     if(selId != 0 && editdel.val() == "DEL") t = 2;
-    console.log(t);
-    var dataObj = {
-	// t=0 create
-	// t=1 update
-	// t=2 delete
-	submitType: t,
-	pid: selId,
-	title: tit.val(),
-	categories: cat.val(),
-	content: cont.val(),
-	type: type.val(),
-	access: access.val()
-    }
+    dataObj = packData();
+    dataObj["pid"] = selId;
+    dataObj["submitType"] = t;
     $.ajax({
 	type: "POST",
 	url: "/edit/submit",
 	dataType: "json",
-	data: {
-	    dat: dataObj
-	},
+	data: { dat: dataObj },
 	success: function(data) {
-	    editresp.html(data);
+	    responde(data);
 	    editdel.val("");
+	    editdel.removeClass("editdeldanger");
 	},
-	error: function() {
-	    console.log("nooo error");
-	}
+	error: function() { jsonError("errorJson in submit"); }
     });
 }
 
 loadPost = function() {
     var selId = getSelectedId();
     if(selId == 0) {
+	clearAll();
+	cont.change();
 	return;
     }
-    var dataObj = {
-	id: selId
-    }
+    var dataObj = { id: selId }
     $.ajax({
 	type: "POST",
 	url: "/edit/loadpost",
 	dataType: "json",
-	data: {
-	    dat: dataObj
-	},
+	data: { dat: dataObj },
 	success: function(data) {
-	    editid.html(data[0]);
-	    editdc.html(procTime(data[1]["crtDate"]));
-	    cont.html(data[1]["content"]);
+	    console.log(data);
+	    editid.val(data[0]);
+	    editdc.val(procTime(data[1]["crtDate"]));
+	    cont.val(data[1]["content"]);
 	    tit.val(procTitle(data[1]["title"]));
 	    cat.val(procCat(data[1]["categories"]));
 	    type.val(data[1]["ptype"]);
 	    access.val(data[1]["access"]);
 	    cont.change();
 	},
-	error: function() {
-	    console.log("nooo error in loadPost json");
-	}
+	error: function() { jsonError("errorJson in loadPost"); }
     });
+}
+
+packData = function() {
+    var dataObj = {
+	title: tit.val(),
+	categories: cat.val(),
+	content: cont.val(),
+	type: type.val(),
+	access: access.val()
+    }
+    return dataObj;
 }
 
 getSelectedId = function() {
@@ -154,4 +131,32 @@ procTitle = function(title) {
 procCat = function(cats) {
     if(cats == null) return "";
     else return cats.join(", ");
+}
+
+jsonError = function(m) {
+    console.log(m);
+    responde("ney: error json");
+}
+
+responde = function(m) {
+    if(m.substring(0, 3) == "yey") {
+	editresp.addClass("editrespyey");
+	editresp.removeClass("editrespney");
+    } else {
+	editresp.removeClass("editrespyey");
+	editresp.addClass("editrespney");
+    }
+    console.log(m.substring(0, 3));
+    editresp.html(m);
+}
+
+clearAll = function() {
+    tit.val("");
+    cat.val("");
+    cont.val("");
+    type.val("");
+    access.val("");
+    editid.html("");
+    editdc.html("");
+    editresp.html("");
 }
