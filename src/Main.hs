@@ -1,4 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE TypeFamilies      #-}
+{-# LANGUAGE GADTs             #-}
 
 module Main where
 
@@ -33,6 +36,7 @@ main = do
     where sessConfig =
             SessionCfg { sc_cookieName = "elfeckcom"
                        , sc_sessionTTL = 60 * 5 * 50
+                       , sc_sessionExpandTTL = True
                        , sc_sessionIdEntropy = 40
                        , sc_emptySession = Nothing
                        , sc_persistCfg = Nothing
@@ -125,7 +129,7 @@ handlePosts = do
           sessId <- runSQL $ insertSession userId
           writeSession (Just sessId)
           loginResponse True
-  where errorJson = json $ ("error in sent json" :: T.Text)
+  where errorJson = json $ ("ney: json error" :: T.Text)
 
 submitEdit xs = do
   r <- case (head xs) of

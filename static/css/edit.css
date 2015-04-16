@@ -24,6 +24,7 @@ input.editin {
     margin-top: 20px;
     border-width: 1px;
     padding: 0px;
+    font-size: 13px;
 }
 
 input#edittitle {
@@ -71,6 +72,7 @@ textarea#editarea {
     margin-top: 5px;
     margin-left: 48px;
     border-width: 1px;
+    font-size: 13px;
 }
 
 div#editpreview {
@@ -92,6 +94,7 @@ select.editselect {
     height: 202px;
     margin-top: 5px;
     font-family: 'Open Sans', sans-serif;
+    font-size: 13px;
 }
 
 div#submitbutton {

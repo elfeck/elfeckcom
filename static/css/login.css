@@ -50,3 +50,7 @@ input.login {
     padding: 0px;
     text-align: center;
 }
+
+input#logpw {
+    font-size: 8px;
+}

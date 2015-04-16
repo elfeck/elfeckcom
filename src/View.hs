@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleContexts  #-}
 
 module View where
 
 import Prelude hiding (div, head, id)
 import Data.Maybe
-import System.Locale (defaultTimeLocale)
 import Data.Time.Format
 import qualified Data.Text as T
 import Text.Blaze.Html (preEscapedString, string, stringValue, toHtml)
@@ -14,7 +14,8 @@ import Text.Blaze.Html5 (Html, (!), docTypeHtml,
                          textarea, input, select, option)
 import Text.Blaze.Html5.Attributes (charset,
                                     href, rel, src, type_, class_, id, style,
-                                    multiple, readonly, selected)
+                                    multiple, readonly, selected,
+                                    autocomplete)
 import Database.Persist.Sql
 
 import Model
@@ -117,9 +118,10 @@ siteEdit posts = do
     div ! class_ "editright" $ do
       input ! class_ "editin" ! id "editid" ! readonly "readonly"
       input ! class_ "editin" ! id "editdc" ! readonly "readonly"
-      select ! class_ "editselect" ! multiple "multiple" ! id "editlist" $ do
-        option ! id "0" ! selected "selected" $ "[new post]"
-        toHtml $ map postToSelect posts
+      select ! class_ "editselect" ! multiple "multiple" ! id "editlist"
+        ! autocomplete "off" $ do
+          option ! id "0" ! selected "selected" $ "[new post]"
+          toHtml $ map postToSelect posts
       div ! id "editresp" ! class_ "editinfo" $ ""
       input ! class_ "editin" ! id "editdelete"
       div ! id "submitbutton" ! class_ "button buttonidle" $ "S"

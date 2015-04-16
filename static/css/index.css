@@ -80,6 +80,7 @@ div.testbody {
 }
 
 div.footer {
+    margin-bottom: 10px;
     height: 18px;
     background-color: #d4d4d4;
     text-align: center;

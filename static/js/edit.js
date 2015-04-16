@@ -12,6 +12,9 @@ $(function() {
     editdc = $("#editdc");
     editresp = $("#editresp");
 
+    clearAll();
+    editList.focus();
+
     registerButton(submitBut, submit);
     tit.on("keyup", previewSubmit);
     cat.on("keyup", previewSubmit);
@@ -79,7 +82,6 @@ loadPost = function() {
 	dataType: "json",
 	data: { dat: dataObj },
 	success: function(data) {
-	    console.log(data);
 	    editid.val(data[0]);
 	    editdc.val(procTime(data[1]["crtDate"]));
 	    cont.val(data[1]["content"]);
@@ -151,12 +153,7 @@ responde = function(m) {
 }
 
 clearAll = function() {
-    tit.val("");
-    cat.val("");
-    cont.val("");
-    type.val("");
-    access.val("");
-    editid.html("");
-    editdc.html("");
-    editresp.html("");
+    tit.val(""); cat.val(""); cont.val("");
+    type.val(""); access.val("");
+    editid.val("");  editdc.val(""); editresp.text("");
 }
