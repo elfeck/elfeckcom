@@ -17,6 +17,16 @@ content format
     > Categories
     > Content
 
+(*) Types
+    0: Website Main Post
+    1: Blog Post
+    2: Twitter-like Snippet
+
+(*) Submit Types
+    0: Inset
+    1: Update
+    2: Delete
+
 
 MD to html parsing
 ===============================================================================

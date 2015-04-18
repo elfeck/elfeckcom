@@ -19,6 +19,8 @@ $(function() {
     tit.on("keyup", previewSubmit);
     cat.on("keyup", previewSubmit);
     cont.on("keyup", previewSubmit);
+    type.on("keyup", previewSubmit);
+    access.on("keyup", previewSubmit);
     cont.on("change", previewSubmit);
     editList.on("change", loadPost);
     editdel.on("keyup", function() {
@@ -29,6 +31,7 @@ $(function() {
 
 previewSubmit = function() {
     dataObj = packData();
+    dataObj["pid"] = editid.val();
     $.ajax({
 	type: "POST",
 	url: "/edit/preview",

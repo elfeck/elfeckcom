@@ -15,6 +15,8 @@ data Ele = Plain L.Text
          | Bold L.Text
          | Link (L.Text, L.Text)
          | Image (L.Text, L.Text)
+         | Newline
+         | Listelement L.Text
          deriving Show
 
 data PState = SItalic

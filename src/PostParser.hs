@@ -1,38 +1,45 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module EntryParser where
+module PostParser where
 
 import Prelude hiding (div, id)
 import Data.Maybe
 import qualified Data.Text.Lazy as L
 
 import Text.Blaze.Html (toHtml, toValue)
-import Text.Blaze.Html5 (Html, (!), div, img, ul, li, a, i ,b)
+import Text.Blaze.Html5 (Html, (!), div, img, ul, li, a, i ,b, link)
 import Text.Blaze.Html5.Attributes (href, rel, src, type_, class_, id)
 import Text.Blaze.Html.Renderer.Text (renderHtml)
 
+import Model
 import MdParser
 
-parseEdit :: [L.Text] -> L.Text
-parseEdit content = renderHtml $ do
-  putHtml $ parseTitle (content !! 0)
-  putHtml $ parseCategories (content !! 1)
-  putHtml $ parseContent (content !! 2)
+parsePreview :: [L.Text] -> L.Text
+parsePreview (typ : pid : content) =
+  case typ of
+   "0" -> renderHtml $ do
+     link ! href "/css/site.css" ! rel "stylesheet" ! type_ "text/css"
+     putHtml $ parseContent (content !! 2) -- content
+   _ -> renderHtml $ do
+     putHtml $ parseTitle (content !! 0)
+     putHtml $ parseCategories (content !! 1)
+     putHtml $ parseContent (content !! 2)
   where putHtml (Just h) = h
         putHtml Nothing = return ()
 
+parsePost :: (PostId, Post) -> L.Text
+parsePost = undefined
+
 parseTitle :: L.Text -> Maybe Html
 parseTitle "" = Nothing
-parseTitle title = Just $ div (toHtml title)
+parseTitle title = Just $ div ! class_ "title" $ (toHtml title)
 
 parseCategories :: L.Text -> Maybe Html
 parseCategories "" = Nothing
-parseCategories cat = Just $ div (toHtml cat)
+parseCategories cat = Just $ div ! class_ "categories" $ (toHtml cat)
 
 parseContent :: L.Text -> Maybe Html
-parseContent cont = case docToHtml $ parseMd cont of
-  Nothing -> Nothing
-  Just xs -> Just (toHtml $ xs)
+parseContent cont = fmap toHtml $ (docToHtml $ parseMd cont)
 
 docToHtml :: Doc -> Maybe [Html]
 docToHtml [] = Nothing

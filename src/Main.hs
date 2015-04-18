@@ -18,7 +18,7 @@ import Web.Spock.Shared hiding (SessionId)
 import Database.Persist.Sqlite hiding (get)
 
 import View
-import EntryParser
+import PostParser
 import Model
 
 data BlogState = BlogState
@@ -90,10 +90,12 @@ handlePosts = do
     --reqRight' muser 5 $
     do
       dat <- params
-      let chkp = checkJson $ findParams dat ["title", "categories", "content"]
+      let chkp = checkJson $ findParams dat ["type", "pid", "title",
+                                             "categories", "content",
+                                             "access"]
       case chkp of
        Nothing -> errorJson
-       Just par -> editResponse par
+       Just par -> previewResponse par
   post "edit/submit" $ do
     muser <- loadUserSession
     --reqRight' muser 5 $
@@ -145,7 +147,7 @@ submitEdit xs = do
         _ -> return ("ney: unkwn stype")
   submitResponse r
 
-editResponse xs = json $ parseEdit (map fromStrict xs)
+previewResponse xs = json $ parsePreview (map fromStrict xs)
 
 loginResponse True =  json (("login success. yey" :: T.Text), True)
 loginResponse False =  json (("wrong login data, try again" :: T.Text), False)

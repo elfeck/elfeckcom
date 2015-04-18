@@ -1,0 +1,24 @@
+div.par {
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 7px;
+}
+
+div.hdl {
+    margin-top: 5px;
+    margin-left: 10px;
+    margin-right: 15px;
+    font-size: 20px;
+}
+
+a.link {
+    color: #d27b63;
+    --text-decoration: none;
+}
+
+img.imag {
+    display: block;
+    margin: auto;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
