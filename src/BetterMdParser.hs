@@ -34,7 +34,10 @@ main = do
   let pl3 = procL3 pl2 []
   let pl3' = procL3Lines pl3 []
   let pl4 = procL4 pl3' []
+  let pl4' = procL4Ele pl4 []
   print $ pl4
+  putStr $ "\n"
+  print $ pl4'
 
 
 procL1 :: T.Text -> [Level1]
@@ -148,7 +151,8 @@ isRaw (RawLine _) = True
 isRaw _ = False
 
 isListItem t = T.length t >= 2 && (T.take 2 t) == "* "
-isEnumItem t = T.length t >= 2 && isDigit (T.head t) && (T.index t 1) == '.'
+isEnumItem t = T.length t >= 2 && isDigit (T.head t) &&
+               (T.take 2 $ T.tail t) == ". "
 
 procL4 :: [Level3] -> [Level4] -> [Level4]
 procL4 [] doc = procL4Col (reverse doc) []
@@ -225,3 +229,68 @@ sameLineType (EnumLine _) (EnumLine _) = True
 sameLineType (EnumLine (_, le)) (RawLine _) =
   T.length le < 3 || (T.length le >= 3 && (T.take 2 $ T.reverse le) /= "  ")
 sameLineType _ _ = False
+
+procL4Ele :: [Level4] -> [Level4] -> [Level4]
+procL4Ele [] doc = reverse doc
+procL4Ele ((Hdl (l, els)) : xs) doc =
+  procL4Ele xs $ (Hdl (l, (procEles els))) : doc
+procL4Ele ((Par bs) : xs) doc =
+  procL4Ele xs $ ((Par (procBlocks bs [])) : doc)
+procL4Ele (d : xs) doc = procL4Ele xs (d : doc)
+
+procBlocks [] doc = doc
+procBlocks ((List els) : xs) doc =
+  procBlocks xs $ (List (map procEles els)) : doc
+procBlocks ((Enum (n, els) : xs)) doc =
+  procBlocks xs $ (Enum (n, map procEles els)) : doc
+procBlocks ((Norm els) : xs) doc =
+  procBlocks xs $ (Norm (procEles els)) : doc
+
+procEles :: [Ele] -> [Ele]
+procEles els = foldl (++) [] (map procEle els)
+
+data PSt = Itl | Bld | Pln | Dft | Brk
+
+procEle :: Ele -> [Ele]
+procEle (RawEle t) = prl t Dft []
+procEle e = [e]
+
+
+prl :: T.Text -> PSt -> [Ele] -> [Ele]
+prl "" _ d = reverse d
+prl t Dft d | tryFor Bld t = prl (trim Bld t) Bld ((emptE Bld) : d)
+            | tryFor Itl t = prl (trim Itl t) Itl ((emptE Itl) : d)
+            | tryFor Brk t = prl (trim Brk t) Dft ((emptE Brk) : d)
+            | otherwise = prl t Pln ((emptE Pln) : d)
+prl t Pln d | tryFor Bld t = prl (trim Bld t) Bld ((emptE Bld) : d)
+            | tryFor Itl t = prl (trim Itl t) Itl ((emptE Itl) : d)
+            | tryFor Brk t = prl (trim Brk t) Dft ((emptE Brk) : d)
+            | otherwise = prl (T.tail t) Pln (appD d $ T.head t)
+prl t s d | tryFor Brk t = prl (T.drop 2 t) s ((emptE s) : Newline : d)
+          | chkStart s t = prl (trim s t) Dft d
+          | otherwise = prl (T.tail t) s (appD d $ T.head t)
+
+emptE Bld = Bold ""
+emptE Itl = Italic ""
+emptE Pln = Plain ""
+emptE Brk = Newline
+
+trim Bld t = T.drop 2 t
+trim Brk t = T.drop 3 t
+trim _ t = T.drop 1 t
+
+tryFor :: PSt -> T.Text -> Bool
+tryFor s t = chkStart s t && chkEnd s t
+
+chkStart Bld t = T.take 2 t == "**"
+chkStart Itl t = T.take 1 t == "*"
+chkStart Brk t = T.take 3 t == "  \n"
+
+chkEnd Bld t = T.length t > 2 && T.isInfixOf "**" (T.drop 2 t)
+chkEnd Itl t = T.length t > 1 && T.isInfixOf "*" (T.drop 1 t)
+chkEnd Brk _ = True
+
+appD :: [Ele] -> Char -> [Ele]
+appD ((Plain t) : d) c = ((Plain $ T.append t (T.singleton c)) : d)
+appD ((Italic t) : d) c = ((Italic $ T.append t (T.singleton c)) : d)
+appD ((Bold t) : d) c = ((Bold $ T.append t (T.singleton c)) : d)
