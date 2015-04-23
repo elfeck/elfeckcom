@@ -234,22 +234,18 @@ procL4Ele :: [Level4] -> [Level4] -> [Level4]
 procL4Ele [] doc = reverse doc
 procL4Ele ((Hdl (l, els)) : xs) doc =
   procL4Ele xs $ (Hdl (l, (procEles els))) : doc
-procL4Ele ((Par bs) : xs) doc =
-  procL4Ele xs $ ((Par (procBlocks bs [])) : doc)
+procL4Ele ((Par bs) : xs) doc = procL4Ele xs $ ((Par (procB bs [])) : doc)
 procL4Ele (d : xs) doc = procL4Ele xs (d : doc)
 
-procBlocks [] doc = doc
-procBlocks ((List els) : xs) doc =
-  procBlocks xs $ (List (map procEles els)) : doc
-procBlocks ((Enum (n, els) : xs)) doc =
-  procBlocks xs $ (Enum (n, map procEles els)) : doc
-procBlocks ((Norm els) : xs) doc =
-  procBlocks xs $ (Norm (procEles els)) : doc
+procB [] d = d
+procB ((List els) : xs) d = procB xs $ (List (map procEles els)) : d
+procB ((Enum (n, els) : xs)) d = procB xs $ (Enum (n, map procEles els)) : d
+procB ((Norm els) : xs) d = procB xs $ (Norm (procEles els)) : d
 
 procEles :: [Ele] -> [Ele]
 procEles els = foldl (++) [] (map procEle els)
 
-data PSt = Itl | Bld | Pln | Dft | Brk
+data PSt = Itl | Bld | Pln | Dft | Brk | Ln1 | Ln2 | Im1 | Im2
 
 procEle :: Ele -> [Ele]
 procEle (RawEle t) = prl t Dft []
@@ -258,39 +254,77 @@ procEle e = [e]
 
 prl :: T.Text -> PSt -> [Ele] -> [Ele]
 prl "" _ d = reverse d
-prl t Dft d | tryFor Bld t = prl (trim Bld t) Bld ((emptE Bld) : d)
+prl t Dft d | tryFor Im1 t = prl (trim Im1 t) Im1 ((emptE Im1) : d)
+            | tryFor Ln1 t = prl (trim Ln1 t) Ln1 ((emptE Ln1) : d)
+            | tryFor Bld t = prl (trim Bld t) Bld ((emptE Bld) : d)
             | tryFor Itl t = prl (trim Itl t) Itl ((emptE Itl) : d)
-            | tryFor Brk t = prl (trim Brk t) Dft ((emptE Brk) : d)
             | otherwise = prl t Pln ((emptE Pln) : d)
-prl t Pln d | tryFor Bld t = prl (trim Bld t) Bld ((emptE Bld) : d)
+prl t Pln d | tryFor Im1 t = prl (trim Im1 t) Im1 ((emptE Im1) : d)
+            | tryFor Ln1 t = prl (trim Ln1 t) Ln1 ((emptE Ln1) : d)
+            | tryFor Bld t = prl (trim Bld t) Bld ((emptE Bld) : d)
             | tryFor Itl t = prl (trim Itl t) Itl ((emptE Itl) : d)
-            | tryFor Brk t = prl (trim Brk t) Dft ((emptE Brk) : d)
-            | otherwise = prl (T.tail t) Pln (appD d $ T.head t)
-prl t s d | tryFor Brk t = prl (T.drop 2 t) s ((emptE s) : Newline : d)
+            | otherwise = prl (T.tail t) Pln (appD Pln d $ T.head t)
+prl t s d | isLn1 s && tryFor Ln2 t = prl (trim Ln1 $ trim Ln2 t) Ln2 d
+          | isIm1 s && tryFor Im2 t = prl (trim Im2 $ trim Im2 t) Im2 d
           | chkStart s t = prl (trim s t) Dft d
-          | otherwise = prl (T.tail t) s (appD d $ T.head t)
+          | otherwise = prl (T.tail t) s (appD s d $ T.head t)
+
+isLn1 Ln1 = True
+isLn1 _ = False
+
+isIm1 Im1 = True
+isIm1 _ = False
 
 emptE Bld = Bold ""
 emptE Itl = Italic ""
 emptE Pln = Plain ""
-emptE Brk = Newline
+emptE Ln1 = Link ("", "")
+emptE Im1 = Image ("", "")
 
 trim Bld t = T.drop 2 t
 trim Brk t = T.drop 3 t
+trim Im1 t = T.drop 2 t
 trim _ t = T.drop 1 t
 
 tryFor :: PSt -> T.Text -> Bool
+tryFor Ln1 t = chkStart' Ln1 t && chkEnd Ln1 t && chkEnd Ln2 t
+tryFor Ln2 t = chkStart' Ln2 t
+tryFor Im1 t = chkStart' Im1 t && chkEnd Im1 t && chkEnd Im2 t
+tryFor Im2 t = chkStart' Im2 t
 tryFor s t = chkStart s t && chkEnd s t
 
 chkStart Bld t = T.take 2 t == "**"
 chkStart Itl t = T.take 1 t == "*"
 chkStart Brk t = T.take 3 t == "  \n"
+chkStart Ln1 _ = False
+chkStart Ln2 t = T.take 1 t == ")"
+chkStart Im1 _ = False
+chkStart Im2 t = T.take 1 t == ")"
+
+chkStart' Ln1 t = T.take 1 t == "["
+chkStart' Ln2 t = T.take 2 t == "]("
+chkStart' Im1 t = T.take 2 t == "!["
+chkStart' Im2 t = T.take 2 t == "]("
+chkStart' _ _ = undefined
 
 chkEnd Bld t = T.length t > 2 && T.isInfixOf "**" (T.drop 2 t)
 chkEnd Itl t = T.length t > 1 && T.isInfixOf "*" (T.drop 1 t)
+chkEnd Ln1 t = T.length t > 2 && T.isInfixOf "](" (T.drop 1 t)
+chkEnd Ln2 t = T.length t > 2 && T.isInfixOf ")" spl
+  where spl = case T.splitOn "](" t of
+               (a : []) -> ""
+               (a : xs) -> head xs
+chkEnd Im1 t = T.length t > 2 && T.isInfixOf "](" (T.drop 2 t)
+chkEnd Im2 t = chkEnd Ln2 t
 chkEnd Brk _ = True
 
-appD :: [Ele] -> Char -> [Ele]
-appD ((Plain t) : d) c = ((Plain $ T.append t (T.singleton c)) : d)
-appD ((Italic t) : d) c = ((Italic $ T.append t (T.singleton c)) : d)
-appD ((Bold t) : d) c = ((Bold $ T.append t (T.singleton c)) : d)
+appD :: PSt -> [Ele] -> Char -> [Ele]
+appD Pln ((Plain t) : d) c = ((Plain $ T.append t (T.singleton c)) : d)
+appD Itl ((Italic t) : d) c = ((Italic $ T.append t (T.singleton c)) : d)
+appD Bld ((Bold t) : d) c = ((Bold $ T.append t (T.singleton c)) : d)
+appD Ln1 ((Link (s, l) : d)) c = ((Link (T.append s (T.singleton c), l)) : d)
+appD Ln2 ((Link (s, l) : d)) c = ((Link (s, T.append l (T.singleton c))) : d)
+appD Im1 ((Image (s, l) : d)) c =
+  ((Image (T.append s (T.singleton c), l)) : d)
+appD Im2 ((Image (s, l) : d)) c =
+  ((Image (s, T.append l (T.singleton c))) : d)
