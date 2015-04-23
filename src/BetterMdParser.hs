@@ -19,6 +19,8 @@ data Level3 = Headline (Int, Line) | HtmlBlock [Line] | Paragraph [Line]
 data Line = RawLine T.Text | ListLine T.Text | EnumLine (Int, T.Text)
             deriving Show
 
+type Doc = [Sec]
+type Sec = Level4
 data Level4 = Hdl (Int, [Ele]) | Htm T.Text | Par [Block] deriving Show
 
 data Block = List [[Ele]] | Enum (Int, [[Ele]]) | Norm [Ele] deriving Show
@@ -37,8 +39,15 @@ main = do
   let pl4' = procL4Ele pl4 []
   print $ pl4
   putStr $ "\n"
+  print $ pl4
+  putStr $ "\n"
   print $ pl4'
 
+parseMd = procL4' . procL3' . procL2' . procL1
+
+procL2' l1 = procL2 l1 L2C []
+procL3' l2 = procL3Lines (procL3 l2 []) []
+procL4' l3 = procL4Ele (procL4 l3 []) []
 
 procL1 :: T.Text -> [Level1]
 procL1 text = prs (T.lines text) $ []
@@ -237,7 +246,7 @@ procL4Ele ((Hdl (l, els)) : xs) doc =
 procL4Ele ((Par bs) : xs) doc = procL4Ele xs $ ((Par (procB bs [])) : doc)
 procL4Ele (d : xs) doc = procL4Ele xs (d : doc)
 
-procB [] d = d
+procB [] d = reverse d
 procB ((List els) : xs) d = procB xs $ (List (map procEles els)) : d
 procB ((Enum (n, els) : xs)) d = procB xs $ (Enum (n, map procEles els)) : d
 procB ((Norm els) : xs) d = procB xs $ (Norm (procEles els)) : d
@@ -258,28 +267,39 @@ prl t Dft d | tryFor Im1 t = prl (trim Im1 t) Im1 ((emptE Im1) : d)
             | tryFor Ln1 t = prl (trim Ln1 t) Ln1 ((emptE Ln1) : d)
             | tryFor Bld t = prl (trim Bld t) Bld ((emptE Bld) : d)
             | tryFor Itl t = prl (trim Itl t) Itl ((emptE Itl) : d)
+            | tryFor Brk t = prl (trim Brk t) Dft ((emptE Brk) : d)
             | otherwise = prl t Pln ((emptE Pln) : d)
 prl t Pln d | tryFor Im1 t = prl (trim Im1 t) Im1 ((emptE Im1) : d)
             | tryFor Ln1 t = prl (trim Ln1 t) Ln1 ((emptE Ln1) : d)
             | tryFor Bld t = prl (trim Bld t) Bld ((emptE Bld) : d)
             | tryFor Itl t = prl (trim Itl t) Itl ((emptE Itl) : d)
+            | tryFor Brk t = prl (trim Brk t) Dft ((emptE Brk) : d)
             | otherwise = prl (T.tail t) Pln (appD Pln d $ T.head t)
 prl t s d | isLn1 s && tryFor Ln2 t = prl (trim Ln1 $ trim Ln2 t) Ln2 d
           | isIm1 s && tryFor Im2 t = prl (trim Im2 $ trim Im2 t) Im2 d
+          | notLnkOrImg s && tryFor Brk t = prl (trim Brk t) s
+                                            ((emptE s) : Newline : d)
           | chkStart s t = prl (trim s t) Dft d
           | otherwise = prl (T.tail t) s (appD s d $ T.head t)
 
 isLn1 Ln1 = True
 isLn1 _ = False
-
+isLn2 Ln2 = True
+isLn2 _ = False
 isIm1 Im1 = True
 isIm1 _ = False
+isIm2 Im2 = True
+isIm2 _ = False
+
+notLnkOrImg s = (not $ isLn1 s) && (not $ isIm1 s) && (not $ isLn2 s) &&
+                (not $ isIm2 s)
 
 emptE Bld = Bold ""
 emptE Itl = Italic ""
 emptE Pln = Plain ""
 emptE Ln1 = Link ("", "")
 emptE Im1 = Image ("", "")
+emptE Brk = Newline
 
 trim Bld t = T.drop 2 t
 trim Brk t = T.drop 3 t

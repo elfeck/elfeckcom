@@ -4,18 +4,19 @@ module PostParser where
 
 import Prelude hiding (div, id)
 import Data.Maybe
-import qualified Data.Text.Lazy as L
+import qualified Data.Text as T
+import Data.Text.Lazy (toStrict)
 
-import Text.Blaze.Html (toHtml, toValue)
-import Text.Blaze.Html5 (Html, (!), div, img, ul, li, a, i ,b, link)
+import Text.Blaze.Html (toHtml, toValue, textValue, preEscapedToHtml)
+import Text.Blaze.Html5 (Html, (!), div, img, ul, ol, li, a, i ,b, link, br)
 import Text.Blaze.Html5.Attributes (href, rel, src, type_, class_, id)
 import Text.Blaze.Html.Renderer.Text (renderHtml)
 
 import Model
-import MdParser
+import BetterMdParser
 
-parsePreview :: [L.Text] -> L.Text
-parsePreview (typ : pid : content) =
+parsePreview :: [T.Text] -> T.Text
+parsePreview (typ : pid : content) = toStrict $
   case typ of
    "0" -> renderHtml $ do
      link ! href "/css/site.css" ! rel "stylesheet" ! type_ "text/css"
@@ -27,31 +28,43 @@ parsePreview (typ : pid : content) =
   where putHtml (Just h) = h
         putHtml Nothing = return ()
 
-parsePost :: (PostId, Post) -> L.Text
+parsePost :: (PostId, Post) -> T.Text
 parsePost = undefined
 
-parseTitle :: L.Text -> Maybe Html
+parseTitle :: T.Text -> Maybe Html
 parseTitle "" = Nothing
 parseTitle title = Just $ div ! class_ "title" $ (toHtml title)
 
-parseCategories :: L.Text -> Maybe Html
+parseCategories :: T.Text -> Maybe Html
 parseCategories "" = Nothing
 parseCategories cat = Just $ div ! class_ "categories" $ (toHtml cat)
 
-parseContent :: L.Text -> Maybe Html
+parseContent :: T.Text -> Maybe Html
 parseContent cont = fmap toHtml $ (docToHtml $ parseMd cont)
 
 docToHtml :: Doc -> Maybe [Html]
 docToHtml [] = Nothing
-docToHtml doc = Just $ map blockToHtml doc
+docToHtml doc = Just $ map secToHtml doc
+
+secToHtml :: Sec -> Html
+secToHtml (Par bs) = div ! class_ "par" $ toHtml $ map blockToHtml bs
+secToHtml (Hdl (n, es)) =
+  div ! class_ (textValue (T.append "hdl" $ T.pack $ (show n))) $
+  toHtml $ map eleToHtml es
+secToHtml (Htm t) = preEscapedToHtml t
 
 blockToHtml :: Block -> Html
-blockToHtml (Par es) = div ! class_ "par" $ toHtml $ map eleToHtml es
-blockToHtml (Hdl es) = div ! class_ "hdl" $ toHtml $ map eleToHtml es
+blockToHtml (List els) = ul ! class_ "ul" $ toHtml $ map toListEle els
+blockToHtml (Enum (n, els)) = ol ! class_ "ol" $ toHtml $ map toListEle els
+blockToHtml (Norm els) = toHtml $ map eleToHtml els
+
+toListEle :: [Ele] -> Html
+toListEle els = li ! class_ "li" $ toHtml $ map eleToHtml els
 
 eleToHtml :: Ele -> Html
+eleToHtml Newline = br
 eleToHtml (Plain t) = toHtml t
 eleToHtml (Italic t) = i $ toHtml t
 eleToHtml (Bold t) = b $ toHtml t
-eleToHtml (Link (c, h)) = a ! class_ "link" ! href (toValue h) $ toHtml c
-eleToHtml (Image (c, h)) = img ! class_ "imag" ! src (toValue h)
+eleToHtml (Link (d, l)) = a ! (href $ toValue l) ! class_ "link" $ toHtml d
+eleToHtml (Image (d, l)) = img ! (src $ toValue l) ! class_ "imag"

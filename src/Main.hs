@@ -147,7 +147,7 @@ submitEdit xs = do
         _ -> return ("ney: unkwn stype")
   submitResponse r
 
-previewResponse xs = json $ parsePreview (map fromStrict xs)
+previewResponse xs = json $ parsePreview xs
 
 loginResponse True =  json (("login success. yey" :: T.Text), True)
 loginResponse False =  json (("wrong login data, try again" :: T.Text), False)
