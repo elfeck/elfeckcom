@@ -31,7 +31,6 @@ $(function() {
 
 previewSubmit = function() {
     dataObj = packData();
-    dataObj["pid"] = editid.val();
     $.ajax({
 	type: "POST",
 	url: "/edit/preview",
@@ -78,7 +77,7 @@ loadPost = function() {
 	cont.change();
 	return;
     }
-    var dataObj = { id: selId }
+    var dataObj = { pid: selId }
     $.ajax({
 	type: "POST",
 	url: "/edit/loadpost",
@@ -99,12 +98,16 @@ loadPost = function() {
 }
 
 packData = function() {
+    var t = type.val();
+    var a = access.val();
+    if(t == "") t = "0";
+    if(a == "") a = "5";
     var dataObj = {
 	title: tit.val(),
 	categories: cat.val(),
 	content: cont.val(),
-	type: type.val(),
-	access: access.val()
+	type: t,
+	access: a
     }
     return dataObj;
 }

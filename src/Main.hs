@@ -10,6 +10,7 @@ import Control.Monad.Logger
 import Text.Blaze.Html (Html)
 import Text.Blaze.Html.Renderer.Text (renderHtml)
 import Data.Maybe
+import Data.Time
 import Data.Text.Lazy (toStrict, fromStrict)
 import qualified Data.Text as T
 import Network.Wai.Middleware.Static (staticPolicy, addBase)
@@ -20,6 +21,7 @@ import Database.Persist.Sqlite hiding (get)
 import View
 import PostParser
 import Model
+import Utils
 
 data BlogState = BlogState
 type SessionVal = Maybe SessionId
@@ -90,33 +92,31 @@ handlePosts = do
     --reqRight' muser 5 $
     do
       dat <- params
-      let chkp = checkJson $ findParams dat ["type", "pid", "title",
-                                             "categories", "content",
-                                             "access"]
-      case chkp of
+      let mpost = jsonToPost dat
+      case (mpost) of
+       Just post -> previewResponse post
        Nothing -> errorJson
-       Just par -> previewResponse par
   post "edit/submit" $ do
     muser <- loadUserSession
     --reqRight' muser 5 $
     do
       dat <- params
-      let chkp = checkJson $ findParams dat ["submitType", "pid", "title",
-                                             "categories", "content",
-                                             "type", "access"]
-      case chkp of
-       Nothing -> errorJson
-       Just par -> submitEdit par
+      let msubmitType = findParam dat "submitType"
+      let mpid = fmap textToInt $ findParam dat "pid"
+      let mpost = jsonToPost dat
+      case (msubmitType, mpid, mpost) of
+       (Just st, Just (Just pid), Just post) -> submitEdit st pid post
+       _ -> errorJson
   post "edit/loadpost" $ do
     muser <- loadUserSession
     --reqRight' muser 5 $
     do
       dat <- params
-      let chkp = checkJson $ findParams dat ["id"]
-      case chkp of
+      let mpid = fmap textToInt $ findParam dat "pid"
+      case mpid of
        Nothing -> errorJson
-       Just par -> do
-         resp <- runSQL $ queryPost par
+       Just (Just pid) -> do
+         resp <- runSQL $ queryPost pid
          loadpostResponse resp
   post "login/submit" $ do
     dat <- params
@@ -131,23 +131,23 @@ handlePosts = do
           sessId <- runSQL $ insertSession userId
           writeSession (Just sessId)
           loginResponse True
-  where errorJson = json $ ("ney: json error" :: T.Text)
+  where errorJson = json $ ("ney: json invalid" :: T.Text)
 
-submitEdit xs = do
-  r <- case (head xs) of
+submitEdit submitType pid post = do
+  r <- case submitType of
         "0" -> do
-          resp <- runSQL $ insertPost (drop 2 xs)
+          resp <- runSQL $ insertPost post
           return resp
         "1" -> do
-          resp <- runSQL $ updatePost (tail xs)
+          resp <- runSQL $ updatePost pid post
           return resp
         "2" -> do
-          resp <- runSQL $ deletePost (tail xs)
+          resp <- runSQL $ deletePost pid
           return resp
         _ -> return ("ney: unkwn stype")
   submitResponse r
 
-previewResponse xs = json $ parsePreview xs
+previewResponse post = json $ parsePost post
 
 loginResponse True =  json (("login success. yey" :: T.Text), True)
 loginResponse False =  json (("wrong login data, try again" :: T.Text), False)
@@ -201,3 +201,32 @@ checkUserRight user reqAccess = userAccess user >= reqAccess
 
 blaze :: MonadIO m => Html -> ActionT m a
 blaze = html . toStrict . renderHtml
+
+jsonToPost :: [(T.Text, T.Text)] -> Maybe Post
+jsonToPost params = case chkp of
+  Nothing -> Nothing
+  Just pars -> createPost pars dummyTime dummyTime
+  where chkp = checkJson $ findParams params ["title", "categories",
+                                              "content", "type", "access"]
+
+
+createPost :: [T.Text] -> UTCTime -> UTCTime -> Maybe Post
+createPost postParam crtTime modTime
+  | isNothing ty || isNothing ac = Nothing
+  | otherwise = Just $ Post (procTitle $ postParam !! 0)
+                (procCategories $ postParam !! 1)
+                (postParam !! 2)
+                crtTime
+                modTime
+                (fromJust ty)
+                (fromJust ac)
+  where ty = (textToInt $ postParam !! 3)
+        ac = (textToInt $ postParam !! 4)
+        procTitle "" = Nothing
+        procTitle text = Just text
+        procCategories "" = Nothing
+        procCategories text = Just $ T.splitOn ", " text
+
+dummyTime :: UTCTime
+dummyTime = parseTimeOrError True defaultTimeLocale "%d.%m.%Y %H:%M"
+            "01.01.2000 00:00"

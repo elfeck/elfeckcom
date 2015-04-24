@@ -17,10 +17,8 @@ import Control.Monad.Logger
 import Control.Monad.Trans.Resource
 import Database.Persist.TH
 import qualified Data.Text as T
-import Data.Text.Read
 import Data.Time
 import Data.Maybe
-import System.Locale
 import Web.Spock.Shared hiding (SessionId)
 
 import Database.Persist.Sql
@@ -84,83 +82,52 @@ insertUser :: T.Text -> T.Text -> Int -> SqlPersistM T.Text
 insertUser name pass access = do
   mName <- getBy (UniqueUsername name)
   case mName of
-   Just _ -> return "Username taken"
+   Just _ -> return "ney: username taken"
    Nothing -> do
      insert (User name pass access)
-     return "User created"
+     return "yey: user created"
 
-insertPost :: [T.Text] -> SqlPersistM T.Text
-insertPost postParam = do
-  let ty = (procInt $ postParam !! 3)
-  let ac = (procInt $ postParam !! 4)
+insertPost :: Post -> SqlPersistM T.Text
+insertPost post = do
   now <- liftIO $ getCurrentTime
-  let mpost = createPost postParam now now
+  insert $ adjustTime post now now
+  return "yey: created"
+
+deletePost :: Int -> SqlPersistM T.Text
+deletePost pid = do
+  mpost <- get $ ((toSqlKey $ fromIntegral pid) :: PostId)
   case mpost of
-   Nothing -> return "ney: invl param"
-   Just post -> do insert post
-                   return "yey: created"
+   Nothing -> return "ney: unkwn pid"
+   Just _ -> do delete ((toSqlKey $ fromIntegral pid) :: PostId)
+                return "yey: deleted"
 
-createPost :: [T.Text] -> UTCTime -> UTCTime -> Maybe Post
-createPost postParam crtTime modTime
-  | isNothing ty || isNothing ac = Nothing
-  | otherwise = Just $ Post (procTitle $ postParam !! 0)
-                (procCategories $ postParam !! 1)
-                (postParam !! 2)
-                crtTime
-                modTime
-                (fromJust ty)
-                (fromJust ac)
-  where ty = (procInt $ postParam !! 3)
-        ac = (procInt $ postParam !! 4)
-        procTitle "" = Nothing
-        procTitle text = Just text
-        procCategories "" = Nothing
-        procCategories text = Just $ T.splitOn ", " text
+updatePost :: Int -> Post -> SqlPersistM T.Text
+updatePost pid post = do
+  mpost <- get $ ((toSqlKey $ fromIntegral pid) :: PostId)
+  case mpost of
+   Nothing -> return "ney: unkwn pid"
+   Just oldpost -> do
+     let crtTime = postCrtDate oldpost
+     now <- liftIO $ getCurrentTime
+     replace ((toSqlKey $ fromIntegral pid) :: PostId) $
+       adjustTime post crtTime now
+     return "yey: updated"
 
-deletePost :: [T.Text] -> SqlPersistM T.Text
-deletePost (mpid : postParam) = case procInt mpid of
-  Nothing -> return "ney: invl pid"
-  Just pid -> do
-    mpost <- get $ ((toSqlKey pid) :: PostId)
-    case mpost of
-     Nothing -> return "ney: unkwn pid"
-     Just _ -> do delete ((toSqlKey pid) :: PostId)
-                  return "yey: deleted"
-
-updatePost :: [T.Text] -> SqlPersistM T.Text
-updatePost (mpid : postParam) = case procInt mpid of
-  Nothing -> return "ney: invl pid"
-  Just pid -> do
-    mpost <- get $ ((toSqlKey pid) :: PostId)
-    case mpost of
-     Nothing -> return "ney: unkwn pid"
-     Just post -> do
-       let crtTime = postCrtDate post
-       now <- liftIO $ getCurrentTime
-       let nmpost = createPost postParam crtTime now
-       case nmpost of
-        Nothing -> return "ney: invl param"
-        Just npost -> do replace ((toSqlKey pid) :: PostId) npost
-                         return "yey: updated"
-
-procInt text = case decimal text of
-                Left _ -> Nothing
-                Right (val, "") -> Just val
-                Right (val, _) -> Nothing
+adjustTime :: Post -> UTCTime  -> UTCTime -> Post
+adjustTime (Post t ca co cr md ty ac) cr' md' =
+  (Post t ca co cr' md' ty ac)
 
 queryAllPosts :: SqlPersistM ([(PostId, Post)])
 queryAllPosts = do
   rows <- selectList [] [Desc PostModDate]
   return $ map (\r -> (entityKey r, entityVal r)) rows
 
-queryPost :: [T.Text] -> SqlPersistM (Maybe (PostId, Post))
-queryPost (textpid : _) = case procInt textpid of
-  Nothing -> return Nothing
-  Just pid -> do
-    mpost <- get $ toSqlKey pid
-    case mpost of
-     Nothing -> return Nothing
-     Just post -> return $ Just (toSqlKey pid, post)
+queryPost :: Int -> SqlPersistM (Maybe (PostId, Post))
+queryPost pid = do
+  mpost <- get $ toSqlKey $ fromIntegral pid
+  case mpost of
+   Nothing -> return Nothing
+   Just post -> return $ Just (toSqlKey $ fromIntegral pid, post)
 
 runSQL :: (HasSpock m, SpockConn m ~ SqlBackend) =>
           SqlPersistT (NoLoggingT (ResourceT IO)) a -> m a

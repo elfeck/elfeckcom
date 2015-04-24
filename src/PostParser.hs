@@ -15,29 +15,27 @@ import Text.Blaze.Html.Renderer.Text (renderHtml)
 import Model
 import BetterMdParser
 
-parsePreview :: [T.Text] -> T.Text
-parsePreview (typ : pid : content) = toStrict $
-  case typ of
-   "0" -> renderHtml $ do
+parsePost :: Post -> T.Text
+parsePost post = toStrict $
+  case postPtype post of
+   0 -> renderHtml $ do
      link ! href "/css/site.css" ! rel "stylesheet" ! type_ "text/css"
-     putHtml $ parseContent (content !! 2) -- content
+     putHtml $ parseContent $ postContent post
    _ -> renderHtml $ do
-     putHtml $ parseTitle (content !! 0)
-     putHtml $ parseCategories (content !! 1)
-     putHtml $ parseContent (content !! 2)
+     putHtml $ parseTitle $ postTitle post
+     putHtml $ parseCategories $ postCategories post
+     putHtml $ parseContent $ postContent post
   where putHtml (Just h) = h
         putHtml Nothing = return ()
 
-parsePost :: (PostId, Post) -> T.Text
-parsePost = undefined
+parseTitle :: Maybe T.Text -> Maybe Html
+parseTitle Nothing = Nothing
+parseTitle (Just title) = Just $ div ! class_ "title" $ (toHtml title)
 
-parseTitle :: T.Text -> Maybe Html
-parseTitle "" = Nothing
-parseTitle title = Just $ div ! class_ "title" $ (toHtml title)
-
-parseCategories :: T.Text -> Maybe Html
-parseCategories "" = Nothing
-parseCategories cat = Just $ div ! class_ "categories" $ (toHtml cat)
+parseCategories :: Maybe [T.Text] -> Maybe Html
+parseCategories Nothing = Nothing
+parseCategories (Just cat) =
+  Just $ div ! class_ "categories" $ (toHtml $ T.intercalate ", " cat)
 
 parseContent :: T.Text -> Maybe Html
 parseContent cont = fmap toHtml $ (docToHtml $ parseMd cont)
