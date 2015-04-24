@@ -6,27 +6,27 @@ import Data.Char
 import Data.List
 import qualified Data.Text as T
 
-data Level1 = Empty | Equals T.Text | HtmlTagO T.Text | HtmlTagC T.Text |
-              Raw Line | Headl (Int, Line)
-            deriving Show
-
-data Level2 = BlockNorm [Level1] | BlockHtml [Level1]
-            deriving Show
-data L2State = L2N | L2O (Int, T.Text) | L2C
-
-data Level3 = Headline (Int, Line) | HtmlBlock [Line] | Paragraph [Line]
-            deriving Show
-data Line = RawLine T.Text | ListLine T.Text | EnumLine (Int, T.Text)
-            deriving Show
 
 type Doc = [Sec]
 type Sec = Level4
-data Level4 = Hdl (Int, [Ele]) | Htm T.Text | Par [Block] deriving Show
+data Level4 = Hdl (Int, [Ele])
+            | Htm T.Text
+            | Par [Block]
+            deriving Show
 
-data Block = List [[Ele]] | Enum (Int, [[Ele]]) | Norm [Ele] deriving Show
-data Ele = Newline | Plain T.Text | Italic T.Text | Bold T.Text |
-           Link (T.Text, T.Text) | Image (T.Text, T.Text) |
-           RawEle T.Text deriving Show
+data Block = List [[Ele]]
+           | Enum (Int, [[Ele]])
+           | Norm [Ele]
+           deriving Show
+
+data Ele = Newline
+         | Plain T.Text
+         | Italic T.Text
+         | Bold T.Text
+         | Link (T.Text, T.Text)
+         | Image (T.Text, T.Text)
+         | RawEle T.Text
+         deriving Show
 
 
 main = do
@@ -36,18 +36,23 @@ main = do
   let pl3 = procL3 pl2 []
   let pl3' = procL3Lines pl3 []
   let pl4 = procL4 pl3' []
-  let pl4' = procL4Ele pl4 []
+  let pl4m = mergePar' pl4
   print $ pl4
   putStr $ "\n"
-  print $ pl4
-  putStr $ "\n"
-  print $ pl4'
+  print $ pl4m
 
 parseMd = procL4' . procL3' . procL2' . procL1
 
 procL2' l1 = procL2 l1 L2C []
 procL3' l2 = procL3Lines (procL3 l2 []) []
 procL4' l3 = procL4Ele (procL4 l3 []) []
+
+
+{-
+  Level 1: parse linewise and extract html tags and # headlines
+-}
+data Level1 = Empty | Equals T.Text | HtmlTagO T.Text | HtmlTagC T.Text |
+              Raw Line | Headl (Int, Line) deriving Show
 
 procL1 :: T.Text -> [Level1]
 procL1 text = prs (T.lines text) $ []
@@ -67,6 +72,12 @@ procL1 text = prs (T.lines text) $ []
                        in (T.length $ fst lspan, RawLine $ snd lspan)
                 isHl (c, RawLine t) = c > 0 && T.length t > 0 &&
                                       T.head t == ' '
+
+{-
+  Level 2: Pack normal and htmls together
+-}
+data Level2 = BlockNorm [Level1] | BlockHtml [Level1] deriving Show
+data L2State = L2N | L2O (Int, T.Text) | L2C
 
 procL2 :: [Level1] -> L2State -> [Level2] -> [Level2]
 procL2 [] _ doc = reverse doc
@@ -109,6 +120,18 @@ isOpening _ _ = False
 extractTag (HtmlTagO t) = fst $ T.span (\c -> c /= ' ' && c /= '>') (T.tail t)
 extractTag (HtmlTagC t) = (T.drop 2 (T.init t))
 
+
+{-
+  Level 3: Paragraphs; Sort list line, enum line and normal lines
+    procL3: Keep html as-is, process BlockNorm in pL3B
+    proc3B: Keep Headline as-is, detect == headlines, detect paragraphs
+    procL3Lines: Tag the lines, enums and normals
+-}
+data Level3 = Headline (Int, Line) | HtmlBlock [Line] | Paragraph [Line]
+            deriving Show
+data Line = RawLine T.Text | ListLine T.Text | EnumLine (Int, T.Text)
+            deriving Show
+
 procL3 :: [Level2] -> [Level3] -> [Level3]
 procL3 [] doc = reverse doc
 procL3 ((BlockHtml l1s) : l2s) doc =
@@ -127,8 +150,11 @@ pL3B (l1 : l1s) doc
 isEquals (Equals _) = True
 isEquals _ = False
 
+isEmpty Empty = True
+isEmpty _ = False
+
 isPara [] = False
-isPara ((Paragraph ls) : doc) = True
+isPara ((Paragraph _) : _) = True
 isPara _ = False
 
 appTH l ((Paragraph ls) : doc) = (Paragraph $ ls ++ [onlyContent l]) : doc
@@ -140,6 +166,7 @@ onlyContent (HtmlTagC t) = RawLine t
 onlyContent (Equals t) = RawLine t
 onlyContent _ = RawLine ""
 
+-- Only proc Paragraph lines in prL3P
 procL3Lines :: [Level3] -> [Level3] -> [Level3]
 procL3Lines [] doc = reverse doc
 procL3Lines ((Headline h) : l3s) doc = procL3Lines l3s ((Headline h) : doc)
@@ -147,6 +174,7 @@ procL3Lines ((HtmlBlock l) : l3s) doc = procL3Lines l3s ((HtmlBlock l) : doc)
 procL3Lines ((Paragraph l) : l3s) doc =
   procL3Lines l3s ((Paragraph (prL3P l [])) : doc)
 
+-- Tag the lines as List, Enum or Raw (= normal)
 prL3P :: [Line] -> [Line] -> [Line]
 prL3P [] acc = reverse acc
 prL3P ((RawLine t) : ls) acc
@@ -163,19 +191,23 @@ isListItem t = T.length t >= 2 && (T.take 2 t) == "* "
 isEnumItem t = T.length t >= 2 && isDigit (T.head t) &&
                (T.take 2 $ T.tail t) == ". "
 
+{-
+  Level 4: Gather to lists and enums and normal blocks. Process inline eles
+    procL4: Keep headlines, unline html and blockify the paragraphs
+    procL4Col: unline normal lines
+    mergePar: merge Blocks which end in list/enum with Blocks that start with
+              Norm
+    removeEmpty: remove empty Par
+    procL4Ele: deal with inline ele. Not dependent on other RawEle
+-}
 procL4 :: [Level3] -> [Level4] -> [Level4]
-procL4 [] doc = procL4Col (reverse doc) []
+procL4 [] doc = removeEmpty' $ mergePar' $ procL4Col (reverse doc) []
 procL4 ((Headline (n, t)) : l3s) doc =
   procL4 l3s ((Hdl (n, [RawEle $ textFromLine t])) : doc)
 procL4 ((HtmlBlock ls) : l3s) doc =
   procL4 l3s ((Htm $ T.unlines $ map textFromLine ls) : doc)
 procL4 ((Paragraph ls) : l3s) doc =
   procL4 l3s ((Par $ groupAndMerge ls) : doc)
-
-procL4Col [] doc = reverse doc
-procL4Col ((Par block) : d) doc =
-  procL4Col d $ ((Par $ collapseNormRaw block []) : doc)
-procL4Col (e : d) doc = procL4Col d (e : doc)
 
 groupAndMerge ls = map blockify $ groupBy sameLineType ls
 
@@ -196,12 +228,6 @@ procEnumLines ((EnumLine (_, t) : ls)) doc =
   procEnumLines ls ((RawEle t) : doc)
 procEnumLines ((RawLine t) : ls) ((RawEle to) : doc) =
   procEnumLines ls ((RawEle $ T.unlines [to, t]) : doc)
-
-collapseNormRaw :: [Block] -> [Block] -> [Block]
-collapseNormRaw [] block = reverse block
-collapseNormRaw ((Norm eles) : bl) block
-  = collapseNormRaw bl ((Norm [RawEle (T.unlines $ map toText eles)]) : block)
-collapseNormRaw (b : bl) block = collapseNormRaw bl (b : block)
 
 toText (RawEle t) = t
 
@@ -239,6 +265,46 @@ sameLineType (EnumLine (_, le)) (RawLine _) =
   T.length le < 3 || (T.length le >= 3 && (T.take 2 $ T.reverse le) /= "  ")
 sameLineType _ _ = False
 
+procL4Col [] doc = reverse doc
+procL4Col ((Par block) : d) doc =
+  procL4Col d $ ((Par $ collapseNormRaw block []) : doc)
+procL4Col (e : d) doc = procL4Col d (e : doc)
+
+collapseNormRaw :: [Block] -> [Block] -> [Block]
+collapseNormRaw [] block = reverse block
+collapseNormRaw ((Norm eles) : bl) block
+  = collapseNormRaw bl ((Norm [RawEle (T.unlines $ map toText eles)]) : block)
+collapseNormRaw (b : bl) block = collapseNormRaw bl (b : block)
+
+mergePar' x = mergePar x []
+mergePar :: [Level4] -> [Level4] -> [Level4]
+mergePar [] doc = reverse doc
+mergePar (b : s) [] = mergePar s [b]
+mergePar ((Par bs1) : s) ((Par bs2) : doc)
+  | endListEnum bs2 && startNormal bs1 = mergePar s ((Par $ bs2 ++ bs1) : doc)
+  | otherwise = mergePar s ((Par bs1) : (Par bs2) : doc)
+mergePar (b : s) doc = mergePar s (b : doc)
+
+endListEnum [] = False
+endListEnum bs = isListOrEnum $ last bs
+
+isListOrEnum (Enum _) = True
+isListOrEnum (List _) = True
+isListOrEnum _ = False
+
+startNormal [] = False
+startNormal ((Norm _) : _) = True
+startNormal _ = False
+
+removeEmpty' x = removeEmpty x []
+removeEmpty :: [Level4] -> [Level4] -> [Level4]
+removeEmpty [] doc = reverse doc
+removeEmpty ((Par []) : d) doc = removeEmpty d doc
+removeEmpty (a : d) doc = removeEmpty d (a : doc)
+
+{-
+  Proc eles. Last step
+-}
 procL4Ele :: [Level4] -> [Level4] -> [Level4]
 procL4Ele [] doc = reverse doc
 procL4Ele ((Hdl (l, els)) : xs) doc =
@@ -259,7 +325,6 @@ data PSt = Itl | Bld | Pln | Dft | Brk | Ln1 | Ln2 | Im1 | Im2
 procEle :: Ele -> [Ele]
 procEle (RawEle t) = prl t Dft []
 procEle e = [e]
-
 
 prl :: T.Text -> PSt -> [Ele] -> [Ele]
 prl "" _ d = reverse d
