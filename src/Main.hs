@@ -11,6 +11,7 @@ import Text.Blaze.Html (Html)
 import Text.Blaze.Html.Renderer.Text (renderHtml)
 import Data.Maybe
 import Data.Time
+import Data.Monoid
 import Data.Text.Lazy (toStrict, fromStrict)
 import qualified Data.Text as T
 import Network.Wai.Middleware.Static (staticPolicy, addBase)
@@ -25,16 +26,18 @@ import Utils
 
 data BlogState = BlogState
 type SessionVal = Maybe SessionId
-type BlogApp = SpockM SqlBackend SessionVal BlogState ()
-type BlogAction a = SpockAction SqlBackend SessionVal BlogState a
+type BlogApp = SpockM SqlBackend SessionVal SiteConfig ()
+type BlogAction a = SpockAction SqlBackend SessionVal SiteConfig a
 
 main :: IO ()
 main = do
   svg <- readFile "static/img/header.svg"
+  configFile <- readFile "config.txt"
+  let config = parseConfig $ T.pack configFile
   let files = [svg]
-  pool <- runNoLoggingT $ createSqlitePool "elfeck.db" 5
+  pool <- runNoLoggingT $ createSqlitePool (database config) 5
   runNoLoggingT $ runSqlPool (runMigration migrateCore) pool
-  runSpock 3000 $ spock sessConfig (PCPool pool) BlogState (app files)
+  runSpock 3000 $ spock sessConfig (PCPool pool) config (app files config)
     where sessConfig =
             SessionCfg { sc_cookieName = "elfeckcom"
                        , sc_sessionTTL = 60 * 5 * 50
@@ -44,22 +47,15 @@ main = do
                        , sc_persistCfg = Nothing
                        }
 
-app :: [String] -> BlogApp
-app files = do
+app :: [String] -> SiteConfig -> BlogApp
+app files (SiteConfig _ routes) = do
   middleware (staticPolicy (addBase "static"))
-  handleGets files
+  handleGets files routes
   handlePosts
 
-handleGets :: [String] -> BlogApp
-handleGets files = do
-  get root $ do
-    muser <- loadUserSession
-    blaze $ do
-      siteHead
-      siteHeader (head files)
-      testBody
-      siteFooter $ fmap snd muser
-  get "elfeck" $ redirect "/"
+handleGets :: [String] -> [Route] -> BlogApp
+handleGets files staticRoutes = do
+  sequence_ $ map (handleStatic files) staticRoutes
   get "edit" $ do
     muser <- loadUserSession
     posts <- runSQL $ queryAllPosts
@@ -84,6 +80,24 @@ handleGets files = do
     siteHead
     emptyHeader (head files)
     site404
+
+handleStatic :: [String] -> Route -> BlogApp
+handleStatic _ (Redirect from to) = get (static $ T.unpack from) $ redirect to
+handleGet fs (DB from pid) = get (static $ T.unpack from) $ do
+  muser <- loadUserSession
+  mpost <- runSQL $ queryPost pid
+  case mpost of
+   Nothing -> handleInvPid fs
+   Just post -> blaze $ do
+     siteHead
+     siteHeader (head fs)
+     siteBody $ parsePost $ snd post
+     siteFooter $ fmap snd muser
+
+handleInvPid fs = blaze $ do
+  siteHead
+  siteHeader (head fs)
+  siteInvPid
 
 handlePosts :: BlogApp
 handlePosts = do
@@ -147,7 +161,7 @@ submitEdit submitType pid post = do
         _ -> return ("ney: unkwn stype")
   submitResponse r
 
-previewResponse post = json $ parsePost post
+previewResponse post = json $ renderPost post
 
 loginResponse True =  json (("login success. yey" :: T.Text), True)
 loginResponse False =  json (("wrong login data, try again" :: T.Text), False)

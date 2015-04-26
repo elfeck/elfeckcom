@@ -15,16 +15,18 @@ import Text.Blaze.Html.Renderer.Text (renderHtml)
 import Model
 import BetterMdParser
 
-parsePost :: Post -> T.Text
-parsePost post = toStrict $
-  case postPtype post of
-   0 -> renderHtml $ do
-     link ! href "/css/site.css" ! rel "stylesheet" ! type_ "text/css"
-     putHtml $ parseContent $ postContent post
-   _ -> renderHtml $ do
-     putHtml $ parseTitle $ postTitle post
-     putHtml $ parseCategories $ postCategories post
-     putHtml $ parseContent $ postContent post
+renderPost :: Post -> T.Text
+renderPost post = toStrict $ renderHtml $ parsePost post
+
+parsePost :: Post -> Html
+parsePost post = case postPtype post of
+  0 -> do
+    link ! href "/css/site.css" ! rel "stylesheet" ! type_ "text/css"
+    putHtml $ parseContent $ postContent post
+  _ -> do
+    putHtml $ parseTitle $ postTitle post
+    putHtml $ parseCategories $ postCategories post
+    putHtml $ parseContent $ postContent post
   where putHtml (Just h) = h
         putHtml Nothing = return ()
 

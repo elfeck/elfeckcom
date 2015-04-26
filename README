@@ -1,28 +1,26 @@
 elfeckcom
 ===============================================================================
-(*) This is the source for my new website. You might visit it at elfeck.com
-(*) I'm not good at haskell and/or scotty so don't expect much
+(*) Source for the future elfeck.com website
+(*) This might be very horrible Haskell
 
 
 content format
 ===============================================================================
-(*) Meta
+(*) Post Layout
+    > Title
+    > Categories
+    > Content
     > Creation Time Stamp
     > Modify Time Stamp
     > Access level
     > Type
 
-(*) Content
-    > Title
-    > Categories
-    > Content
-
-(*) Types
+(*) Post Types
     0: Website Main Post
     1: Blog Post
     2: Twitter-like Snippet
 
-(*) Submit Types
+(*) Submit Types (json)
     0: Inset
     1: Update
     2: Delete
@@ -30,9 +28,11 @@ content format
 
 MD to html parsing
 ===============================================================================
-(*) To Handle
+(*) handled
     > Headline		==
-    > Linebreaks	double space
+    > Headline		#, ##, ...
+    > Html		<html>\n ... \n</html>
+    > Linebreaks	double space \n
     > New paragraph	empty line
     > i	  		* *
     > b			** **

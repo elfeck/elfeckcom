@@ -97,11 +97,15 @@ siteFooter muser = do
 wrapContainer a = div ! class_ "footercont" $ a
 spacer = div "[" ! class_ "footerspacer"
 
-testBody :: Html
-testBody = div "" ! class_ "testbody"
+siteBody :: Html -> Html
+siteBody h = div h ! class_ "testbody"
 
 site404 :: Html
 site404 = div "Sorry nothing to see here" ! class_ "testbody"
+
+siteInvPid :: Html
+siteInvPid = div ! class_ "testbody" $
+             "Invalid pid. Something went horribly wrong :("
 
 siteEdit :: [(PostId, Post)] -> Html
 siteEdit posts = do

@@ -72,6 +72,7 @@ a.userlink {
 }
 
 div.testbody {
+    overflow:auto;
     width: 800px;
     height: 600px;
     margin-top: 0px;
