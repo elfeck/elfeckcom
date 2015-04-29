@@ -27,6 +27,7 @@ siteHead = docTypeHtml $ head $ do
   link ! href "/css/index.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "/css/edit.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "/css/login.css" ! rel "stylesheet" ! type_ "text/css"
+  link ! href "/css/evexpl.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "/img/icon.png" ! rel "icon" ! type_ "image/png"
   link ! href "http://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
     ! rel "stylesheet" ! type_ "text/css"
@@ -98,7 +99,7 @@ wrapContainer a = div ! class_ "footercont" $ a
 spacer = div "[" ! class_ "footerspacer"
 
 siteBody :: Html -> Html
-siteBody h = div h ! class_ "testbody"
+siteBody h = div ! class_ "sitebody" $ (div ! class_ "innerbody" $ h)
 
 site404 :: Html
 site404 = div "Sorry nothing to see here" ! class_ "testbody"
@@ -138,6 +139,23 @@ postToSelect (pid, post) = case postTitle post of
   Just title -> option ! id (keyToId pid) $ toHtml title
   where form date = T.pack $ formatTime defaultTimeLocale "%d. %b %R" date
         keyToId pid = (stringValue (show $ fromSqlKey pid))
+
+siteEvexpl :: Html
+siteEvexpl = do
+  script "" ! src "/js/jquery-2.1.3.min.js"
+  script "" ! src "/js/button.js"
+  script "" ! src "/js/evexpl.js"
+  div ! class_ "editbody" $ do
+    div ! class_ "editleft" $ do
+      input ! class_ "editin" ! id "everegion"
+      div ! id "evespacer" $ ""
+      input ! class_ "editin evesite" ! id "s_1"
+      input ! class_ "editin evetype" ! id "t_1"
+      input ! class_ "editin evetype" ! id "n_1"
+    div ! class_ "editright" $ do
+      select ! class_ "editselect" ! multiple "multiple" ! id "evelist"
+        ! autocomplete "off" $ do
+          option ! id "0" ! selected "selected" $ "[new entry]"
 
 siteLogin :: Html
 siteLogin = do

@@ -22,3 +22,10 @@ img.imag {
     margin-top: 5px;
     margin-bottom: 5px;
 }
+
+ul.ul {
+    list-style-type: circle;
+    padding-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}

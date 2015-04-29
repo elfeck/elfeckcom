@@ -1,0 +1,26 @@
+input#everegion {
+    width: 150px;
+    margin-left: 48px;
+}
+
+div#evespacer {
+    width: 300px;
+    height: 20px;
+    display: inline-block;
+}
+
+input.evesite {
+    width: 100px;
+    margin-left: 48px;
+    margin-top: 5px;
+}
+
+input.evetype {
+    margin-left: 10px;
+    margin-top: 5px;
+    width: 100px;
+}
+
+select#evelist {
+    margin-top: 20px;
+}

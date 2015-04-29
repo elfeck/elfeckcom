@@ -76,6 +76,11 @@ handleGets files staticRoutes = do
        runSQL $ logoutUser userId
        writeSession Nothing
        redirect "/"
+  get "evexpl" $ do
+    blaze $ do
+      siteHead
+      infBackHeader (head files) "evexpl"
+      siteEvexpl
   hookAny GET $ \_ -> blaze $ do
     siteHead
     emptyHeader (head files)
@@ -83,7 +88,7 @@ handleGets files staticRoutes = do
 
 handleStatic :: [String] -> Route -> BlogApp
 handleStatic _ (Redirect from to) = get (static $ T.unpack from) $ redirect to
-handleGet fs (DB from pid) = get (static $ T.unpack from) $ do
+handleStatic fs (DB from pid) = get (static $ T.unpack from) $ do
   muser <- loadUserSession
   mpost <- runSQL $ queryPost pid
   case mpost of

@@ -71,13 +71,17 @@ a.userlink {
     text-decoration: none;
 }
 
-div.testbody {
-    overflow:auto;
+div.sitebody {
+    overflow: auto;
     width: 800px;
-    height: 600px;
     margin-top: 0px;
     background-color: #d4d4d4;
     text-align: justify;
+}
+
+div.innerbody {
+    overflow: auto;
+    margin: 10px;
 }
 
 div.footer {
