@@ -3,14 +3,16 @@ input#everegion {
     margin-left: 48px;
 }
 
-div#evespacer {
-    width: 300px;
-    height: 20px;
-    display: inline-block;
+div#everesp {
+    margin-left: 10px;
+    text-align: center;
+    line-height: 20px;
+    font-weight: bold;
+    width: 210px;
 }
 
 input.evesite {
-    width: 100px;
+    width: 150px;
     margin-left: 48px;
     margin-top: 5px;
 }
@@ -18,7 +20,11 @@ input.evesite {
 input.evetype {
     margin-left: 10px;
     margin-top: 5px;
-    width: 100px;
+    width: 150px;
+}
+
+input.wrong {
+    background-color: #ffcccc;
 }
 
 select#evelist {

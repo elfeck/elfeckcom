@@ -146,12 +146,12 @@ siteEvexpl = do
   script "" ! src "/js/button.js"
   script "" ! src "/js/evexpl.js"
   div ! class_ "editbody" $ do
-    div ! class_ "editleft" $ do
+    div ! class_ "editleft" ! id "contleft" $ do
       input ! class_ "editin" ! id "everegion"
-      div ! id "evespacer" $ ""
-      input ! class_ "editin evesite" ! id "s_1"
-      input ! class_ "editin evetype" ! id "t_1"
-      input ! class_ "editin evetype" ! id "n_1"
+      div ! class_ "editinfo" ! id "everesp" $ ""
+      input ! class_ "editin" ! id "editdelete"
+      input ! class_ "editin evesite" ! id "s_0"
+      input ! class_ "editin evetype" ! id "t_0"
     div ! class_ "editright" $ do
       select ! class_ "editselect" ! multiple "multiple" ! id "evelist"
         ! autocomplete "off" $ do
