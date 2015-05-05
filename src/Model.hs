@@ -48,7 +48,7 @@ SystemVisit json
   name T.Text Maybe
   region T.Text
   sites SystemSites
-  crtData UTCTime
+  crtDate UTCTime
   author T.Text
   deriving Show
 |]
@@ -128,7 +128,8 @@ updateSystemVisit eid visit = do
   case mvisit of
    Nothing -> return "ney: unkwn eid"
    Just oldvisit -> do
-     replace ((toSqlKey $ fromIntegral eid) :: SystemVisitId) visit
+     replace ((toSqlKey $ fromIntegral eid) :: SystemVisitId) $
+       adjustTimeSystemVisit visit (systemVisitCrtDate oldvisit)
      return "yey: updated"
 
 adjustTimePost :: Post -> UTCTime -> UTCTime -> Post
@@ -151,7 +152,7 @@ queryUser sessId = do
      else return Nothing
    Nothing -> return Nothing
 
-queryAllPosts :: SqlPersistM ([(PostId, Post)])
+queryAllPosts :: SqlPersistM [(PostId, Post)]
 queryAllPosts = do
   rows <- selectList [] [Desc PostModDate]
   return $ map (\r -> (entityKey r, entityVal r)) rows
@@ -163,6 +164,17 @@ queryPost pid = do
    Nothing -> return Nothing
    Just post -> return $ Just (toSqlKey $ fromIntegral pid, post)
 
+queryAllVisits :: SqlPersistM [(SystemVisitId, SystemVisit)]
+queryAllVisits = do
+  rows <- selectList [] [Desc SystemVisitCrtDate]
+  return $ map (\r -> (entityKey r, entityVal r)) rows
+
+queryVisit :: Int -> SqlPersistM (Maybe (SystemVisitId, SystemVisit))
+queryVisit eid = do
+  mvisit <- get $ toSqlKey $ fromIntegral eid
+  case mvisit of
+   Nothing -> return Nothing
+   Just visit -> return $ Just (toSqlKey $ fromIntegral eid, visit)
 
 runSQL :: (HasSpock m, SpockConn m ~ SqlBackend) =>
           SqlPersistT (NoLoggingT (ResourceT IO)) a -> m a

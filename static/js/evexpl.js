@@ -6,40 +6,101 @@ $(function() {
     types = [$("#t_0")];
 
     eveList = $("#evelist");
+    submitBut = $("#submitbutton");
+    editdel = $("#editdelete");
+    editid = $("#editid");
+    editdc = $("#editdc");
+    editresp = $("#editresp");
 
     reg.on("keyup", validateRegionH);
     sites[0].on("keyup", addNextSite);
     sites[0].on("keyup", validateSiteH);
     types[0].on("keyup", validateTypeH);
+    registerButton(submitBut, submit);
+    eveList.on("change", loadVisit);
+    editdel.on("keyup", function() {
+	if(editdel.val() == "DEL") editdel.addClass("editdeldanger");
+	else editdel.removeClass("editdeldanger");
+    });
     setKeybindings();
 });
 
 submit = function() {
-    console.log(validateAll());
-    if(validateAll()) {
-	console.log(packData());
+    if(!validateAll()) {
+	respond("ney: misng info");
+	return;
     }
+    selId = getSelectedId();
+    t = -1;
+    if(selId == 0) t = 0;
+    if(selId != 0) t = 1;
+    if(selId != 0 && editdel.val() == "DEL") t = 2;
+    dataObj = packData();
+    dataObj["eid"] = selId;
+    dataObj["submitType"] = t;
+    console.log(dataObj);
+    $.ajax({
+	type: "POST",
+	url: "/evexpl/submit",
+	dataType: "json",
+	data: { dat: dataObj },
+	success: function(data) {
+	    respond(data);
+	    editdel.val("");
+	    editdel.removeClass("editdeldanger");
+	},
+	error: function() { jsonError("errorJson in submit"); }
+    });
     reset();
+}
+
+loadVisit = function() {
+    var selId = getSelectedId();
+    if(selId == 0) {
+	reset();
+	return;
+    }
+    var dataObj = { eid: selId }
+    $.ajax({
+	type: "POST",
+	url: "/evexpl/loadvisit",
+	dataType: "json",
+	data: { dat: dataObj },
+	success: function(data) {
+	    console.log(data);
+	    reg.val(data[1]["region"]);
+	    editid.val(data[0]);
+	    editdc.val(procTime(data[1]["crtDate"]));
+	    for(var i = 0; i < data[1]["sites"].length; ++i) {
+		sites[i].val(data[1]["sites"][i][0]);
+		types[i].val(data[1]["sites"][i][1]);
+		addNextSite_();
+	    }
+	},
+	error: function() { jsonError("errorJson in loadPost"); }
+    });
 }
 
 addNextSite = function(event) {
     var regex = new RegExp("^[a-zA-Z0-9\b]+$");
     var key = String.fromCharCode(!event.charCode ? event.which :
 				  event.charCode);
-    if (regex.test(key)) {
-	var curr = sites.length;
-	container.append('<input class="editin evesite" id="s_' + curr +
-			 '"></input>');
-	container.append('<input class="editin evetype" id="t_' + curr +
-			 '"></input>');
-	sites.push($("#s_" + curr));
-	types.push($("#t_" + curr));
-	sites[curr - 1].off();
-	sites[curr - 1].on("keyup", validateSiteH);
-	sites[curr].on("keyup", addNextSite);
-	sites[curr].on("keyup", validateSiteH);
-	types[curr].on("keyup", validateTypeH);
-    }
+    if (regex.test(key)) addNextSite_();
+}
+
+addNextSite_ = function() {
+    var curr = sites.length;
+    container.append('<input class="editin evesite" id="s_' + curr +
+		     '"></input>');
+    container.append('<input class="editin evetype" id="t_' + curr +
+		     '"></input>');
+    sites.push($("#s_" + curr));
+    types.push($("#t_" + curr));
+    sites[curr - 1].off();
+    sites[curr - 1].on("keyup", validateSiteH);
+    sites[curr].on("keyup", addNextSite);
+    sites[curr].on("keyup", validateSiteH);
+    types[curr].on("keyup", validateTypeH);
 }
 
 reset = function(event) {
@@ -55,12 +116,40 @@ reset = function(event) {
     types = [types[0]];
     types[0].val("");
     types[0].removeClass("wrong");
+    editid.val("");
+    editdc.val("");
 }
 
 setKeybindings = function() {
     $(document).keypress(function(event) {
 	if(event.keyCode == 13) submit();
     });
+}
+
+getSelectedId = function() {
+    var selected = eveList.find("option:selected");
+    return selected.attr("id");
+}
+
+
+packData = function() {
+    var ssites = "";
+    var ttypes = "";
+    for(var i = 0; i < sites.length - 1; ++i) {
+	ssites += sites[i].val();
+	ttypes += types[i].val();
+	if(i < sites.length - 2) {
+	    ssites += ",";
+	    ttypes += ",";
+	}
+    }
+    var dataObj = {
+	name: "",
+	region: reg.val(),
+	sites: ssites,
+	types: ttypes
+    };
+    return dataObj;
 }
 
 allowedRegions = [
@@ -89,22 +178,6 @@ allowedTypes = [
 
     ""
 ];
-
-packData = function() {
-    var siteData = [];
-    for(var i = 0; i < sites.length; ++i) {
-	if(sites[i].val() == "") continue;
-	siteData.push(site = {
-	    name: sites[i].val(),
-	    type: types[i].val()
-	});
-    }
-    var dataObj = {
-	region: reg.val(),
-	siteData: siteData
-    };
-    return dataObj;
-}
 
 validateAll = function() {
     if(!validateRegion(reg)) return false;
@@ -153,3 +226,19 @@ validateType = function(input) {
     }
 };
 validateTypeH = function() { validateType($(this)) };
+
+respond = function(m) {
+    if(m.substring(0, 3) == "yey") {
+	editresp.addClass("editrespyey");
+	editresp.removeClass("editrespney");
+    } else {
+	editresp.removeClass("editrespyey");
+	editresp.addClass("editrespney");
+    }
+    console.log(m.substring(0, 3));
+    editresp.html(m);
+}
+
+procTime = function(time) {
+    return time.replace("T", " ").substring(0, 16);
+}

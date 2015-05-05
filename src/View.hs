@@ -138,24 +138,37 @@ postToSelect (pid, post) = case postTitle post of
              toHtml (T.concat ["[post from ", form (postModDate post), "]"])
   Just title -> option ! id (keyToId pid) $ toHtml title
   where form date = T.pack $ formatTime defaultTimeLocale "%d. %b %R" date
-        keyToId pid = (stringValue (show $ fromSqlKey pid))
+        keyToId pid = stringValue (show $ fromSqlKey pid)
 
-siteEvexpl :: Html
-siteEvexpl = do
+siteEvexpl :: [(SystemVisitId, SystemVisit)] -> Html
+siteEvexpl visits = do
   script "" ! src "/js/jquery-2.1.3.min.js"
   script "" ! src "/js/button.js"
   script "" ! src "/js/evexpl.js"
   div ! class_ "editbody" $ do
     div ! class_ "editleft" ! id "contleft" $ do
       input ! class_ "editin" ! id "everegion"
-      div ! class_ "editinfo" ! id "everesp" $ ""
-      input ! class_ "editin" ! id "editdelete"
+      div ! class_ "evespacer" $ ""
       input ! class_ "editin evesite" ! id "s_0"
       input ! class_ "editin evetype" ! id "t_0"
     div ! class_ "editright" $ do
+      input ! class_ "editin" ! id "editid" ! readonly "readonly"
+      input ! class_ "editin" ! id "editdc" ! readonly "readonly"
       select ! class_ "editselect" ! multiple "multiple" ! id "evelist"
         ! autocomplete "off" $ do
           option ! id "0" ! selected "selected" $ "[new entry]"
+          toHtml $ map visitToSelect visits
+      div ! id "editresp" ! class_ "editinfo" $ ""
+      input ! class_ "editin" ! id "editdelete"
+      div ! id "submitbutton" ! class_ "button buttonidle" $ "S"
+
+visitToSelect :: (SystemVisitId, SystemVisit) -> Html
+visitToSelect (eid, visit) =
+  option ! id (keyToId eid) $
+  toHtml (T.concat ["[", systemVisitRegion visit, " at ",
+                    (form $ systemVisitCrtDate visit)])
+  where form date = T.pack $ formatTime defaultTimeLocale "%H:%M]" date
+        keyToId eid = stringValue (show $ fromSqlKey eid)
 
 siteLogin :: Html
 siteLogin = do

@@ -77,10 +77,13 @@ handleGets files staticRoutes = do
        writeSession Nothing
        redirect "/"
   get "evexpl" $ do
+    muser <- loadUserSession
+    visits <- runSQL $ queryAllVisits
+    --reqRight muser 5 $
     blaze $ do
       siteHead
       infBackHeader (head files) "evexpl"
-      siteEvexpl
+      siteEvexpl visits
   hookAny GET $ \_ -> blaze $ do
     siteHead
     emptyHeader (head files)
@@ -143,11 +146,22 @@ handlePosts = do
     do
       dat <- params
       let msubmitType = findParam dat "submitType"
-      let meid = fmap textToInt $ findParam dat "pid"
+      let meid = fmap textToInt $ findParam dat "eid"
       let mvisit = jsonToSystemVisit (fmap snd muser) dat
       case (msubmitType, meid, mvisit) of
        (Just st, Just (Just (eid)), Just visit) -> submitEvexpl st eid visit
-       _ -> errorJson
+       _ -> json $ (show mvisit)
+  post "/evexpl/loadvisit" $ do
+    muser <- loadUserSession
+    --reqRight' muser 5 $
+    do
+      dat <- params
+      let meid = fmap textToInt $ findParam dat "eid"
+      case meid of
+       Nothing -> errorJson
+       Just (Just eid) -> do
+         resp <- runSQL $ queryVisit eid
+         loadvisitResponse resp
   post "login/submit" $ do
     dat <- params
     let chkp = checkJson $ findParams dat ["name", "pass"]
@@ -161,7 +175,7 @@ handlePosts = do
           sessId <- runSQL $ insertSession userId
           writeSession (Just sessId)
           loginResponse True
-  where errorJson = json $ ("ney: json invalid" :: T.Text)
+  where errorJson = json $ ("ney: json invld" :: T.Text)
 
 submitEdit submitType pid post = do
   r <- case submitType of
@@ -200,6 +214,9 @@ submitResponse resp = json resp
 
 loadpostResponse Nothing = json ("could not find post to id" :: T.Text)
 loadpostResponse (Just post) = json $ post
+
+loadvisitResponse Nothing = json ("could not find visit to id" :: T.Text)
+loadvisitResponse (Just visit) = json $ visit
 
 findParam :: [(T.Text, T.Text)] -> T.Text -> Maybe T.Text
 findParam [] _ = Nothing
@@ -254,13 +271,16 @@ jsonToPost params = case chkp of
                                               "content", "type", "access"]
 
 -- Handles possible user error here. Should be somewhere else
+-- DummyAuthor for not having to login while testing
 jsonToSystemVisit :: Maybe User -> [(T.Text, T.Text)] -> Maybe SystemVisit
 jsonToSystemVisit mauthor params = case (mauthor, chkp) of
   (Just author, Just pars) ->
     createSystemVisit (userName author) pars dummyTime
+  (Nothing, Just pars) -> createSystemVisit (dummyAuthor) pars dummyTime
   _ -> Nothing
   where chkp = checkJson $ findParams params ["name", "region", "sites",
                                               "types"]
+        dummyAuthor = "Seb"
 
 createPost :: [T.Text] -> UTCTime -> UTCTime -> Maybe Post
 createPost postParam crtTime modTime

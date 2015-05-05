@@ -45,7 +45,7 @@ previewSubmit = function() {
 
 submit = function() {
     if(!validateMinimal()) {
-	responde("ney: misng info");
+	respond("ney: misng info");
 	return;
     }
     selId = getSelectedId();
@@ -62,7 +62,7 @@ submit = function() {
 	dataType: "json",
 	data: { dat: dataObj },
 	success: function(data) {
-	    responde(data);
+	    respond(data);
 	    editdel.val("");
 	    editdel.removeClass("editdeldanger");
 	},
@@ -143,10 +143,10 @@ procCat = function(cats) {
 
 jsonError = function(m) {
     console.log(m);
-    responde("ney: error json");
+    respond("ney: error json");
 }
 
-responde = function(m) {
+respond = function(m) {
     if(m.substring(0, 3) == "yey") {
 	editresp.addClass("editrespyey");
 	editresp.removeClass("editrespney");

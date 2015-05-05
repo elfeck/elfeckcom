@@ -1,13 +1,10 @@
 input#everegion {
     width: 150px;
     margin-left: 48px;
+    margin-bottom: 20px;
 }
 
-div#everesp {
-    margin-left: 10px;
-    text-align: center;
-    line-height: 20px;
-    font-weight: bold;
+div.evespacer {
     width: 210px;
 }
 
@@ -28,5 +25,4 @@ input.wrong {
 }
 
 select#evelist {
-    margin-top: 20px;
 }
