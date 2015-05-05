@@ -137,6 +137,17 @@ handlePosts = do
        Just (Just pid) -> do
          resp <- runSQL $ queryPost pid
          loadpostResponse resp
+  post "evexpl/submit" $ do
+    muser <- loadUserSession
+    --reqRight' muser 5 $
+    do
+      dat <- params
+      let msubmitType = findParam dat "submitType"
+      let meid = fmap textToInt $ findParam dat "pid"
+      let mvisit = jsonToSystemVisit (fmap snd muser) dat
+      case (msubmitType, meid, mvisit) of
+       (Just st, Just (Just (eid)), Just visit) -> submitEvexpl st eid visit
+       _ -> errorJson
   post "login/submit" $ do
     dat <- params
     let chkp = checkJson $ findParams dat ["name", "pass"]
@@ -163,7 +174,21 @@ submitEdit submitType pid post = do
         "2" -> do
           resp <- runSQL $ deletePost pid
           return resp
-        _ -> return ("ney: unkwn stype")
+        _ -> return "ney: unkwn stype"
+  submitResponse r
+
+submitEvexpl submitType eid visit = do
+  r <- case submitType of
+    "0" -> do
+      resp <- runSQL $ insertSystemVisit visit
+      return resp
+    "1" -> do
+      resp <- runSQL $ updateSystemVisit eid visit
+      return resp
+    "2" -> do
+      resp <- runSQL $ deleteSystemVisit eid
+      return resp
+    _ -> return "ney: unkwn stype"
   submitResponse r
 
 previewResponse post = json $ renderPost post
@@ -228,6 +253,14 @@ jsonToPost params = case chkp of
   where chkp = checkJson $ findParams params ["title", "categories",
                                               "content", "type", "access"]
 
+-- Handles possible user error here. Should be somewhere else
+jsonToSystemVisit :: Maybe User -> [(T.Text, T.Text)] -> Maybe SystemVisit
+jsonToSystemVisit mauthor params = case (mauthor, chkp) of
+  (Just author, Just pars) ->
+    createSystemVisit (userName author) pars dummyTime
+  _ -> Nothing
+  where chkp = checkJson $ findParams params ["name", "region", "sites",
+                                              "types"]
 
 createPost :: [T.Text] -> UTCTime -> UTCTime -> Maybe Post
 createPost postParam crtTime modTime
@@ -245,6 +278,20 @@ createPost postParam crtTime modTime
         procTitle text = Just text
         procCategories "" = Nothing
         procCategories text = Just $ T.splitOn ", " text
+
+createSystemVisit :: T.Text -> [T.Text] -> UTCTime -> Maybe SystemVisit
+createSystemVisit author visitParam crtTime
+  | isNothing reg || length sites /= length types = Nothing
+  | otherwise = Just $ SystemVisit name (fromJust reg) (zip sites types)
+                crtTime author
+  where name = procName (visitParam !! 0)
+        reg = procRegion (visitParam !! 1)
+        sites = T.splitOn "," (visitParam !! 2)
+        types = T.splitOn "," (visitParam !! 3)
+        procRegion "" = Nothing
+        procRegion text = Just text
+        procName "" = Nothing
+        procName text = Just text
 
 dummyTime :: UTCTime
 dummyTime = parseTimeOrError True defaultTimeLocale "%d.%m.%Y %H:%M"
