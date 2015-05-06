@@ -280,7 +280,7 @@ jsonToSystemVisit mauthor params = case (mauthor, chkp) of
   _ -> Nothing
   where chkp = checkJson $ findParams params ["name", "region", "sites",
                                               "types"]
-        dummyAuthor = "Seb"
+        dummyAuthor = "seb"
 
 createPost :: [T.Text] -> UTCTime -> UTCTime -> Maybe Post
 createPost postParam crtTime modTime

@@ -15,7 +15,9 @@ $(function() {
     reg.on("keyup", validateRegionH);
     sites[0].on("keyup", addNextSite);
     sites[0].on("keyup", validateSiteH);
+    sites[0].on("keyup", handleSiteHotkey);
     types[0].on("keyup", validateTypeH);
+    types[0].on("keyup", handleTypeHotkey);
     registerButton(submitBut, submit);
     eveList.on("change", loadVisit);
     editdel.on("keyup", function() {
@@ -24,6 +26,41 @@ $(function() {
     });
     setKeybindings();
 });
+
+handleSiteHotkey = function(event) {
+    if(event.altKey) {
+	if(event.keyCode == 82) $(this).val("Relic");
+	if(event.keyCode == 68) $(this).val("Data");
+	if(event.keyCode == 67) $(this).val("Combat");
+	if(event.keyCode == 87) $(this).val("Wormhole");
+	if(event.keyCode == 71) $(this).val("Gas");
+    }
+}
+
+handleTypeHotkey = function(event) {
+    var index = -1;
+    for(var i = 0; i < sites.length; ++i) {
+	if($(this)[0] == types[i][0]) index = i;
+    }
+    if(event.altKey) {
+	if(sites[index].val() == "Relic") {
+	    if(event.keyCode == 81) $(this).val("Monument Site");
+	    if(event.keyCode == 84) $(this).val("Temple Site");
+	    if(event.keyCode == 83) $(this).val("Science Outpost");
+	    if(event.keyCode == 67) $(this).val("Crystal Quarry");
+	}
+	if(sites[index].val() == "Data") {
+	    if(event.keyCode == 84) $(this).val("Sparking Transmitter");
+	    if(event.keyCode == 83) $(this).val("Survey Site");
+	    if(event.keyCode == 67) $(this).val("Command Center");
+	    if(event.keyCode == 68) $(this).val("Data Mining Site");
+
+	    if(event.keyCode == 49) $(this).val("Limited Sleeper Cache");
+	    if(event.keyCode == 50) $(this).val("Standard Sleeper Cache");
+	    if(event.keyCode == 51) $(this).val("Superior Sleeper Cache");
+	}
+    }
+}
 
 submit = function() {
     if(!validateAll()) {
@@ -68,6 +105,7 @@ loadVisit = function() {
 	data: { dat: dataObj },
 	success: function(data) {
 	    console.log(data);
+	    reset();
 	    reg.val(data[1]["region"]);
 	    editid.val(data[0]);
 	    editdc.val(procTime(data[1]["crtDate"]));
@@ -98,9 +136,12 @@ addNextSite_ = function() {
     types.push($("#t_" + curr));
     sites[curr - 1].off();
     sites[curr - 1].on("keyup", validateSiteH);
+    sites[curr - 1].on("keyup", handleSiteHotkey);
     sites[curr].on("keyup", addNextSite);
     sites[curr].on("keyup", validateSiteH);
+    sites[curr].on("keyup", handleSiteHotkey);
     types[curr].on("keyup", validateTypeH);
+    types[curr].on("keyup", handleTypeHotkey);
 }
 
 reset = function(event) {
@@ -111,6 +152,7 @@ reset = function(event) {
     sites[0].off();
     sites[0].on("keyup", addNextSite);
     sites[0].on("keyup", validateSiteH);
+    sites[0].on("keyup", handleSiteHotkey);
     sites[0].focus();
     sites[0].removeClass("wrong");
     types = [types[0]];
@@ -122,6 +164,7 @@ reset = function(event) {
 
 setKeybindings = function() {
     $(document).keypress(function(event) {
+	if(event.altKey) event.preventDefault();
 	if(event.keyCode == 13) submit();
     });
 }
@@ -173,7 +216,7 @@ allowedTypes = [
     "Sparking Transmitter", "Survey Site", "Command Center",
     "Data Mining Site",
 
-    "Limited Sleeper Cache", "Normal Sleeper Cache",
+    "Limited Sleeper Cache", "Standard Sleeper Cache",
     "Superior Sleeper Cache",
 
     ""
@@ -231,6 +274,9 @@ respond = function(m) {
     if(m.substring(0, 3) == "yey") {
 	editresp.addClass("editrespyey");
 	editresp.removeClass("editrespney");
+	setTimeout(function() {
+	    editresp.html("");
+	}, 2000);
     } else {
 	editresp.removeClass("editrespyey");
 	editresp.addClass("editrespney");
