@@ -147,10 +147,10 @@ siteEvexpl visits = do
   script "" ! src "/js/evexpl.js"
   div ! class_ "editbody" $ do
     div ! class_ "editleft" ! id "contleft" $ do
-      input ! class_ "editin" ! id "everegion"
+      input ! class_ "editin" ! id "everegion" ! autocomplete "off"
       div ! class_ "evespacer" $ ""
-      input ! class_ "editin evesite" ! id "s_0"
-      input ! class_ "editin evetype" ! id "t_0"
+      input ! class_ "editin evesite" ! id "s_0" ! autocomplete "off"
+      input ! class_ "editin evetype" ! id "t_0" ! autocomplete "off"
     div ! class_ "editright" $ do
       input ! class_ "editin" ! id "editid" ! readonly "readonly"
       input ! class_ "editin" ! id "editdc" ! readonly "readonly"
@@ -164,7 +164,7 @@ siteEvexpl visits = do
 
 visitToSelect :: (SystemVisitId, SystemVisit) -> Html
 visitToSelect (eid, visit) =
-  option ! id (keyToId eid) $
+  option ! id (keyToId eid) ! class_ "listEntry" $
   toHtml (T.concat ["[", systemVisitRegion visit, " at ",
                     (form $ systemVisitCrtDate visit)])
   where form date = T.pack $ formatTime defaultTimeLocale "%H:%M]" date

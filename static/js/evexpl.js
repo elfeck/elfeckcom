@@ -15,12 +15,13 @@ $(function() {
     reg.on("keyup", validateRegionH);
     sites[0].on("keyup", addNextSite);
     sites[0].on("keyup", validateSiteH);
-    sites[0].on("keyup", handleSiteHotkey);
     types[0].on("keyup", validateTypeH);
-    types[0].on("keyup", handleTypeHotkey);
+    sites[0].on("keydown", handleSiteHotkey);
+    types[0].on("keydown", handleTypeHotkey);
     registerButton(submitBut, submit);
     eveList.on("change", loadVisit);
     editdel.on("keyup", function() {
+	console.log(editdel.val());
 	if(editdel.val() == "DEL") editdel.addClass("editdeldanger");
 	else editdel.removeClass("editdeldanger");
     });
@@ -67,8 +68,8 @@ submit = function() {
 	respond("ney: misng info");
 	return;
     }
-    selId = getSelectedId();
-    t = -1;
+    var selId = getSelectedId();
+    var t = -1;
     if(selId == 0) t = 0;
     if(selId != 0) t = 1;
     if(selId != 0 && editdel.val() == "DEL") t = 2;
@@ -85,10 +86,45 @@ submit = function() {
 	    respond(data);
 	    editdel.val("");
 	    editdel.removeClass("editdeldanger");
+	    updateList(t, selId, dataObj);
+	    if(t == 0 || t == 2) {
+		reset();
+		resetSelected();
+	    }
+	    else loadVisit();
 	},
 	error: function() { jsonError("errorJson in submit"); }
     });
-    reset();
+}
+
+updateList = function(submitType, selId, data) {
+    if(submitType == 0) {
+	var id = queryMaxId() + 1;
+	$("#0").after('<option id="' + id + '" class="listEntry">[' +
+		      data["region"] + ' at ' + currTime() + ']</option>');
+    }
+    if(submitType == 1) {
+	var oldT = $("#" + selId).text();
+	var ind = oldT.lastIndexOf(" ") + 1;
+	var oldTime = oldT.substr(ind).substr(0, 5);
+	console.log(oldTime);
+	$("#" + selId).html('[' + data["region"] + ' at ' +
+			    oldTime + ']</option>');
+    }
+    if(submitType == 2) {
+	$("#" + selId).remove();
+    }
+}
+
+queryMaxId = function() {
+    var eles = $(".listEntry");
+    if(eles.length == 0) return 1;
+    else return parseInt($(eles[0]).attr("id"));
+}
+
+currTime = function() {
+    d = new Date();
+    return d.getUTCHours() + ":" + d.getUTCMinutes();
 }
 
 loadVisit = function() {
@@ -109,10 +145,14 @@ loadVisit = function() {
 	    reg.val(data[1]["region"]);
 	    editid.val(data[0]);
 	    editdc.val(procTime(data[1]["crtDate"]));
-	    for(var i = 0; i < data[1]["sites"].length; ++i) {
-		sites[i].val(data[1]["sites"][i][0]);
-		types[i].val(data[1]["sites"][i][1]);
-		addNextSite_();
+	    if(data[1]["sites"].length == 1 && data[1]["sites"][0][0] == "") {
+		// Nothing
+	    } else {
+		for(var i = 0; i < data[1]["sites"].length; ++i) {
+		    sites[i].val(data[1]["sites"][i][0]);
+		    types[i].val(data[1]["sites"][i][1]);
+		    addNextSite_();
+		}
 	    }
 	},
 	error: function() { jsonError("errorJson in loadPost"); }
@@ -136,15 +176,15 @@ addNextSite_ = function() {
     types.push($("#t_" + curr));
     sites[curr - 1].off();
     sites[curr - 1].on("keyup", validateSiteH);
-    sites[curr - 1].on("keyup", handleSiteHotkey);
+    sites[curr - 1].on("keydown", handleSiteHotkey);
     sites[curr].on("keyup", addNextSite);
     sites[curr].on("keyup", validateSiteH);
-    sites[curr].on("keyup", handleSiteHotkey);
+    sites[curr].on("keydown", handleSiteHotkey);
     types[curr].on("keyup", validateTypeH);
-    types[curr].on("keyup", handleTypeHotkey);
+    types[curr].on("keydown", handleTypeHotkey);
 }
 
-reset = function(event) {
+reset = function() {
     for(var i = 1; i < sites.length; ++i) sites[i].remove();
     for(var i = 1; i < types.length; ++i) types[i].remove();
     sites = [sites[0]];
@@ -152,7 +192,7 @@ reset = function(event) {
     sites[0].off();
     sites[0].on("keyup", addNextSite);
     sites[0].on("keyup", validateSiteH);
-    sites[0].on("keyup", handleSiteHotkey);
+    sites[0].on("keydown", handleSiteHotkey);
     sites[0].focus();
     sites[0].removeClass("wrong");
     types = [types[0]];
@@ -160,6 +200,14 @@ reset = function(event) {
     types[0].removeClass("wrong");
     editid.val("");
     editdc.val("");
+    eles = $(".listEntry");
+}
+
+resetSelected = function() {
+    for(var i = 0; i < eles.length; ++i) {
+	$(eles[i]).prop("selected", false);
+    }
+    $("#0").prop("selected", true);
 }
 
 setKeybindings = function() {
@@ -179,12 +227,12 @@ packData = function() {
     var ssites = "";
     var ttypes = "";
     for(var i = 0; i < sites.length - 1; ++i) {
-	ssites += sites[i].val();
-	ttypes += types[i].val();
-	if(i < sites.length - 2) {
+	if(ssites != "" && sites[i].val() != "") {
 	    ssites += ",";
 	    ttypes += ",";
 	}
+	ssites += sites[i].val();
+	ttypes += types[i].val();
     }
     var dataObj = {
 	name: "",
@@ -203,7 +251,9 @@ allowedRegions = [
     "Outer Passage", "Outer Ring", "Paragon Soul", "Period Basis",
     "Perrigen Falls", "Providence", "Pure Blind", "Querious", "Scalding Pass",
     "The Spire", "Stain", "Syndicate", "Tenal", "Tenerifis", "Tribute",
-    "Vale of the Silent", "Venal", "Wicked Creek"
+    "Vale of the Silent", "Venal", "Wicked Creek",
+
+    "C3/Null"
 ];
 
 allowedSites = [
