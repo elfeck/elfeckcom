@@ -251,9 +251,7 @@ allowedRegions = [
     "Outer Passage", "Outer Ring", "Paragon Soul", "Period Basis",
     "Perrigen Falls", "Providence", "Pure Blind", "Querious", "Scalding Pass",
     "The Spire", "Stain", "Syndicate", "Tenal", "Tenerifis", "Tribute",
-    "Vale of the Silent", "Venal", "Wicked Creek",
-
-    "C3/Null"
+    "Vale of the Silent", "Venal", "Wicked Creek"
 ];
 
 allowedSites = [
@@ -268,7 +266,6 @@ allowedTypes = [
 
     "Limited Sleeper Cache", "Standard Sleeper Cache",
     "Superior Sleeper Cache",
-
     ""
 ];
 
