@@ -59,11 +59,11 @@ handleGets files staticRoutes = do
   get "edit" $ do
     muser <- loadUserSession
     posts <- runSQL $ queryAllPosts
-    --reqRight muser 5 $
-    blaze $ do
-      siteHead
-      infBackHeader (head files) "edit"
-      siteEdit posts
+    reqRight muser 5 $
+      blaze $ do
+        siteHead
+        infBackHeader (head files) "edit"
+        siteEdit posts
   get "login" $ blaze $ do
     siteHead
     infBackHeader (head files) "login"
@@ -79,11 +79,11 @@ handleGets files staticRoutes = do
   get "evexpl" $ do
     muser <- loadUserSession
     visits <- runSQL $ queryAllVisits
-    --reqRight muser 5 $
-    blaze $ do
-      siteHead
-      infBackHeader (head files) "evexpl"
-      siteEvexpl visits
+    reqRight muser 5 $
+      blaze $ do
+        siteHead
+        infBackHeader (head files) "evexpl"
+        siteEvexpl visits
   hookAny GET $ \_ -> blaze $ do
     siteHead
     emptyHeader (head files)

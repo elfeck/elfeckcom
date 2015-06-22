@@ -28,6 +28,7 @@ siteHead = docTypeHtml $ head $ do
   link ! href "/css/edit.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "/css/login.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "/css/evexpl.css" ! rel "stylesheet" ! type_ "text/css"
+  link ! href "/css/jquery-ui.min.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "/img/icon.png" ! rel "icon" ! type_ "image/png"
   link ! href "http://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
     ! rel "stylesheet" ! type_ "text/css"
@@ -143,6 +144,7 @@ postToSelect (pid, post) = case postTitle post of
 siteEvexpl :: [(SystemVisitId, SystemVisit)] -> Html
 siteEvexpl visits = do
   script "" ! src "/js/jquery-2.1.3.min.js"
+  script "" ! src "/js/jquery-ui.min.js"
   script "" ! src "/js/button.js"
   script "" ! src "/js/evexpl.js"
   div ! class_ "editbody" $ do

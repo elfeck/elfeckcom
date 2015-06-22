@@ -6,7 +6,8 @@ import Data.Monoid
 import Numeric
 import qualified Data.Text as T
 
-data PirateFaction = BloodRaider | Gurista | Sansha | Angel | Serpentis | Drone
+data PirateFaction = BloodRaider | Gurista | Sansha | Angel | Serpentis
+                   | Drone
                    deriving Show
 data WEffect = None | CataclysmicVariable | Margentar | BlackHole | Pulsar |
                WolfRayetStar | RegGiant
@@ -32,7 +33,8 @@ regionToLine r = (T.unpack $ regionName r) ++ replicate nb ' ' ++
 
 systemToLine :: System -> String
 systemToLine (KSystem r n s) = (T.unpack n) ++ replicate nn ' ' ++
-                               (T.unpack $ regionName r) ++ replicate nr ' ' ++
+                               (T.unpack $ regionName r) ++
+                               replicate nr ' ' ++
                                ((showFFloat (Just 2) s) "") ++ "\n"
   where nn = 20 - T.length n
         nr = 20 - T.length (regionName r)
