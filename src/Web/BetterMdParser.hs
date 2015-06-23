@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module BetterMdParser where
+module Web.BetterMdParser where
 
 import Data.Char
 import Data.List

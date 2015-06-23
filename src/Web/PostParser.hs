@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module PostParser where
+module Web.PostParser where
 
 import Prelude hiding (div, id)
 import Data.Maybe
@@ -12,8 +12,8 @@ import Text.Blaze.Html5 (Html, (!), div, img, ul, ol, li, a, i ,b, link, br)
 import Text.Blaze.Html5.Attributes (href, rel, src, type_, class_, id)
 import Text.Blaze.Html.Renderer.Text (renderHtml)
 
-import Model
-import BetterMdParser
+import Model.Model
+import Web.BetterMdParser
 
 renderPost :: Post -> T.Text
 renderPost post = toStrict $ renderHtml $ parsePost post

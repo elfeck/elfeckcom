@@ -9,7 +9,7 @@
 {-# LANGUAGE TypeFamilies               #-}
 {-# LANGUAGE FlexibleInstances          #-}
 
-module Model where
+module Model.Model where
 
 import Data.Aeson.Types
 import Control.Monad.IO.Class

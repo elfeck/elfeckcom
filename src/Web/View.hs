@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE FlexibleContexts  #-}
 
-module View where
+module Web.View where
 
 import Prelude hiding (div, head, id)
 import Data.Maybe
@@ -18,7 +18,7 @@ import Text.Blaze.Html5.Attributes (charset,
                                     autocomplete)
 import Database.Persist.Sql
 
-import Model
+import Model.Model
 
 siteHead :: Html
 siteHead = docTypeHtml $ head $ do
@@ -33,31 +33,31 @@ siteHead = docTypeHtml $ head $ do
   link ! href "http://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
     ! rel "stylesheet" ! type_ "text/css"
 
-siteHeader :: String -> Html
-siteHeader headerSvg = do
+siteHeader :: Html
+siteHeader = do
   div ! class_ "header" $ do
     div ! class_ "headercontainer" $ ul ! class_ "headerleft" $ do
       headerEntry "elfeck"
       headerEntry "whyiliketrees"
-    div ! class_ "headercontainer" $ preEscapedString headerSvg
+    div ! class_ "headercontainer" $ img ! src "/img/header.svg"
     div ! class_ "headercontainer" $ ul ! class_ "headerright" $ do
       headerEntry "math and stuff"
       headerEntry "drivel"
 
-emptyHeader :: String -> Html
-emptyHeader headerSvg = do
+emptyHeader :: Html
+emptyHeader = do
   div ! class_ "header" $ do
     div ! class_ "headercontainer" $ ul "" ! class_ "headerleft"
-    div ! class_ "headercontainer" $ preEscapedString headerSvg
+    div ! class_ "headercontainer" $ img ! src "/img/header.svg"
     div ! class_ "headercontainer" $ ul "" ! class_ "headerright"
 
-infBackHeader :: String -> String -> Html
-infBackHeader headerSvg inf = do
+infBackHeader :: String -> Html
+infBackHeader inf = do
   div ! class_ "header" $ do
     div ! class_ "headercontainer" $ ul ! class_ "headerleft" $ do
       li ! class_ "headerentry" $ toHtml inf
       li ! class_ "headerentry" $ ""
-    div ! class_ "headercontainer" $ preEscapedString headerSvg
+    div ! class_ "headercontainer" $ img ! src "/img/header.svg"
     div ! class_ "headercontainer" $ ul ! class_ "headerright" $ do
       li ! class_ "headerentry" $ ""
       li ! class_ "headerentry" $ a "home" ! href "/" ! class_ "headerlink"

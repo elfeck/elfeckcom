@@ -7,7 +7,7 @@ import Database.Persist
 import Database.Persist.Sqlite
 import qualified Data.Text as T
 
-import Model
+import Model.Model
 
 createUser :: String -> String -> String -> Int -> IO ()
 createUser dbpath name pw access = do

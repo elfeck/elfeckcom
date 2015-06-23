@@ -1,5 +1,5 @@
 [Database]
-elfeck.db
+db/elfeck.db
 
 [Routes]
 /		db 1
