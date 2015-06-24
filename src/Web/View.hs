@@ -7,31 +7,48 @@ import Prelude hiding (div, head, id)
 import Data.Maybe
 import Data.Time.Format
 import qualified Data.Text as T
+import Database.Persist.Sql (fromSqlKey)
 import Text.Blaze.Html (preEscapedString, string, stringValue, toHtml)
-import Text.Blaze.Html5 (Html, (!), docTypeHtml,
-                         head, meta, title, link, script,
-                         body, div, img, ul, li, a,
-                         textarea, input, select, option)
-import Text.Blaze.Html5.Attributes (charset,
-                                    href, rel, src, type_, class_, id, style,
-                                    multiple, readonly, selected,
+import Text.Blaze.Html5 (Html, (!), docTypeHtml, head, meta, title, link,
+                         script, body, div, img, ul, li, a, textarea, input,
+                         select, option, br, canvas)
+import Text.Blaze.Html5.Attributes (charset, href, rel, src, type_, class_,
+                                    id, style, multiple, readonly, selected,
                                     autocomplete)
-import Database.Persist.Sql
 
 import Model.Types
 
+
+{-
+ Index Elements: Head, Header and Footer
+ Sadly all Pages use the same Head so all CSS is required right here
+-}
 siteHead :: Html
 siteHead = docTypeHtml $ head $ do
   title "elfeck"
   meta ! charset "utf-8"
-  link ! href "/css/index.css" ! rel "stylesheet" ! type_ "text/css"
-  link ! href "/css/edit.css" ! rel "stylesheet" ! type_ "text/css"
-  link ! href "/css/login.css" ! rel "stylesheet" ! type_ "text/css"
-  link ! href "/css/evexpl.css" ! rel "stylesheet" ! type_ "text/css"
-  link ! href "/css/jquery-ui.min.css" ! rel "stylesheet" ! type_ "text/css"
-  link ! href "/img/icon.png" ! rel "icon" ! type_ "image/png"
+  link ! href "static/css/index.css" ! rel "stylesheet" ! type_ "text/css"
+  link ! href "static/css/site.css" ! rel "stylesheet" ! type_ "text/css"
+  link ! href "static/img/icon.png" ! rel "icon" ! type_ "image/png"
   link ! href "http://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
     ! rel "stylesheet" ! type_ "text/css"
+
+inputHead :: Html
+inputHead = docTypeHtml $ head $ do
+  title "elfeck"
+  meta ! charset "utf-8"
+  link ! href "static/css/index.css" ! rel "stylesheet" ! type_ "text/css"
+  link ! href "static/css/input.css" ! rel "stylesheet" ! type_ "text/css"
+  link ! href "static/css/edit.css" ! rel "stylesheet" ! type_ "text/css"
+  link ! href "static/css/login.css" ! rel "stylesheet" ! type_ "text/css"
+  link ! href "static/css/evexpl.css" ! rel "stylesheet" ! type_ "text/css"
+  link ! href "static/css/site.css" ! rel "stylesheet" ! type_ "text/css"
+  link ! href "static/css/jquery-ui.min.css" ! rel "stylesheet"
+    ! type_ "text/css"
+  link ! href "static/img/icon.png" ! rel "icon" ! type_ "image/png"
+  link ! href "http://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
+    ! rel "stylesheet" ! type_ "text/css"
+
 
 siteHeader :: Html
 siteHeader = do
@@ -39,7 +56,7 @@ siteHeader = do
     div ! class_ "headercontainer" $ ul ! class_ "headerleft" $ do
       headerEntry "elfeck"
       headerEntry "whyiliketrees"
-    div ! class_ "headercontainer" $ img ! src "/img/header.svg"
+    div ! class_ "headercontainer" $ img ! src "static/img/header.svg"
     div ! class_ "headercontainer" $ ul ! class_ "headerright" $ do
       headerEntry "math and stuff"
       headerEntry "drivel"
@@ -48,7 +65,7 @@ emptyHeader :: Html
 emptyHeader = do
   div ! class_ "header" $ do
     div ! class_ "headercontainer" $ ul "" ! class_ "headerleft"
-    div ! class_ "headercontainer" $ img ! src "/img/header.svg"
+    div ! class_ "headercontainer" $ img ! src "static/img/header.svg"
     div ! class_ "headercontainer" $ ul "" ! class_ "headerright"
 
 infBackHeader :: String -> Html
@@ -57,10 +74,21 @@ infBackHeader inf = do
     div ! class_ "headercontainer" $ ul ! class_ "headerleft" $ do
       li ! class_ "headerentry" $ toHtml inf
       li ! class_ "headerentry" $ ""
-    div ! class_ "headercontainer" $ img ! src "/img/header.svg"
+    div ! class_ "headercontainer" $ img ! src "static/img/header.svg"
     div ! class_ "headercontainer" $ ul ! class_ "headerright" $ do
       li ! class_ "headerentry" $ ""
       li ! class_ "headerentry" $ a "home" ! href "/" ! class_ "headerlink"
+
+darkHeader :: Html
+darkHeader = do
+  div ! class_ "header" $ do
+    div ! class_ "headercontainer" $ ul ! class_ "headerleft" $ do
+      headerEntry "elfeck"
+      headerEntry "whyiliketrees"
+    div ! class_ "headercontainer" $ img ! src "static/img/header_dark.svg"
+    div ! class_ "headercontainer" $ ul ! class_ "headerright" $ do
+      headerEntry "math and stuff"
+      headerEntry "drivel"
 
 headerEntry :: String -> Html
 headerEntry name =
@@ -99,6 +127,9 @@ siteFooter muser = do
 wrapContainer a = div ! class_ "footercont" $ a
 spacer = div "[" ! class_ "footerspacer"
 
+{-
+ Site Body Container
+-}
 siteBody :: Html -> Html
 siteBody h = div ! class_ "sitebody" $ (div ! class_ "innerbody" $ h)
 
@@ -109,29 +140,32 @@ siteInvPid :: Html
 siteInvPid = div ! class_ "testbody" $
              "Invalid pid. Something went horribly wrong :("
 
+{-
+ Edit Page
+-}
 siteEdit :: [(PostId, Post)] -> Html
 siteEdit posts = do
-  script "" ! src "/js/jquery-2.1.3.min.js"
-  script "" ! src "/js/button.js"
-  script "" ! src "/js/edit.js"
-  div ! class_ "editbody" $ do
-    div ! class_ "editleft" $ do
-      input ! class_ "editin" ! id "edittitle"
-      input ! class_ "editin" ! id "editcategories"
-      input ! class_ "editin" ! id "edittype"
-      input ! class_ "editin" ! id "editaccess"
-      textarea "" ! id "editarea"
-    div ! class_ "editright" $ do
-      input ! class_ "editin" ! id "editid" ! readonly "readonly"
-      input ! class_ "editin" ! id "editdc" ! readonly "readonly"
-      select ! class_ "editselect" ! multiple "multiple" ! id "editlist"
+  script "" ! src "static/js/jquery-2.1.3.min.js"
+  script "" ! src "static/js/button.js"
+  script "" ! src "static/js/edit.js"
+  div ! class_ "colbody" $ do
+    div ! class_ "colleft" $ do
+      input ! class_ "stdinput" ! id "eTitle"
+      input ! class_ "stdinput" ! id "eCategories"
+      input ! class_ "stdinput" ! id "eType"
+      input ! class_ "stdinput" ! id "eAccess"
+      textarea "" ! id "eArea"
+    div ! class_ "colright" $ do
+      input ! class_ "stdinput" ! id "ePostid" ! readonly "readonly"
+      input ! class_ "stdinput" ! id "ePostdate" ! readonly "readonly"
+      select ! multiple "multiple" ! class_ "stdlist" ! id "eList"
         ! autocomplete "off" $ do
           option ! id "0" ! selected "selected" $ "[new post]"
           toHtml $ map postToSelect posts
-      div ! id "editresp" ! class_ "editinfo" $ ""
-      input ! class_ "editin" ! id "editdelete"
-      div ! id "submitbutton" ! class_ "button buttonidle" $ "S"
-    div "" ! id "editpreview"
+      div ! id "eResponsefield" $ ""
+      input ! class_ "stdinput" ! id "eDeletefield"
+      div ! id "eSubmitbutton" ! class_ "button buttonidle" $ "S"
+    div "" ! id "ePreview"
 
 postToSelect :: (PostId, Post) -> Html
 postToSelect (pid, post) = case postTitle post of
@@ -141,28 +175,33 @@ postToSelect (pid, post) = case postTitle post of
   where form date = T.pack $ formatTime defaultTimeLocale "%d. %b %R" date
         keyToId pid = stringValue (show $ fromSqlKey pid)
 
+{-
+ Evexpl Page
+-}
 siteEvexpl :: [(SystemVisitId, SystemVisit)] -> Html
 siteEvexpl visits = do
-  script "" ! src "/js/jquery-2.1.3.min.js"
-  script "" ! src "/js/jquery-ui.min.js"
-  script "" ! src "/js/button.js"
-  script "" ! src "/js/evexpl.js"
-  div ! class_ "editbody" $ do
-    div ! class_ "editleft" ! id "contleft" $ do
-      input ! class_ "editin" ! id "everegion" ! autocomplete "off"
-      div ! class_ "evespacer" $ ""
-      input ! class_ "editin evesite" ! id "s_0" ! autocomplete "off"
-      input ! class_ "editin evetype" ! id "t_0" ! autocomplete "off"
-    div ! class_ "editright" $ do
-      input ! class_ "editin" ! id "editid" ! readonly "readonly"
-      input ! class_ "editin" ! id "editdc" ! readonly "readonly"
-      select ! class_ "editselect" ! multiple "multiple" ! id "evelist"
+  script "" ! src "static/js/jquery-2.1.3.min.js"
+  script "" ! src "static/js/jquery-ui.min.js"
+  script "" ! src "static/js/button.js"
+  script "" ! src "static/js/evexpl.js"
+  script "" ! src "static/js/evexplval.js"
+  script "" ! src "static/js/evexpldata.js"
+  div ! class_ "colbody" $ do
+    div ! class_ "colleft" ! id "xContainer" $ do
+      input ! class_ "stdinput" ! id "xRegion" ! autocomplete "off"
+      div ! class_ "xSpacer" $ ""
+      input ! class_ "stdinput xSite" ! id "s_0" ! autocomplete "off"
+      input ! class_ "stdinput xType" ! id "t_0" ! autocomplete "off"
+    div ! class_ "colright" $ do
+      input ! class_ "stdinput" ! id "xEntryid" ! readonly "readonly"
+      input ! class_ "stdinput" ! id "xEntrydate" ! readonly "readonly"
+      select ! class_ "stdlist" ! multiple "multiple" ! id "xList"
         ! autocomplete "off" $ do
           option ! id "0" ! selected "selected" $ "[new entry]"
           toHtml $ map visitToSelect visits
-      div ! id "editresp" ! class_ "editinfo" $ ""
-      input ! class_ "editin" ! id "editdelete"
-      div ! id "submitbutton" ! class_ "button buttonidle" $ "S"
+      div ! id "xResponsefield" ! class_ "stdinput" $ ""
+      input ! class_ "stdinput" ! id "xDeletefield"
+      div ! id "xSubmitbutton" ! class_ "button buttonidle" $ "S"
 
 visitToSelect :: (SystemVisitId, SystemVisit) -> Html
 visitToSelect (eid, visit) =
@@ -172,17 +211,42 @@ visitToSelect (eid, visit) =
   where form date = T.pack $ formatTime defaultTimeLocale "%H:%M]" date
         keyToId eid = stringValue (show $ fromSqlKey eid)
 
+{-
+ Login Page
+-}
 siteLogin :: Html
 siteLogin = do
-  script "" ! src "/js/jquery-2.1.3.min.js"
-  script "" ! src "/js/button.js"
-  script "" ! src "/js/login.js"
-  div ! class_ "logbody" $ do
-    div "name"! class_ "loginfo"
-    input ! class_ "login" ! id "logname" ! type_ "text"
-    div "" ! class_ "loginspacer"
-    div "pass"! class_ "loginfo"
-    input ! class_ "login" ! id "logpw" ! type_ "password"
-    div ! class_ "logrespcont" $ do
-      div "login" ! id "logbut" ! class_ "button buttonidle"
-      div "" ! id "logresponse"
+  script "" ! src "static/js/jquery-2.1.3.min.js"
+  script "" ! src "static/js/button.js"
+  script "" ! src "static/js/login.js"
+  div ! id "lBody" $ do
+    div "name" ! class_ "lInfo"
+    input ! class_ "lInput" ! id "lUsername" ! type_ "text"
+    div "" ! id "lSpacer"
+    div "pass"! class_ "lInfo"
+    input ! class_ "lInput" ! id "lPw" ! type_ "password"
+    div ! id "lResponsecontainer" $ do
+      div "login" ! id "lSubmitbutton" ! class_ "button buttonidle"
+      div "" ! id "lResponsefield"
+
+{-
+ whyiliketrees
+-}
+whyiliketreesBody :: Html
+whyiliketreesBody = do
+  script "" ! src "external/whyiliketrees/whyiliketrees.js"
+  link ! href "static/css/whyiliketrees.css" ! rel "stylesheet"
+    ! type_ "text/css"
+  div ! id "main" $ do
+    div "" ! class_ "inf inf1" ! id "info1"
+    div "" ! class_ "inf inf2" ! id "info2"
+    div "" ! class_ "inf inf1" ! id "info3"
+    div "" ! class_ "inf inf2" ! id "info4"
+    div "" ! class_ "inf inf1" ! id "info5"
+    div "" ! class_ "inf inf2" ! id "info6"
+    canvas "" ! id "canvas" ! readonly "readonly"
+    textarea "" ! id "console"
+    div ! class_ "controls" ! id "info7" $ do
+      "Controls: WASD, Space, Space+Shift, Arrow Keys"
+      br
+      "Toggle Debug: P, Toggle Mouse I"

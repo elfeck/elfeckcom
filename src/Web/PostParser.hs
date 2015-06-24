@@ -21,7 +21,6 @@ renderPost post = toStrict $ renderHtml $ parsePost post
 parsePost :: Post -> Html
 parsePost post = case postPtype post of
   0 -> do
-    link ! href "/css/site.css" ! rel "stylesheet" ! type_ "text/css"
     putHtml $ parseContent $ postContent post
   _ -> do
     putHtml $ parseTitle $ postTitle post

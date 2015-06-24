@@ -28,25 +28,11 @@ data Ele = Newline
          | RawEle T.Text
          deriving Show
 
-
-main = do
-  f <- readFile "src/test.txt"
-  let pl1 = procL1 $ T.pack f
-  let pl2 = procL2 pl1 L2C []
-  let pl3 = procL3 pl2 []
-  let pl3' = procL3Lines pl3 []
-  let pl4 = procL4 pl3' []
-  let pl4m = mergePar' pl4
-  print $ pl4
-  putStr $ "\n"
-  print $ pl4m
-
 parseMd = procL4' . procL3' . procL2' . procL1
 
 procL2' l1 = procL2 l1 L2C []
 procL3' l2 = procL3Lines (procL3 l2 []) []
 procL4' l3 = procL4Ele (procL4 l3 []) []
-
 
 {-
   Level 1: parse linewise and extract html tags and # headlines

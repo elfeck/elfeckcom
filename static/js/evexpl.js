@@ -1,30 +1,38 @@
 $(function() {
-    container = $("#contleft");
-    reg = $("#everegion");
-    reg.focus();
+    region = $("#xRegion");
+    region.on("keyup", validateRegionH);
+
     sites = [$("#s_0")];
-    types = [$("#t_0")];
-
-    eveList = $("#evelist");
-    submitBut = $("#submitbutton");
-    editdel = $("#editdelete");
-    editid = $("#editid");
-    editdc = $("#editdc");
-    editresp = $("#editresp");
-
-    reg.on("keyup", validateRegionH);
     sites[0].on("keyup", addNextSite);
     sites[0].on("keyup", validateSiteH);
-    types[0].on("keyup", validateTypeH);
     sites[0].on("keydown", handleSiteHotkey);
+
+    types = [$("#t_0")];
+    types[0].on("keyup", validateTypeH);
     types[0].on("keydown", handleTypeHotkey);
-    registerButton(submitBut, submit);
-    eveList.on("change", loadVisit);
-    editdel.on("keyup", function() {
-	console.log(editdel.val());
-	if(editdel.val() == "DEL") editdel.addClass("editdeldanger");
-	else editdel.removeClass("editdeldanger");
+
+    list = $("#xList");
+    list.on("change", submitViewVisit);
+
+    submitbutton = $("#xSubmitbutton");
+    registerButton(submitbutton, submit);
+
+    deletefield = $("#xDeletefield");
+    deletefield.on("keyup", function() {
+	console.log(deletefield.val());
+	if(deletefield.val() == "DEL") {
+	    deletefield.addClass("delDanger");
+	} else {
+	    deletefield.removeClass("delDanger");
+	}
     });
+
+    entryid = $("#xEntryid");
+    entrydate = $("#xEntrydate");
+    responsefield = $("#xResponsefield");
+    container = $("#xContainer");
+
+    region.focus();
     setKeybindings();
 });
 
@@ -63,6 +71,45 @@ handleTypeHotkey = function(event) {
     }
 }
 
+setKeybindings = function() {
+    $(document).keypress(function(event) {
+	if(event.altKey) event.preventDefault();
+	if(event.keyCode == 13) submit();
+    });
+}
+
+submitViewVisit = function() {
+    var selId = getSelectedId();
+    if(selId == 0) {
+	reset();
+	return;
+    }
+    var dataObj = { eid: selId }
+    $.ajax({
+	type: "POST",
+	url: "/evexpl/loadvisit",
+	dataType: "json",
+	data: { dat: dataObj },
+	success: function(data) {
+	    console.log(data);
+	    reset();
+	    region.val(data[1]["region"]);
+	    entryid.val(data[0]);
+	    entrydate.val(procTime(data[1]["crtDate"]));
+	    if(data[1]["sites"].length == 1 && data[1]["sites"][0][0] == "") {
+		// Nothing
+	    } else {
+		for(var i = 0; i < data[1]["sites"].length; ++i) {
+		    sites[i].val(data[1]["sites"][i][0]);
+		    types[i].val(data[1]["sites"][i][1]);
+		    addNextSite_();
+		}
+	    }
+	},
+	error: function() { jsonError("errorJson in loadPost"); }
+    });
+}
+
 submit = function() {
     if(!validateAll()) {
 	respond("ney: misng info");
@@ -72,7 +119,7 @@ submit = function() {
     var t = -1;
     if(selId == 0) t = 0;
     if(selId != 0) t = 1;
-    if(selId != 0 && editdel.val() == "DEL") t = 2;
+    if(selId != 0 && deletefield.val() == "DEL") t = 2;
     dataObj = packData();
     dataObj["eid"] = selId;
     dataObj["submitType"] = t;
@@ -84,14 +131,14 @@ submit = function() {
 	data: { dat: dataObj },
 	success: function(data) {
 	    respond(data);
-	    editdel.val("");
-	    editdel.removeClass("editdeldanger");
+	    deletefield.val("");
+	    deletefield.removeClass("deletefielddanger");
 	    updateList(t, selId, dataObj);
 	    if(t == 0 || t == 2) {
 		reset();
 		resetSelected();
 	    }
-	    else loadVisit();
+	    else submitViewVisit();
 	},
 	error: function() { jsonError("errorJson in submit"); }
     });
@@ -122,43 +169,6 @@ queryMaxId = function() {
     else return parseInt($(eles[0]).attr("id"));
 }
 
-currTime = function() {
-    d = new Date();
-    return d.getUTCHours() + ":" + d.getUTCMinutes();
-}
-
-loadVisit = function() {
-    var selId = getSelectedId();
-    if(selId == 0) {
-	reset();
-	return;
-    }
-    var dataObj = { eid: selId }
-    $.ajax({
-	type: "POST",
-	url: "/evexpl/loadvisit",
-	dataType: "json",
-	data: { dat: dataObj },
-	success: function(data) {
-	    console.log(data);
-	    reset();
-	    reg.val(data[1]["region"]);
-	    editid.val(data[0]);
-	    editdc.val(procTime(data[1]["crtDate"]));
-	    if(data[1]["sites"].length == 1 && data[1]["sites"][0][0] == "") {
-		// Nothing
-	    } else {
-		for(var i = 0; i < data[1]["sites"].length; ++i) {
-		    sites[i].val(data[1]["sites"][i][0]);
-		    types[i].val(data[1]["sites"][i][1]);
-		    addNextSite_();
-		}
-	    }
-	},
-	error: function() { jsonError("errorJson in loadPost"); }
-    });
-}
-
 addNextSite = function(event) {
     var regex = new RegExp("^[a-zA-Z0-9\b]+$");
     var key = String.fromCharCode(!event.charCode ? event.which :
@@ -168,9 +178,9 @@ addNextSite = function(event) {
 
 addNextSite_ = function() {
     var curr = sites.length;
-    container.append('<input class="editin evesite" id="s_' + curr +
+    container.append('<input class="stdinput xSite" id="s_' + curr +
 		     '"></input>');
-    container.append('<input class="editin evetype" id="t_' + curr +
+    container.append('<input class="stdinput xType" id="t_' + curr +
 		     '"></input>');
     sites.push($("#s_" + curr));
     types.push($("#t_" + curr));
@@ -198,8 +208,8 @@ reset = function() {
     types = [types[0]];
     types[0].val("");
     types[0].removeClass("wrong");
-    editid.val("");
-    editdc.val("");
+    entryid.val("");
+    entrydate.val("");
     eles = $(".listEntry");
 }
 
@@ -210,18 +220,10 @@ resetSelected = function() {
     $("#0").prop("selected", true);
 }
 
-setKeybindings = function() {
-    $(document).keypress(function(event) {
-	if(event.altKey) event.preventDefault();
-	if(event.keyCode == 13) submit();
-    });
-}
-
 getSelectedId = function() {
-    var selected = eveList.find("option:selected");
+    var selected = list.find("option:selected");
     return selected.attr("id");
 }
-
 
 packData = function() {
     var ssites = "";
@@ -236,102 +238,33 @@ packData = function() {
     }
     var dataObj = {
 	name: "",
-	region: reg.val(),
+	region: region.val(),
 	sites: ssites,
 	types: ttypes
     };
     return dataObj;
 }
 
-allowedRegions = [
-    "Branch", "Cache", "Catch", "Cloud Ring", "Cobalt Edge", "Curse",
-    "Deklein", "Delve", "Detroid", "Esoteria", "Etherium Reach", "Fade",
-    "Feythabolis", "Fountain", "Geminate", "Great Wildlands", "Immensea",
-    "Impass", "Insmother", "The Kalevala Expanse", "Malpais", "Oasa", "Omist",
-    "Outer Passage", "Outer Ring", "Paragon Soul", "Period Basis",
-    "Perrigen Falls", "Providence", "Pure Blind", "Querious", "Scalding Pass",
-    "The Spire", "Stain", "Syndicate", "Tenal", "Tenerifis", "Tribute",
-    "Vale of the Silent", "Venal", "Wicked Creek"
-];
-
-allowedSites = [
-    "Combat", "Data", "Relic", "Wormhole", "Gas"
-];
-
-allowedTypes = [
-    "Monument Site", "Temple Site", "Science Outpost", "Crystal Quarry",
-
-    "Sparking Transmitter", "Survey Site", "Command Center",
-    "Data Mining Site",
-
-    "Limited Sleeper Cache", "Standard Sleeper Cache",
-    "Superior Sleeper Cache",
-    ""
-];
-
-validateAll = function() {
-    if(!validateRegion(reg)) return false;
-    for(var i = 0; i < sites.length; i++) {
-	if(!validateSite(sites[i])) return false;
-	if(!validateType(types[i])) return false;
-    }
-    return true;
-}
-
-validateRegion = function(input) {
-    if(allowedRegions.indexOf(input.val()) < 0) {
-	input.addClass("wrong");
-	return false;
-    } else {
-	input.removeClass("wrong");
-	return true;
-    }
-};
-validateRegionH = function() { validateRegion($(this)) };
-
-
-validateSite = function(input) {
-    var index = -1;
-    for(var i = 0; i < sites.length; ++i) {
-	if(input[0] == sites[i][0]) index = i;
-    }
-    bothEmpty = input.val() == "" && types[index].val() == "";
-    if(!bothEmpty && allowedSites.indexOf(input.val()) < 0) {
-	input.addClass("wrong");
-	return false;
-    } else {
-	input.removeClass("wrong");
-	return true;
-    }
-};
-validateSiteH = function() { validateSite($(this)) };
-
-validateType = function(input) {
-    if(allowedTypes.indexOf(input.val()) < 0) {
-	input.addClass("wrong");
-	return false;
-    } else {
-	input.removeClass("wrong");
-	return true;
-    }
-};
-validateTypeH = function() { validateType($(this)) };
-
 respond = function(m) {
     if(m.substring(0, 3) == "yey") {
-	editresp.addClass("editrespyey");
-	editresp.removeClass("editrespney");
+	responsefield.addClass("responseYey");
+	responsefield.removeClass("responseNey");
 	setTimeout(function() {
-	    editresp.html("");
+	    responsefield.html("");
 	}, 2000);
     } else {
-	editresp.removeClass("editrespyey");
-	editresp.addClass("editrespney");
+	responsefield.removeClass("responseYey");
+	responsefield.addClass("responseNey");
     }
     console.log(m.substring(0, 3));
-    editresp.html(m);
+    responsefield.html(m);
 }
 
 procTime = function(time) {
     return time.replace("T", " ").substring(0, 16);
+}
+
+currTime = function() {
+    d = new Date();
+    return d.getUTCHours() + ":" + d.getUTCMinutes();
 }

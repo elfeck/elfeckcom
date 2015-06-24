@@ -1,35 +1,44 @@
 $(function() {
-    tit = $("#edittitle");
-    cat = $("#editcategories");
-    cont = $("#editarea");
-    type = $("#edittype");
-    access = $("#editaccess");
-    preview = $("#editpreview");
-    editList = $("#editlist");
-    submitBut = $("#submitbutton");
-    editdel = $("#editdelete");
-    editid = $("#editid");
-    editdc = $("#editdc");
-    editresp = $("#editresp");
+    title = $("#eTitle");
+    title.on("keyup", submitPreview);
+
+    categories = $("#eCategories");
+    categories.on("keyup", submitPreview);
+
+    area = $("#eArea");
+    area.on("keyup", submitPreview);
+    area.on("change", submitPreview);
+
+    type = $("#eType");
+    type.on("keyup", submitPreview);
+
+    access = $("#eAccess");
+    access.on("keyup", submitPreview);
+
+    list = $("#eList");
+    list.on("change", loadPost);
+
+    preview = $("#ePreview");
+    postid = $("#ePostid");
+    postdate = $("#ePostdate");
+    responsefield = $("#eResponsefield");
+
+    deletefield = $("#eDeletefield");
+    deletefield.on("keyup", function() {
+	if(deletefield.val() == "DEL") {
+	    deletefield.addClass("delDanger");
+	} else {
+	    deletefield.removeClass("delDanger");
+	}
+    });
+
+    submitbutton = $("#eSubmitbutton"); registerButton(submitbutton, submit);
 
     clearAll();
-    editList.focus();
-
-    registerButton(submitBut, submit);
-    tit.on("keyup", previewSubmit);
-    cat.on("keyup", previewSubmit);
-    cont.on("keyup", previewSubmit);
-    type.on("keyup", previewSubmit);
-    access.on("keyup", previewSubmit);
-    cont.on("change", previewSubmit);
-    editList.on("change", loadPost);
-    editdel.on("keyup", function() {
-	if(editdel.val() == "DEL") editdel.addClass("editdeldanger");
-	else editdel.removeClass("editdeldanger");
-    });
+    list.focus();
 });
 
-previewSubmit = function() {
+submitPreview = function() {
     dataObj = packData();
     $.ajax({
 	type: "POST",
@@ -39,7 +48,7 @@ previewSubmit = function() {
 	success: function(data) {
 	    preview.html(data);
 	},
-	error: function() { jsonError("errorJson in previewSubmit"); }
+	error: function() { jsonError("errorJson in submitPreview"); }
     });
 };
 
@@ -52,7 +61,7 @@ submit = function() {
     t = -1;
     if(selId == 0) t = 0;
     if(selId != 0) t = 1;
-    if(selId != 0 && editdel.val() == "DEL") t = 2;
+    if(selId != 0 && deletefield.val() == "DEL") t = 2;
     dataObj = packData();
     dataObj["pid"] = selId;
     dataObj["submitType"] = t;
@@ -63,8 +72,8 @@ submit = function() {
 	data: { dat: dataObj },
 	success: function(data) {
 	    respond(data);
-	    editdel.val("");
-	    editdel.removeClass("editdeldanger");
+	    deletefield.val("");
+	    deletefield.removeClass("editdeldanger");
 	},
 	error: function() { jsonError("errorJson in submit"); }
     });
@@ -74,7 +83,7 @@ loadPost = function() {
     var selId = getSelectedId();
     if(selId == 0) {
 	clearAll();
-	cont.change();
+	area.change();
 	return;
     }
     var dataObj = { pid: selId }
@@ -84,14 +93,14 @@ loadPost = function() {
 	dataType: "json",
 	data: { dat: dataObj },
 	success: function(data) {
-	    editid.val(data[0]);
-	    editdc.val(procTime(data[1]["crtDate"]));
-	    cont.val(data[1]["content"]);
-	    tit.val(procTitle(data[1]["title"]));
-	    cat.val(procCat(data[1]["categories"]));
+	    postid.val(data[0]);
+	    postdate.val(procTime(data[1]["crtDate"]));
+	    area.val(data[1]["content"]);
+	    title.val(procTitle(data[1]["title"]));
+	    categories.val(procCat(data[1]["categories"]));
 	    type.val(data[1]["ptype"]);
 	    access.val(data[1]["access"]);
-	    cont.change();
+	    area.change();
 	},
 	error: function() { jsonError("errorJson in loadPost"); }
     });
@@ -103,9 +112,9 @@ packData = function() {
     if(t == "") t = "0";
     if(a == "") a = "5";
     var dataObj = {
-	title: tit.val(),
-	categories: cat.val(),
-	content: cont.val(),
+	title: title.val(),
+	categories: categories.val(),
+	content: area.val(),
 	type: t,
 	access: a
     }
@@ -113,12 +122,12 @@ packData = function() {
 }
 
 getSelectedId = function() {
-    var selected = editList.find("option:selected");
+    var selected = list.find("option:selected");
     return selected.attr("id");
 }
 
 validateMinimal = function() {
-    return cont.val() != "" && isInt(type.val()) && isInt(access.val());
+    return area.val() != "" && isInt(type.val()) && isInt(access.val());
 }
 
 isInt = function(value) {
@@ -148,18 +157,18 @@ jsonError = function(m) {
 
 respond = function(m) {
     if(m.substring(0, 3) == "yey") {
-	editresp.addClass("editrespyey");
-	editresp.removeClass("editrespney");
+	responsefield.addClass("responseYey");
+	responsefield.removeClass("responseNey");
     } else {
-	editresp.removeClass("editrespyey");
-	editresp.addClass("editrespney");
+	responsefield.removeClass("responseYey");
+	responsefield.addClass("responseNey");
     }
     console.log(m.substring(0, 3));
-    editresp.html(m);
+    responsefield.html(m);
 }
 
 clearAll = function() {
-    tit.val(""); cat.val(""); cont.val("");
+    title.val(""); categories.val(""); area.val("");
     type.val(""); access.val("");
-    editid.val("");  editdc.val(""); editresp.text("");
+    postid.val("");  postdate.val(""); responsefield.text("");
 }

@@ -1,0 +1,63 @@
+html {
+    font-family: "sans serif";
+    background-color: #222222;
+}
+div.footer {
+    border-color: #555555;
+    background-color: #333333;
+}
+div#main {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    background-color: #333333;
+}
+canvas#canvas {
+    border-width: 1px;
+    border-style: solid;
+    border-color: transparent;
+    display: block;
+    margin: auto;
+    padding-top: 3px;
+}
+textarea#console {
+    font-family: "sans serif";
+    overflow: hidden;
+    background-color: #222222;
+    font-family: inherit;
+    font-size: 12px;
+    color: #949494;
+    border-width: 0px;
+    width: 600px;
+    /* looks ugly atm */
+    height: 0px;;
+    display: block;
+    margin: auto;
+}
+div.inf {
+    color: #949494;
+    height: 12px;
+    width: 200px;
+    background-color: inherit;
+    font-family: inherit;
+    font-size: 12px;
+    color: #949494;
+    margin-bottom: 2px;
+}
+div.controls {
+    color: #949494;
+    margin-top: 3px;
+    font-family: inherit;
+    font-size: 11px;
+    text-align: center;
+    margin-bottom: 2px;
+}
+div.inf1 {
+    float: left;
+    width: 300px;
+    margin-left: 100px;
+}
+div.inf2 {
+    overflow: hidden;
+    width: 300px;
+    text-align: right;
+}

@@ -2,6 +2,7 @@
 
 module Main where
 
+import System.Environment (getArgs)
 import Control.Monad.Logger
 import qualified Data.Text as T
 import Network.Wai.Middleware.Static (staticPolicy, addBase)
@@ -16,7 +17,8 @@ import Model.Types
 
 main :: IO ()
 main = do
-  configFile <- readFile "config.txt"
+  args <- getArgs
+  configFile <- readFile $ findConfigFile args
   let config = parseConfig $ T.pack configFile
   pool <- runNoLoggingT $ createSqlitePool (database config) 5
   runNoLoggingT $ runSqlPool (runMigration migrateCore) pool
@@ -32,6 +34,10 @@ main = do
 
 app :: SiteConfig -> BlogApp
 app (SiteConfig rootDir _ routes) = do
-  middleware (staticPolicy (addBase $ (T.unpack rootDir) ++ "/static"))
+  middleware (staticPolicy (addBase $ T.unpack rootDir))
   handleGets routes
   handlePosts
+
+findConfigFile :: [String] -> String
+findConfigFile [] = "config.txt"
+findConfigFile arg = head arg

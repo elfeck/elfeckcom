@@ -18,11 +18,11 @@ handleGets staticRoutes = do
     muser <- loadUserSession
     posts <- runSQL $ queryAllPosts
     reqRight muser 5 $ blaze $ do
-      siteHead
+      inputHead
       infBackHeader "edit"
       siteEdit posts
   get "login" $ blaze $ do
-    siteHead
+    inputHead
     infBackHeader "login"
     siteLogin
   get "logout" $ do
@@ -37,9 +37,16 @@ handleGets staticRoutes = do
     muser <- loadUserSession
     visits <- runSQL $ queryAllVisits
     reqRight muser 5 $ blaze $ do
-      siteHead
+      inputHead
       infBackHeader "evexpl"
       siteEvexpl visits
+  get "playwhyiliketrees" $ do
+    muser <- loadUserSession
+    blaze $ do
+      siteHead
+      darkHeader
+      whyiliketreesBody
+      siteFooter $ fmap snd muser
   hookAny GET $ \_ -> blaze $ do
     siteHead
     emptyHeader

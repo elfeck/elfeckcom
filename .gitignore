@@ -5,3 +5,5 @@ cabal.sandbox.config
 *.db-shm
 *.db-wal
 /static/eve
+config.txt
+/external

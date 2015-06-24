@@ -1,69 +1,40 @@
-div.editbody {
-    width: 800px;
-    height: auto;
-    margin-top: 0px;
-    padding-bottom: 20px;
-    background-color: #d4d4d4;
-    text-align: justify;
-}
+/*
 
-div.editleft {
-    display: inline-block;
-    width: 550px;
-}
+ IDs
 
-div.editright {
-    display: inline-block;
-    vertical-align: top;
-    margin-left: 10px;
-    width: 190px;
-}
+*/
 
-input.editin {
-    height: 18px;
-    margin-top: 20px;
-    border-width: 1px;
-    padding: 0px;
-    font-size: 13px;
-}
-
-input#edittitle {
+input#eTitle {
     width: 200px;
     margin-left: 48px;
 }
-
-input#editcategories {
+input#eCategories {
     width: 200px;
     margin-left: 10px;
 }
-
-input#edittype {
+input#eType {
     width: 32px;
     margin-left: 10px;
     text-align: center;
 }
-
-input#editaccess {
+input#eAccess {
     width: 32px;
     margin-left: 10px;
     text-align: center;
 }
-
-input#editid {
+input#ePostid {
     margin-top: 20px;
     width: 32px;
     text-align: center;
 }
-
-input#editdc {
+input#ePostdate {
     text-align: center;
     line-height: 20px;
     margin-top: 20px;
     margin-left: 10px;
     width: 142px;
 }
-
-textarea#editarea {
+textarea#eArea {
     width: 500px;
     height: 227px;
     resize: none;
@@ -74,8 +45,7 @@ textarea#editarea {
     border-width: 1px;
     font-size: 13px;
 }
-
-div#editpreview {
+div#ePreview {
     width: 800px;
     height: auto;
     min-height: 100px;
@@ -88,16 +58,7 @@ div#editpreview {
     border-style: dashed;
     word-wrap:break-word;
 }
-
-select.editselect {
-    width: 188px;
-    height: 202px;
-    margin-top: 5px;
-    font-family: 'Open Sans', sans-serif;
-    font-size: 13px;
-}
-
-div#submitbutton {
+div#eSubmitbutton {
     margin-top: 5px;
     display: inline-block;
     vertical-align: bottom;
@@ -105,41 +66,28 @@ div#submitbutton {
     height: 18px;
     margin-left: 6px;
 }
-
-input#editdelete {
+input#eDeletefield {
     margin-top: 5px;
     margin-left: 6px;
     width: 36px;
     height: 18px;
     text-align: center;
 }
-
-input.editdeldanger {
-    background-color: #990000;
-    color: #ffffff;
-}
-
-div.editinfo {
+div#eResponsefield {
+    width: 100px;
+    height: 20px;
+    text-align: center;
+    line-height: 20px;
+    font-weight: bold;
     background-color: white;
     font-family: 'Open Sans', sans-serif;
     line-height: 20px;
     font-size: 12px;
-    height: 20px;
     vertical-align: bottom;
     display: inline-block;
 }
-
-div#editresp {
-    text-align: center;
-    line-height: 20px;
-    font-weight: bold;
-    width: 100px;
-}
-
-div.editrespyey {
-    color: #009900;
-}
-
-div.editrespney {
-    color: #990000;
+select#eList {
+    width: 188px;
+    height: 202px;
+    margin-top: 5px;
 }
