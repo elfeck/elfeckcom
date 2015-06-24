@@ -1,3 +1,6 @@
+[RootDir]
+.
+
 [Database]
 db/elfeck.db
 

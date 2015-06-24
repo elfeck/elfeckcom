@@ -18,7 +18,7 @@ import Text.Blaze.Html5.Attributes (charset,
                                     autocomplete)
 import Database.Persist.Sql
 
-import Model.Model
+import Model.Types
 
 siteHead :: Html
 siteHead = docTypeHtml $ head $ do

@@ -9,10 +9,9 @@ import Web.Spock.Safe hiding (head, SessionId)
 import Database.Persist.Sqlite hiding (get)
 
 import Web.Utils
-import Web.HandlerGet
-import Web.HandlerPost
-import Web.PostParser
-import Model.Model
+import Web.GetHandler
+import Web.PostHandler
+import Model.Types
 
 
 main :: IO ()
@@ -32,7 +31,7 @@ main = do
                        }
 
 app :: SiteConfig -> BlogApp
-app (SiteConfig _ routes) = do
-  middleware (staticPolicy (addBase "static"))
+app (SiteConfig rootDir _ routes) = do
+  middleware (staticPolicy (addBase $ (T.unpack rootDir) ++ "/static"))
   handleGets routes
   handlePosts

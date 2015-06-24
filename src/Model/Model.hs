@@ -1,58 +1,16 @@
-{-# LANGUAGE EmptyDataDecls             #-}
-{-# LANGUAGE FlexibleContexts           #-}
-{-# LANGUAGE GADTs                      #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses      #-}
-{-# LANGUAGE OverloadedStrings          #-}
-{-# LANGUAGE QuasiQuotes                #-}
-{-# LANGUAGE TemplateHaskell            #-}
-{-# LANGUAGE TypeFamilies               #-}
-{-# LANGUAGE FlexibleInstances          #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Model.Model where
 
 import Data.Aeson.Types
 import Control.Monad.IO.Class
-import Control.Monad.Logger
-import Control.Monad.Trans.Resource
-import Database.Persist.TH
 import qualified Data.Text as T
 import Data.Time
 import Data.Maybe
 import Web.Spock.Shared hiding (SessionId)
-
 import Database.Persist.Sql
 
-type SystemSites = [(T.Text, T.Text)]
-share [mkPersist sqlSettings, mkMigrate "migrateCore"][persistLowerCase|
-Session
-  validUntil UTCTime
-  userId UserId
-  deriving Show
-User
-  name T.Text
-  pass T.Text
-  access Int
-  UniqueUsername name
-  deriving Show
-Post json
-  title T.Text Maybe
-  categories [T.Text] Maybe
-  content T.Text
-  crtDate UTCTime
-  modDate UTCTime
-  ptype Int
-  access Int
-  deriving Show
-SystemVisit json
-  name T.Text Maybe
-  region T.Text
-  sites SystemSites
-  crtDate UTCTime
-  author T.Text
-  deriving Show
-|]
-
+import Model.Types
 
 loginUser :: T.Text -> T.Text -> SqlPersistM (Maybe UserId)
 loginUser name pass = do
@@ -175,8 +133,3 @@ queryVisit eid = do
   case mvisit of
    Nothing -> return Nothing
    Just visit -> return $ Just (toSqlKey $ fromIntegral eid, visit)
-
-runSQL :: (HasSpock m, SpockConn m ~ SqlBackend) =>
-          SqlPersistT (NoLoggingT (ResourceT IO)) a -> m a
-runSQL action =
-  runQuery $ \conn -> runResourceT $ runNoLoggingT $ runSqlConn action conn

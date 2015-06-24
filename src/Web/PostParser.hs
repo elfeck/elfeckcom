@@ -12,7 +12,7 @@ import Text.Blaze.Html5 (Html, (!), div, img, ul, ol, li, a, i ,b, link, br)
 import Text.Blaze.Html5.Attributes (href, rel, src, type_, class_, id)
 import Text.Blaze.Html.Renderer.Text (renderHtml)
 
-import Model.Model
+import Model.Types
 import Web.BetterMdParser
 
 renderPost :: Post -> T.Text
