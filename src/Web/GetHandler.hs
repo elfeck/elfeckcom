@@ -21,6 +21,7 @@ handleGets staticRoutes = do
       inputHead
       infBackHeader "edit"
       siteEdit posts
+      siteFooter $ fmap snd muser
   get "login" $ blaze $ do
     inputHead
     infBackHeader "login"
@@ -40,6 +41,7 @@ handleGets staticRoutes = do
       inputHead
       infBackHeader "evexpl"
       siteEvexpl visits
+      siteFooter $ fmap snd muser
   get "playwhyiliketrees" $ do
     muser <- loadUserSession
     blaze $ do
@@ -62,7 +64,8 @@ handleStatic (DB from pid) = get (static $ T.unpack from) $ do
    Just post -> blaze $ do
      siteHead
      siteHeader
-     siteBody $ parsePost $ snd post
+     case from of "/" -> siteSmBody $ parsePost $ snd post
+                  _ -> siteBody $ parsePost $ snd post
      siteFooter $ fmap snd muser
 
 handleInvPid = blaze $ do

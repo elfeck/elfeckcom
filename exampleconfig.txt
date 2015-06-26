@@ -1,0 +1,13 @@
+[RootDir]
+/home/elfeckcom
+
+[Database]
+db/elfeck.db
+
+[Routes]
+/		db 1
+elfeck		redirect /
+whyiliketrees	db 8
+mathandstuff	db 3
+drivel		db 4
+impressum	db 5

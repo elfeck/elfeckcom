@@ -117,11 +117,30 @@ div.usersep {
 
 div.sitebody {
     overflow: auto;
+    position: relative;
     width: 800px;
     margin-top: 0px;
     background-color: #d4d4d4;
     text-align: justify;
 }
+
+div.innerSmBody {
+    display: inline-block;
+    overflow: auto;
+    width: 480px;
+    margin: 10px;
+}
+
+div.indexSidePanel {
+    position: absolute;
+    bottom: 0;
+    display: inline-block;
+    overflow: auto;
+    width: 300px;
+    background-image: url("../img/index_side.svg");
+    height: 350px;
+}
+
 div.innerbody {
     overflow: auto;
     margin: 10px;

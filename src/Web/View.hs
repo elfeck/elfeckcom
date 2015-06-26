@@ -133,6 +133,11 @@ spacer = div "[" ! class_ "footerspacer"
 siteBody :: Html -> Html
 siteBody h = div ! class_ "sitebody" $ (div ! class_ "innerbody" $ h)
 
+siteSmBody :: Html -> Html
+siteSmBody h = div ! class_ "sitebody" $ do
+  div ! class_ "innerSmBody" $ h
+  div ! class_ "indexSidePanel" $ ""
+
 site404 :: Html
 site404 = div "Sorry nothing to see here" ! class_ "testbody"
 

@@ -31,13 +31,12 @@ main = do
                        , sc_emptySession = Nothing
                        , sc_persistCfg = Nothing
                        }
+          findConfigFile [] = "config.txt"
+          findConfigFile arg = head arg
+
 
 app :: SiteConfig -> BlogApp
 app (SiteConfig rootDir _ routes) = do
   middleware (staticPolicy (addBase $ T.unpack rootDir))
   handleGets routes
   handlePosts
-
-findConfigFile :: [String] -> String
-findConfigFile [] = "config.txt"
-findConfigFile arg = head arg
