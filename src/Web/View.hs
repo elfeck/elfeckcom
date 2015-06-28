@@ -245,7 +245,7 @@ siteLogin = do
 -}
 whyiliketreesBody :: Html
 whyiliketreesBody = do
-  script "" ! src "external/whyiliketrees/whyiliketrees.js"
+  script "" ! src "static/games/whyiliketrees.js"
   link ! href "static/css/whyiliketrees.css" ! rel "stylesheet"
     ! type_ "text/css"
   div ! id "main" $ do

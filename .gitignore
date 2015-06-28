@@ -7,3 +7,4 @@ cabal.sandbox.config
 /static/eve
 config.txt
 /external
+/static/games

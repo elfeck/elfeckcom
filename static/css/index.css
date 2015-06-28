@@ -66,7 +66,7 @@ li.headerentry {
     text-align: center;
 }
 a.headerlink {
-    color: #d27b63;
+    color: #d47257;
     text-decoration: none;
 }
 div.userinfo {
@@ -97,7 +97,7 @@ div.footerinfo {
     display: inline-block;
 }
 a.footerlink {
-    color: #d27b63;
+    color: #d47257;
     text-decoration: none;
 }
 div.footerspacer {
@@ -139,11 +139,12 @@ div.sidepanel {
 }
 
 div.indexBody {
-    width: 480px;
+    width: 500px;
+    margin-right: 0px;
 }
 
 div.indexSP {
-    width: 300px;
+    width: 290px;
     height: 350px;
     background-image: url("../img/index_side.svg");
 }
