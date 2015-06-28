@@ -103,7 +103,7 @@ siteFooter muser = do
     wrapContainer $ do
       div "built with" ! class_ "footerinfo"
       a " Spock " ! class_ "footerlink" ! href "http://www.spock.li/"
-      div "& written in haskell" ! class_ "footerinfo"
+      div "& written in Haskell" ! class_ "footerinfo"
     div ! class_ "usersep" $ "|"
     wrapContainer $ a "impressum" ! class_ "footerlink" ! href "/impressum"
     if isNothing muser
@@ -133,10 +133,16 @@ spacer = div "[" ! class_ "footerspacer"
 siteBody :: Html -> Html
 siteBody h = div ! class_ "sitebody" $ (div ! class_ "innerbody" $ h)
 
-siteSmBody :: Html -> Html
-siteSmBody h = div ! class_ "sitebody" $ do
-  div ! class_ "innerSmBody" $ h
-  div ! class_ "indexSidePanel" $ ""
+indexBody :: Html -> Html
+indexBody h = div ! class_ "sitebody" $ do
+  div ! class_ "innerbody indexBody" $ h
+  div ! class_ "sidepanel indexSP" $ ""
+
+genericBody :: String -> Html -> Html
+genericBody "" h = siteBody h
+genericBody name h = div ! class_ "sitebody" $ do
+  div ! class_ (stringValue $ "innerbody " ++ name ++ "Body") $ h
+  div ! class_ (stringValue $ "sidepanel " ++ name ++ "SP") $ ""
 
 site404 :: Html
 site404 = div "Sorry nothing to see here" ! class_ "testbody"

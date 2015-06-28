@@ -64,9 +64,11 @@ handleStatic (DB from pid) = get (static $ T.unpack from) $ do
    Just post -> blaze $ do
      siteHead
      siteHeader
-     case from of "/" -> siteSmBody $ parsePost $ snd post
-                  _ -> siteBody $ parsePost $ snd post
+     genericBody (procURL from) $ parsePost $ snd post
      siteFooter $ fmap snd muser
+       where procURL "/" = "index"
+             procURL "whyiliketrees" = "wilt"
+             procURL u = T.unpack u
 
 handleInvPid = blaze $ do
   siteHead
