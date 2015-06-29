@@ -1,6 +1,6 @@
 elfeckcom
 ===============================================================================
-(*) Source for the elfeck.com website
+(*) Source for the http://elfeck.com website
 (*) This might be very horrible Haskell and even worse Javascript
 
 (*) Please do not use the images from /static/img/ without asking me first

@@ -11,6 +11,12 @@ div#main {
     padding-bottom: 2px;
     background-color: #333333;
 }
+a.headerlink {
+    color: #d47257;
+}
+a.footerlink {
+    color: #d47257;
+}
 canvas#canvas {
     border-width: 1px;
     border-style: solid;
