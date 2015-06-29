@@ -9,3 +9,4 @@ config.txt
 /external
 /static/games
 /db
+/docker/dockerversion.txt
