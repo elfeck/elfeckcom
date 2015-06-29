@@ -11,7 +11,6 @@ module Model.Types where
 
 import Data.Time
 import qualified Data.Text as T
-import Database.Persist.Sql
 import Database.Persist.TH
 
 type SystemSites = [(T.Text, T.Text)]
@@ -23,6 +22,7 @@ Session
 User
   name T.Text
   pass T.Text
+  salt T.Text
   access Int
   UniqueUsername name
   deriving Show

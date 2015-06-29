@@ -1,7 +1,17 @@
 elfeckcom
 ===============================================================================
-(*) Source for the future elfeck.com website
-(*) This might be very horrible Haskell
+(*) Source for the elfeck.com website
+(*) This might be very horrible Haskell and even worse Javascript
+
+(*) Please do not use the images from /static/img/ without asking me first
+
+
+Credits
+===============================================================================
+(*) The backend is built with Spock: https://github.com/agrafix/Spock
+(*) The code is heavily base on: https://github.com/agrafix/funblog
+
+(*) HUGE thanks goes to agrafix for Spock and the example project
 
 
 content format

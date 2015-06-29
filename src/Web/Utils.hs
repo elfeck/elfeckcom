@@ -12,7 +12,6 @@ import Control.Monad.Trans.Resource
 import Web.Spock.Safe hiding (head, SessionId)
 import Text.Blaze.Html (Html)
 import Text.Blaze.Html.Renderer.Text (renderHtml)
-
 import Data.Text.Read
 import Data.Maybe
 import Database.Persist.Sqlite hiding (get)
@@ -57,6 +56,7 @@ parseRoutes _ = []
 constructRoute :: (T.Text, T.Text, T.Text) -> Route
 constructRoute (url, "redirect", link) = Redirect url link
 constructRoute (url, "db", pid) = DB url $ fromJust $ textToInt pid
+constructRoute _ = undefined
 
 {-
  Utility
@@ -109,7 +109,7 @@ textToInt :: T.Text -> Maybe Int
 textToInt text = case decimal text of
                 Left _ -> Nothing
                 Right (val, "") -> Just val
-                Right (val, _) -> Nothing
+                Right (_, _) -> Nothing
 
 tuplify (a : b : c : []) = (a, b, c)
 tuplify _ = undefined

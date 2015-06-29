@@ -2,24 +2,24 @@
 
 module Model.Model where
 
-import Data.Aeson.Types
 import Control.Monad.IO.Class
 import qualified Data.Text as T
 import Data.Time
-import Data.Maybe
-import Web.Spock.Shared hiding (SessionId)
 import Database.Persist.Sql
 
 import Model.Types
+import Model.CryptoUtils
 
 loginUser :: T.Text -> T.Text -> SqlPersistM (Maybe UserId)
 loginUser name pass = do
   mName <- getBy (UniqueUsername name)
   case mName of
    Just row ->
-     if (userPass (entityVal row)) == pass
-     then return $ Just (entityKey row)
-     else return Nothing
+     let user = entityVal row
+     in if (userPass user) ==
+           (makeHex $ hashText pass (decodeHex $ userSalt user))
+        then return $ Just (entityKey row)
+        else return Nothing
    Nothing ->
      return Nothing
 
@@ -31,13 +31,13 @@ insertSession userId = do
   now <- liftIO getCurrentTime
   insert (Session (addUTCTime (5 * 3600) now) userId)
 
-insertUser :: T.Text -> T.Text -> Int -> SqlPersistM T.Text
-insertUser name pass access = do
+insertUser :: User -> SqlPersistM T.Text
+insertUser (User name pass salt access) = do
   mName <- getBy (UniqueUsername name)
   case mName of
    Just _ -> return "ney: username taken"
    Nothing -> do
-     insert (User name pass access)
+     insert (User name pass salt access)
      return "yey: user created"
 
 insertPost :: Post -> SqlPersistM T.Text
