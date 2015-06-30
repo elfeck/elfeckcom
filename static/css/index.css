@@ -161,12 +161,23 @@ div.wiltSP {
 
 div.mathandstuffBody {
     width: 530px;
-    height: 125px;
 }
 
 div.mathandstuffSP {
     width: 250px;
-    height: 150px;
+    height: 350px;
     background-image: url("../img/mathandstuff_side.svg");
-    top: 0;
+    bottom: 0;
+}
+
+div.drivelBody {
+    width: 630px;
+    height: 105px;
+}
+
+div.drivelSP {
+    width: 100px;
+    height: 125px;
+    background-image: url("../img/drivel_side.svg");
+    bottom: 0;
 }
