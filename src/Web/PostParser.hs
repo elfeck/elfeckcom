@@ -3,7 +3,6 @@
 module Web.PostParser where
 
 import Prelude hiding (div, id)
-import Data.Maybe
 import qualified Data.Text as T
 import Data.Text.Lazy (toStrict)
 

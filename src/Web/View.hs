@@ -23,16 +23,21 @@ import Model.Types
  Index Elements: Head, Header and Footer
  Sadly all Pages use the same Head so all CSS is required right here
 -}
-siteHead :: Html
-siteHead = docTypeHtml $ head $ do
+siteHead :: String -> Html
+siteHead path = docTypeHtml $ head $ do
   title "elfeck"
   meta ! charset "utf-8"
-  link ! href "static/css/index.css" ! rel "stylesheet" ! type_ "text/css"
-  link ! href "static/css/site.css" ! rel "stylesheet" ! type_ "text/css"
-  link ! href "static/img/icon.png" ! rel "icon" ! type_ "image/png"
+  link ! href (appPath "static/css/index.css") ! rel "stylesheet"
+    ! type_ "text/css"
+  link ! href (appPath "static/css/site.css") ! rel "stylesheet"
+    ! type_ "text/css"
+  link ! href (appPath "static/img/icon.png") ! rel "icon"
+    ! type_ "image/png"
   link ! href "http://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
     ! rel "stylesheet" ! type_ "text/css"
+    where appPath p = stringValue (path ++ p)
 
+-- Missing root-path adjustment
 inputHead :: Html
 inputHead = docTypeHtml $ head $ do
   title "elfeck"
@@ -50,24 +55,27 @@ inputHead = docTypeHtml $ head $ do
     ! rel "stylesheet" ! type_ "text/css"
 
 
-siteHeader :: Html
-siteHeader = do
+siteHeader :: String -> Html
+siteHeader path = do
   div ! class_ "header" $ do
     div ! class_ "headercontainer" $ ul ! class_ "headerleft" $ do
       headerEntry "elfeck"
       headerEntry "whyiliketrees"
-    div ! class_ "headercontainer" $ img ! src "static/img/header.svg"
+    div ! class_ "headercontainer" $ img
+      ! src (stringValue $ path ++ "static/img/header.svg")
     div ! class_ "headercontainer" $ ul ! class_ "headerright" $ do
       headerEntry "math and stuff"
       headerEntry "drivel"
 
-emptyHeader :: Html
-emptyHeader = do
+emptyHeader :: String -> Html
+emptyHeader path = do
   div ! class_ "header" $ do
     div ! class_ "headercontainer" $ ul "" ! class_ "headerleft"
-    div ! class_ "headercontainer" $ img ! src "static/img/header.svg"
+    div ! class_ "headercontainer" $ img
+      ! src (stringValue $ path ++ "static/img/header.svg")
     div ! class_ "headercontainer" $ ul "" ! class_ "headerright"
 
+-- Missing root-path adjustment
 infBackHeader :: String -> Html
 infBackHeader inf = do
   div ! class_ "header" $ do
@@ -79,13 +87,14 @@ infBackHeader inf = do
       li ! class_ "headerentry" $ ""
       li ! class_ "headerentry" $ a "home" ! href "/" ! class_ "headerlink"
 
-darkHeader :: Html
-darkHeader = do
+darkHeader :: String -> Html
+darkHeader path = do
   div ! class_ "header" $ do
     div ! class_ "headercontainer" $ ul ! class_ "headerleft" $ do
       headerEntry "elfeck"
       headerEntry "whyiliketrees"
-    div ! class_ "headercontainer" $ img ! src "static/img/header_dark.svg"
+    div ! class_ "headercontainer" $ img
+      ! src (stringValue $ path ++ "static/img/header_dark.svg")
     div ! class_ "headercontainer" $ ul ! class_ "headerright" $ do
       headerEntry "math and stuff"
       headerEntry "drivel"
@@ -243,10 +252,11 @@ siteLogin = do
 {-
  whyiliketrees
 -}
+-- Adjusted path to be /games/whyiliketrees in ../
 whyiliketreesBody :: Html
 whyiliketreesBody = do
-  script "" ! src "static/games/whyiliketrees.js"
-  link ! href "static/css/whyiliketrees.css" ! rel "stylesheet"
+  script "" ! src "../static/games/whyiliketrees.js"
+  link ! href "../static/css/whyiliketrees.css" ! rel "stylesheet"
     ! type_ "text/css"
   div ! id "main" $ do
     div "" ! class_ "inf inf1" ! id "info1"

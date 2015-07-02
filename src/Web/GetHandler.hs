@@ -42,16 +42,16 @@ handleGets staticRoutes = do
       infBackHeader "evexpl"
       siteEvexpl visits
       siteFooter $ fmap snd muser
-  get "playwhyiliketrees" $ do
+  get "games/whyiliketrees" $ do
     muser <- loadUserSession
     blaze $ do
-      siteHead
-      darkHeader
+      siteHead  "../"
+      darkHeader "../"
       whyiliketreesBody
       siteFooter $ fmap snd muser
   hookAny GET $ \_ -> blaze $ do
-    siteHead
-    emptyHeader
+    siteHead ""
+    emptyHeader ""
     site404
 
 handleStatic :: Route -> BlogApp
@@ -62,8 +62,8 @@ handleStatic (DB from pid) = get (static $ T.unpack from) $ do
   case mpost of
    Nothing -> handleInvPid
    Just post -> blaze $ do
-     siteHead
-     siteHeader
+     siteHead ""
+     siteHeader ""
      genericBody (procURL from) $ parsePost $ snd post
      siteFooter $ fmap snd muser
        where procURL "/" = "index"
@@ -71,6 +71,6 @@ handleStatic (DB from pid) = get (static $ T.unpack from) $ do
              procURL u = T.unpack u
 
 handleInvPid = blaze $ do
-  siteHead
-  siteHeader
+  siteHead ""
+  siteHeader ""
   siteInvPid
