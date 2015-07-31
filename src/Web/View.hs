@@ -48,7 +48,7 @@ inputHead = docTypeHtml $ head $ do
   link ! href "static/css/login.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "static/css/evexpl.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "static/css/site.css" ! rel "stylesheet" ! type_ "text/css"
-  link ! href "static/css/jquery-ui.min.css" ! rel "stylesheet"
+  link ! href "static/css/lib/jquery-ui.min.css" ! rel "stylesheet"
     ! type_ "text/css"
   link ! href "static/img/icon.png" ! rel "icon" ! type_ "image/png"
   link ! href "http://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
@@ -165,7 +165,7 @@ siteInvPid = div ! class_ "testbody" $
 -}
 siteEdit :: [(PostId, Post)] -> Html
 siteEdit posts = do
-  script "" ! src "static/js/jquery-2.1.3.min.js"
+  script "" ! src "static/js/lib/jquery-2.1.3.min.js"
   script "" ! src "static/js/button.js"
   script "" ! src "static/js/edit.js"
   div ! class_ "colbody" $ do
@@ -200,8 +200,8 @@ postToSelect (pid, post) = case postTitle post of
 -}
 siteEvexpl :: [(SystemVisitId, SystemVisit)] -> Html
 siteEvexpl visits = do
-  script "" ! src "static/js/jquery-2.1.3.min.js"
-  script "" ! src "static/js/jquery-ui.min.js"
+  script "" ! src "static/js/lib/jquery-2.1.3.min.js"
+  script "" ! src "static/js/lib/jquery-ui.min.js"
   script "" ! src "static/js/button.js"
   script "" ! src "static/js/evexpl.js"
   script "" ! src "static/js/evexplval.js"
@@ -236,7 +236,7 @@ visitToSelect (eid, visit) =
 -}
 siteLogin :: Html
 siteLogin = do
-  script "" ! src "static/js/jquery-2.1.3.min.js"
+  script "" ! src "static/js/lib/jquery-2.1.3.min.js"
   script "" ! src "static/js/button.js"
   script "" ! src "static/js/login.js"
   div ! id "lBody" $ do

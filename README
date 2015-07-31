@@ -6,12 +6,11 @@ elfeckcom
 (*) Please do not use the images from /static/img/ without asking me first
 
 
-Credits
+credits
 ===============================================================================
 (*) The backend is built with Spock: https://github.com/agrafix/Spock
-(*) The code is heavily base on: https://github.com/agrafix/funblog
-
-(*) HUGE thanks goes to agrafix for Spock and the example project
+(*) The code is heavily based on: https://github.com/agrafix/funblog
+(*) Thanks to agrafix and the haskell irc
 
 
 content format
@@ -38,7 +37,6 @@ content format
 
 MD to html parsing
 ===============================================================================
-(*) handled
     > Headline		==
     > Headline		#, ##, ...
     > Html		<html>\n ... \n</html>
