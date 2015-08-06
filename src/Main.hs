@@ -38,5 +38,5 @@ main = do
 app :: SiteConfig -> BlogApp
 app (SiteConfig rootDir _ routes) = do
   middleware (staticPolicy (addBase $ T.unpack rootDir))
-  handleGets routes
+  handleGets routes (T.unpack rootDir)
   handlePosts

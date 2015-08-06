@@ -8,12 +8,12 @@ import Data.Maybe
 import Data.Time.Format
 import qualified Data.Text as T
 import Database.Persist.Sql (fromSqlKey)
-import Text.Blaze.Html (preEscapedString, string, stringValue, toHtml)
+import Text.Blaze.Html (stringValue, toHtml)
 import Text.Blaze.Html5 (Html, (!), docTypeHtml, head, meta, title, link,
-                         script, body, div, img, ul, li, a, textarea, input,
+                         script, div, img, ul, li, a, textarea, input,
                          select, option, br, canvas)
 import Text.Blaze.Html5.Attributes (charset, href, rel, src, type_, class_,
-                                    id, style, multiple, readonly, selected,
+                                    id, multiple, readonly, selected,
                                     autocomplete)
 
 import Model.Types
@@ -253,9 +253,9 @@ siteLogin = do
  whyiliketrees
 -}
 -- Adjusted path to be /games/whyiliketrees in ../
-whyiliketreesBody :: Html
-whyiliketreesBody = do
-  script "" ! src "../static/games/whyiliketrees.js"
+whyiliketreesBody :: [String] -> Html
+whyiliketreesBody jsFiles = do
+  toHtml $ map toScriptTag jsFiles
   link ! href "../static/css/whyiliketrees.css" ! rel "stylesheet"
     ! type_ "text/css"
   div ! id "main" $ do
@@ -271,3 +271,7 @@ whyiliketreesBody = do
       "Controls: WASD, Space, Space+Shift, Arrow Keys"
       br
       "Toggle Debug: P, Toggle Mouse I"
+
+toScriptTag :: String -> Html
+toScriptTag file = script "" ! src
+                   (stringValue ("../static/games/whyiliketrees/" ++ file))
