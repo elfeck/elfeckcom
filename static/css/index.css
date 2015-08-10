@@ -52,12 +52,22 @@ ul.headerleft {
     width: 300px;
     margin: 0px;
     padding: 0px;
+    padding-right: 25px;
+    border-color: #c4c4c4;
+    border-width: 0px;
+    border-bottom-width: 1px;
+    border-style: solid;
 }
 ul.headerright {
     display: table;
     width: 300px;
     margin: 0px;
     padding: 0px;
+    padding-left: 25px;
+    border-color: #c4c4c4;
+    border-width: 0px;
+    border-bottom-width: 1px;
+    border-style: solid;
 }
 li.headerentry {
     font-size: 23px;
@@ -77,16 +87,18 @@ a.userlink {
     text-decoration: none;
 }
 div.footer {
+    line-height: 16px;
     margin-bottom: 10px;
     height: 18px;
-    background-color: #e2e2e0;
+    background-color: #e8e8e6;
     text-align: center;
-    font-size: 12px;
-    color: #949494;
+    font-size: 11px;
+    color: #aaaaaa;
     border-color: #c4c4c4;
     border-width: 0px;
     border-top-width: 1px;
     border-style: solid;
+    position: relative;
 }
 div.footercont {
     margin-left: 2px;
@@ -97,7 +109,7 @@ div.footerinfo {
     display: inline-block;
 }
 a.footerlink {
-    color: #be4f31;
+    color: #db9481;
     text-decoration: none;
 }
 div.footerspacer {
@@ -109,7 +121,11 @@ div.usersep {
     margin-left: 3px;
     margin-right: 3px;
 }
-
+div.postdate {
+    display: inline-block;
+    position: absolute;
+    right: 5;
+}
 /*
 
  Basic Body
@@ -121,7 +137,7 @@ div.sitebody {
     position: relative;
     width: 800px;
     margin: 0px;
-    background-color: #e2e2e0;
+    background-color: #e8e8e6;
     text-align: justify;
 }
 
@@ -159,15 +175,15 @@ div.wiltSP {
     background-image: url("../img/whyiliketrees_side.svg");
 }
 
-div.mathandstuffBody {
+div.projectsandstuffBody {
     width: 530px;
 }
 
-div.mathandstuffSP {
+div.projectsandstuffSP {
     width: 250px;
     height: 350px;
-    background-image: url("../img/mathandstuff_side.svg");
-    bottom: 30;
+    background-image: url("../img/projectsandstuff_side.svg");
+    bottom: 0;
 }
 
 div.drivelBody {

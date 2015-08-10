@@ -32,7 +32,11 @@ div#lBody {
     margin-top: 0px;
     padding-bottom: 20px;
     padding-top: 30px;
-    background-color: #d4d4d4;
+    background-color: #e8e8e6;
+    border-color: #c4c4c4;
+    border-width: 0px;
+    border-bottom-width: 1px;
+    border-style: solid;;
 }
 div#lSpacer {
     width: 100%;

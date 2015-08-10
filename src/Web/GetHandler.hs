@@ -24,7 +24,7 @@ handleGets staticRoutes rootDir = do
       inputHead
       infBackHeader "edit"
       siteEdit posts
-      siteFooter $ fmap snd muser
+      siteFooter (fmap snd muser) Nothing
   get "login" $ blaze $ do
     inputHead
     infBackHeader "login"
@@ -44,7 +44,7 @@ handleGets staticRoutes rootDir = do
       inputHead
       infBackHeader "evexpl"
       siteEvexpl visits
-      siteFooter $ fmap snd muser
+      siteFooter (fmap snd muser) Nothing
   get "games/whyiliketrees" $ do
     gameFiles <- liftIO $ getDirectoryContents
                  (rootDir ++ "/static/games/whyiliketrees/")
@@ -53,7 +53,7 @@ handleGets staticRoutes rootDir = do
       siteHead  "../"
       darkHeader "../"
       whyiliketreesBody (filter onlyJs gameFiles)
-      siteFooter $ fmap snd muser
+      siteFooter (fmap snd muser) Nothing
   hookAny GET $ \_ -> blaze $ do
     siteHead ""
     emptyHeader ""
@@ -73,7 +73,7 @@ handleStatic (DB from pid) = get (static $ T.unpack from) $ do
      siteHead ""
      siteHeader ""
      genericBody (procURL from) $ parsePost $ snd post
-     siteFooter $ fmap snd muser
+     siteFooter (fmap snd muser) (Just $ snd post)
        where procURL "/" = "index"
              procURL "whyiliketrees" = "wilt"
              procURL u = T.unpack u

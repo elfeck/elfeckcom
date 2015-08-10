@@ -17,6 +17,20 @@ a.headerlink {
 a.footerlink {
     color: #d47257;
 }
+ul.headerleft {
+    display: table;
+    width: 300px;
+    margin: 0px;
+    padding: 0px;
+    border-width: 0px
+}
+ul.headerright {
+    display: table;
+    width: 300px;
+    margin: 0px;
+    padding: 0px;
+    border-width: 0px
+}
 canvas#canvas {
     border-width: 1px;
     border-style: solid;

@@ -18,6 +18,7 @@ import Text.Blaze.Html5.Attributes (charset, href, rel, src, type_, class_,
 
 import Model.Types
 
+headerEle = ["elfeck", "whyiliketrees", "projects & stuff", "drivel"]
 
 {-
  Index Elements: Head, Header and Footer
@@ -59,13 +60,13 @@ siteHeader :: String -> Html
 siteHeader path = do
   div ! class_ "header" $ do
     div ! class_ "headercontainer" $ ul ! class_ "headerleft" $ do
-      headerEntry "elfeck"
-      headerEntry "whyiliketrees"
+      headerEntry $ headerEle !! 0
+      headerEntry $ headerEle !! 1
     div ! class_ "headercontainer" $ img
       ! src (stringValue $ path ++ "static/img/header.svg")
     div ! class_ "headercontainer" $ ul ! class_ "headerright" $ do
-      headerEntry "math and stuff"
-      headerEntry "drivel"
+      headerEntry $ headerEle !! 2
+      headerEntry $ headerEle !! 3
 
 emptyHeader :: String -> Html
 emptyHeader path = do
@@ -102,11 +103,15 @@ darkHeader path = do
 headerEntry :: String -> Html
 headerEntry name =
   li ! class_ "headerentry" $
-  a (toHtml name) ! href (stringValue ("/" ++ [a | a <- name, a /= ' '])) !
+  a (toHtml name) ! href (stringValue ("/" ++ prs name "")) !
   class_ "headerlink"
+  where prs [] acc = acc
+        prs (' ' : xs) acc = prs xs acc
+        prs ('&' : xs) acc = prs xs (acc ++ "and")
+        prs (x : xs) acc = prs xs (acc ++ [x])
 
-siteFooter :: Maybe User -> Html
-siteFooter muser = do
+siteFooter :: Maybe User -> Maybe Post -> Html
+siteFooter muser mpost = do
   div ! class_ "footer" $ do
     div ! class_ "userinfo" $ "["
     wrapContainer $ do
@@ -132,6 +137,13 @@ siteFooter muser = do
        div ! class_ "usersep" $ "|"
        wrapContainer $ a "logout" ! class_ "userlink" ! href "/logout"
        div ! class_ "userinfo" $ "]"
+    case mpost of
+      Just post ->
+        div ! class_ "postdate" $ toHtml
+        ("last updated: " ++ (frm $ postModDate post))
+      _ -> return ()
+
+frm = formatTime defaultTimeLocale "%d. %b %Y"
 
 wrapContainer a = div ! class_ "footercont" $ a
 spacer = div "[" ! class_ "footerspacer"
