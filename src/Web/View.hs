@@ -158,6 +158,11 @@ genericBody name h = div ! class_ "sitebody" $ do
   div ! class_ (stringValue $ "innerbody " ++ name ++ "Body") $ h
   div ! class_ (stringValue $ "sidepanel " ++ name ++ "SP") $ ""
 
+drivelBody :: Html
+drivelBody = do
+  script "" ! src "static/js/lib/jquery-2.1.3.min.js"
+  script "" ! src "static/js/drivel.css"
+
 site404 :: Html
 site404 = div "Sorry nothing to see here" ! class_ "errorbody"
 

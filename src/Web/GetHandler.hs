@@ -13,15 +13,18 @@ import Control.Monad.IO.Class (liftIO)
 import Web.View
 import Web.Utils
 import Web.PostParser
+import Model.Types
 import Model.Model
 
 
 handleGets :: [Route] -> String -> BlogApp
 handleGets staticRoutes rootDir = do
   sequence_ $ map handleStatic staticRoutes
-  handleBlog
+  handleDrivel
+  handleDrivelEntry
   handleLogin
   handleLogout
+  handleEdit
   handleEvexpl
   handleWhyiliketrees rootDir
   handleUnknown
@@ -45,7 +48,34 @@ handleStatic (DB from pid) = get (static $ T.unpack from) $ do
         procURL "whyiliketrees" = "wilt"
         procURL u = T.unpack u
 
-handleBlog = return ()
+handleDrivel :: BlogApp
+handleDrivel = get "drivel" $ do
+  muser <- loadUserSession
+  blaze $ do
+    siteHead "./"
+    siteHeader "./../"
+    siteBody $ drivelBody
+    siteFooter (fmap snd muser) Nothing
+
+handleDrivelEntry :: BlogApp
+handleDrivelEntry = get ("drivel" <//> "post" <//> var) $ \pid -> do
+  muser <- loadUserSession
+  mpost <- runSQL $ queryPost (pid :: Int)
+  case mpost of
+   Nothing -> error404 (fmap snd muser)
+   Just post ->
+     if postPtype (snd post) < 1
+     then error404 (fmap snd muser)
+     else blaze $ do
+       siteHead "./../../"
+       siteHeader "./../../"
+       siteBody $ parsePost $ snd post
+       siteFooter (fmap snd muser) Nothing
+
+error404 user = blaze $ do siteHead $ "./../../"
+                           infBackHeader "invalid url" "./../../"
+                           siteBody $ site404
+                           siteFooter user Nothing
 
 handleEdit :: BlogApp
 handleEdit = get "edit" $ do
@@ -103,7 +133,6 @@ handleUnknown = hookAny GET $ \path -> do
     infBackHeader "invalid url" (relPath from)
     siteBody $ site404
     siteFooter (fmap snd muser) Nothing
-
 
 relPath :: T.Text -> String
 relPath from = "./" ++ foldl (++) "" (replicate d "../")
