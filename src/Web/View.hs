@@ -3,15 +3,15 @@
 
 module Web.View where
 
-import Prelude hiding (div, head, id)
+import Prelude hiding (div, head, id, span)
 import Data.Maybe
 import Data.Time.Format
 import qualified Data.Text as T
 import Database.Persist.Sql (fromSqlKey)
 import Text.Blaze.Html (stringValue, toHtml)
 import Text.Blaze.Html5 (Html, (!), docTypeHtml, head, meta, title, link,
-                         script, div, img, ul, li, a, textarea, input,
-                         select, option, br, canvas)
+                         script, div, img, ul, li, a, textarea, input, span,
+                         i, select, option, br, canvas)
 import Text.Blaze.Html5.Attributes (charset, href, rel, src, type_, class_,
                                     id, multiple, readonly, selected,
                                     autocomplete)
@@ -68,22 +68,15 @@ siteHeader path = do
       headerEntry $ headerEle !! 2
       headerEntry $ headerEle !! 3
 
-emptyHeader :: String -> Html
-emptyHeader path = do
-  div ! class_ "header" $ do
-    div ! class_ "headercontainer" $ ul "" ! class_ "headerleft"
-    div ! class_ "headercontainer" $ img
-      ! src (stringValue $ path ++ "static/img/header.svg")
-    div ! class_ "headercontainer" $ ul "" ! class_ "headerright"
-
 -- Missing root-path adjustment
-infBackHeader :: String -> Html
-infBackHeader inf = do
+infBackHeader :: String -> String -> Html
+infBackHeader inf path = do
   div ! class_ "header" $ do
     div ! class_ "headercontainer" $ ul ! class_ "headerleft" $ do
       li ! class_ "headerentry" $ toHtml inf
       li ! class_ "headerentry" $ ""
-    div ! class_ "headercontainer" $ img ! src "static/img/header.svg"
+    div ! class_ "headercontainer" $ img !
+      src (stringValue $ path ++ "static/img/header.svg")
     div ! class_ "headercontainer" $ ul ! class_ "headerright" $ do
       li ! class_ "headerentry" $ ""
       li ! class_ "headerentry" $ a "home" ! href "/" ! class_ "headerlink"
@@ -143,7 +136,7 @@ siteFooter muser mpost = do
         ("last updated: " ++ (frm $ postModDate post))
       _ -> return ()
 
-frm = formatTime defaultTimeLocale "%d. %b %Y"
+frm = formatTime defaultTimeLocale "%d %b %Y"
 
 wrapContainer a = div ! class_ "footercont" $ a
 spacer = div "[" ! class_ "footerspacer"
@@ -166,11 +159,13 @@ genericBody name h = div ! class_ "sitebody" $ do
   div ! class_ (stringValue $ "sidepanel " ++ name ++ "SP") $ ""
 
 site404 :: Html
-site404 = div "Sorry nothing to see here" ! class_ "testbody"
+site404 = div "Sorry nothing to see here" ! class_ "errorbody"
 
 siteInvPid :: Html
-siteInvPid = div ! class_ "testbody" $
-             "Invalid pid. Something went horribly wrong :("
+siteInvPid = div ! class_ "errorbody" $ do
+  span "Something went seriously wrong. If you have time please send me an email with this URL to"
+  br
+  i "kreisel.sebastian (at) gmail (dot) com"
 
 {-
  Edit Page

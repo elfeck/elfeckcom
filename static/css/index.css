@@ -140,7 +140,12 @@ div.sitebody {
     background-color: #e8e8e6;
     text-align: justify;
 }
-
+div.errorbody {
+    width: 760px;
+    display: inline-block;
+    margin: 10px;
+    text-align: center;
+}
 div.innerbody {
     display: inline-block;
     overflow: auto;
@@ -153,44 +158,36 @@ div.sidepanel {
     position: absolute;
     bottom: 0;
 }
-
 div.indexBody {
     width: 500px;
     margin-right: 0px;
 }
-
 div.indexSP {
     width: 290px;
     height: 350px;
     background-image: url("../img/index_side.svg");
 }
-
 div.wiltBody {
     width: 630px;
 }
-
 div.wiltSP {
     width: 150px;
     height: 170px;
     background-image: url("../img/whyiliketrees_side.svg");
 }
-
 div.projectsandstuffBody {
     width: 530px;
 }
-
 div.projectsandstuffSP {
     width: 250px;
     height: 350px;
     background-image: url("../img/projectsandstuff_side.svg");
     bottom: 0;
 }
-
 div.drivelBody {
     width: 630px;
     height: 105px;
 }
-
 div.drivelSP {
     width: 100px;
     height: 125px;
