@@ -1,0 +1,16 @@
+div.drivelcontent {
+    display: inline-block;
+    width: 600px;
+    background-color: #f0f0f2;
+}
+
+div#drivelside {
+    display: inline-block;
+    margin: 10px;
+    margin-left: 0px;
+    width: 170px;
+    background-color: #f0f0f2;
+}
+div.drivelop {
+    margin-left: 10px;
+}

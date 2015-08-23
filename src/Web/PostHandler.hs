@@ -7,7 +7,7 @@ module Web.PostHandler where
 import qualified Data.Text as T
 import Web.Spock.Safe hiding (head, SessionId)
 import Data.Maybe
-import Data.Time
+
 
 import Web.Utils
 import Web.PostParser
@@ -18,68 +18,95 @@ import Model.Types
 
 handlePosts :: BlogApp
 handlePosts = do
-  post "edit/preview" $ do
-    muser <- loadUserSession
-    reqRight' muser 5 $ do
-      dat <- params
-      let mpost = jsonToPost dat
-      case (mpost) of
-       Just post -> previewResponse post
-       Nothing -> errorJson
-  post "edit/submit" $ do
-    muser <- loadUserSession
-    reqRight' muser 5 $ do
-      dat <- params
-      let msubmitType = findParam dat "submitType"
-      let mpid = fmap textToInt $ findParam dat "pid"
-      let mpost = jsonToPost dat
-      case (msubmitType, mpid, mpost) of
-       (Just st, Just (Just pid), Just post) -> submitEdit st pid post
-       _ -> errorJson
-  post "edit/loadpost" $ do
-    muser <- loadUserSession
-    reqRight' muser 5 $ do
-      dat <- params
-      let mpid = fmap textToInt $ findParam dat "pid"
-      case mpid of
-       Nothing -> errorJson
-       Just (Just pid) -> do
-         resp <- runSQL $ queryPost pid
-         loadpostResponse resp
-  post "evexpl/submit" $ do
-    muser <- loadUserSession
-    reqRight' muser 5 $ do
-      dat <- params
-      let msubmitType = findParam dat "submitType"
-      let meid = fmap textToInt $ findParam dat "eid"
-      let mvisit = jsonToSystemVisit (fmap snd muser) dat
-      case (msubmitType, meid, mvisit) of
-       (Just st, Just (Just (eid)), Just visit) -> submitEvexpl st eid visit
-       _ -> json $ (show mvisit)
-  post "/evexpl/loadvisit" $ do
-    muser <- loadUserSession
-    reqRight' muser 5 $ do
-      dat <- params
-      let meid = fmap textToInt $ findParam dat "eid"
-      case meid of
-       Nothing -> errorJson
-       Just (Just eid) -> do
-         resp <- runSQL $ queryVisit eid
-         loadvisitResponse resp
-  post "login/submit" $ do
+  handleDrivelCategories
+  handleEditPreview
+  handleEditSubmit
+  handleEditLoad
+  handleEvexplSubmit
+  handleEvexplLoad
+  handleLoginSubmit
+
+handleDrivelCategories :: BlogApp
+handleDrivelCategories = post "drivel/categories" $ do
+  muser <- loadUserSession
+  let access = if isNothing muser
+               then 0
+               else userAccess (snd $ fromJust muser)
+  cats <- runSQL $ queryAllCategories access
+  json cats
+
+handleEditPreview :: BlogApp
+handleEditPreview = post "edit/preview" $ do
+  muser <- loadUserSession
+  reqRight' muser 5 $ do
     dat <- params
-    let chkp = checkJson $ findParams dat ["name", "pass"]
-    case chkp of
+    let mpost = jsonToPost dat
+    case (mpost) of
+     Just post -> previewResponse post
      Nothing -> errorJson
-     Just par -> do
-       login <- runSQL $ loginUser (par !! 0) (par !! 1)
-       case login of
-        Nothing -> loginResponse False
-        Just userId -> do
-          sessId <- runSQL $ insertSession userId
-          writeSession (Just sessId)
-          loginResponse True
-  where errorJson = json $ ("ney: json invld" :: T.Text)
+
+handleEditSubmit :: BlogApp
+handleEditSubmit = post "edit/submit" $ do
+  muser <- loadUserSession
+  reqRight' muser 5 $ do
+    dat <- params
+    let msubmitType = findParam dat "submitType"
+    let mpid = fmap textToInt $ findParam dat "pid"
+    let mpost = jsonToPost dat
+    case (msubmitType, mpid, mpost) of
+     (Just st, Just (Just pid), Just post) -> submitEdit st pid post
+     _ -> errorJson
+
+handleEditLoad :: BlogApp
+handleEditLoad = post "edit/loadpost" $ do
+  muser <- loadUserSession
+  reqRight' muser 5 $ do
+    dat <- params
+    let mpid = fmap textToInt $ findParam dat "pid"
+    case mpid of
+     Nothing -> errorJson
+     Just (Just pid) -> do
+       resp <- runSQL $ queryPost pid
+       loadpostResponse resp
+
+handleEvexplSubmit :: BlogApp
+handleEvexplSubmit = post "evexpl/submit" $ do
+  muser <- loadUserSession
+  reqRight' muser 5 $ do
+    dat <- params
+    let msubmitType = findParam dat "submitType"
+    let meid = fmap textToInt $ findParam dat "eid"
+    let mvisit = jsonToSystemVisit (fmap snd muser) dat
+    case (msubmitType, meid, mvisit) of
+     (Just st, Just (Just (eid)), Just visit) -> submitEvexpl st eid visit
+     _ -> json $ (show mvisit)
+
+handleEvexplLoad :: BlogApp
+handleEvexplLoad = post "/evexpl/loadvisit" $ do
+  muser <- loadUserSession
+  reqRight' muser 5 $ do
+    dat <- params
+    let meid = fmap textToInt $ findParam dat "eid"
+    case meid of
+     Nothing -> errorJson
+     Just (Just eid) -> do
+       resp <- runSQL $ queryVisit eid
+       loadvisitResponse resp
+
+handleLoginSubmit :: BlogApp
+handleLoginSubmit = post "login/submit" $ do
+  dat <- params
+  let chkp = checkJson $ findParams dat ["name", "pass"]
+  case chkp of
+   Nothing -> errorJson
+   Just par -> do
+     login <- runSQL $ loginUser (par !! 0) (par !! 1)
+     case login of
+      Nothing -> loginResponse False
+      Just userId -> do
+        sessId <- runSQL $ insertSession userId
+        writeSession (Just sessId)
+        loginResponse True
 
 submitEdit submitType pid post = do
   r <- case submitType of
@@ -121,3 +148,5 @@ loadpostResponse (Just post) = json $ post
 
 loadvisitResponse Nothing = json ("could not find visit to id" :: T.Text)
 loadvisitResponse (Just visit) = json $ visit
+
+errorJson = json $ ("ney: json invld" :: T.Text)

@@ -160,11 +160,21 @@ genericBody name h = div ! class_ "sitebody" $ do
 
 drivelBody :: Html
 drivelBody = do
+  link ! href "static/css/drivel.css" ! rel "stylesheet" ! type_ "text/css"
   script "" ! src "static/js/lib/jquery-2.1.3.min.js"
-  script "" ! src "static/js/drivel.css"
+  script "" ! src "static/js/drivel.js"
+  div ! class_ "sitebody" $ do
+    div ! class_ "innerbody drivelcontent" $ ""
+    div ! id "drivelside" $ ""
 
 site404 :: Html
 site404 = div "Sorry nothing to see here" ! class_ "errorbody"
+
+siteAccessError :: Html
+siteAccessError = div ! class_ "errorbody" $ do
+  span "You do not have the right to see this post. Please "
+  a "log in" ! class_ "link" ! href "/login"
+  span "."
 
 siteInvPid :: Html
 siteInvPid = div ! class_ "errorbody" $ do

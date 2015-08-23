@@ -7,6 +7,7 @@ import qualified Data.Text as T
 import Web.Spock.Safe hiding (head, SessionId)
 
 import Data.List
+import Data.Maybe
 import System.Directory (getDirectoryContents)
 import Control.Monad.IO.Class (liftIO)
 
@@ -54,28 +55,39 @@ handleDrivel = get "drivel" $ do
   blaze $ do
     siteHead "./"
     siteHeader "./../"
-    siteBody $ drivelBody
+    drivelBody
     siteFooter (fmap snd muser) Nothing
 
 handleDrivelEntry :: BlogApp
 handleDrivelEntry = get ("drivel" <//> "post" <//> var) $ \pid -> do
   muser <- loadUserSession
   mpost <- runSQL $ queryPost (pid :: Int)
+  let access = if isNothing muser
+               then 0
+               else userAccess $ snd $ fromJust muser
   case mpost of
    Nothing -> error404 (fmap snd muser)
    Just post ->
      if postPtype (snd post) < 1
      then error404 (fmap snd muser)
-     else blaze $ do
-       siteHead "./../../"
-       siteHeader "./../../"
-       siteBody $ parsePost $ snd post
-       siteFooter (fmap snd muser) Nothing
+     else
+       if access < postAccess (snd post)
+       then accessError (fmap snd muser)
+       else blaze $ do
+         siteHead "./../../"
+         siteHeader "./../../"
+         siteBody $ parsePost $ snd post
+         siteFooter (fmap snd muser) Nothing
 
 error404 user = blaze $ do siteHead $ "./../../"
                            infBackHeader "invalid url" "./../../"
                            siteBody $ site404
                            siteFooter user Nothing
+
+accessError user = blaze $ do siteHead $ "./../../"
+                              infBackHeader "access denied" "./../../"
+                              siteBody $ siteAccessError
+                              siteFooter user Nothing
 
 handleEdit :: BlogApp
 handleEdit = get "edit" $ do

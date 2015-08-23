@@ -3,6 +3,8 @@
 module Model.Model where
 
 import Control.Monad.IO.Class
+import Data.Maybe
+import Data.List (nub)
 import qualified Data.Text as T
 import Data.Time
 import Database.Persist.Sql
@@ -121,6 +123,13 @@ queryPost pid = do
   case mpost of
    Nothing -> return Nothing
    Just post -> return $ Just (toSqlKey $ fromIntegral pid, post)
+
+queryAllCategories :: Int -> SqlPersistM [T.Text]
+queryAllCategories access = do
+  rows <- selectList [PostAccess <=. access, PostPtype >. 0] []
+  let mcats = map (\r -> postCategories (entityVal r)) rows
+  let cats = map fromJust $ filter isJust mcats
+  return $ nub $ foldl (++) [] cats
 
 queryAllVisits :: SqlPersistM [(SystemVisitId, SystemVisit)]
 queryAllVisits = do
