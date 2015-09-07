@@ -19,6 +19,7 @@ import Model.Types
 handlePosts :: BlogApp
 handlePosts = do
   handleDrivelCategories
+  handleDrivelPosts
   handleEditPreview
   handleEditSubmit
   handleEditLoad
@@ -32,8 +33,28 @@ handleDrivelCategories = post "drivel/categories" $ do
   let access = if isNothing muser
                then 0
                else userAccess (snd $ fromJust muser)
-  cats <- runSQL $ queryAllCategories access
+  cats <- runSQL $ queryAllDrivelCategories access
   json cats
+
+handleDrivelPosts :: BlogApp
+handleDrivelPosts = post "drivel/posts" $ do
+  muser <- loadUserSession
+  dat <- params
+  let mfrom = findParam dat "from"
+  let mtill = findParam dat "till"
+  let access = if isNothing muser
+               then 0
+               else userAccess (snd $ fromJust muser)
+  case (mfrom, mtill) of
+   (Just tfrom, Just ttill) -> do
+     let ifrom = textToInt tfrom
+     let itill = textToInt ttill
+     case (ifrom, itill) of
+      (Just from, Just till) -> do
+        posts <- runSQL $ queryDrivelPostsRange access (from, till)
+        getpostsResponse posts
+      _ -> errorJson
+   _ -> errorJson
 
 handleEditPreview :: BlogApp
 handleEditPreview = post "edit/preview" $ do
@@ -135,6 +156,8 @@ submitEvexpl submitType eid visit = do
       return resp
     _ -> return "ney: unkwn stype"
   submitResponse r
+
+getpostsResponse posts = json $ posts
 
 previewResponse post = json $ renderPost post
 

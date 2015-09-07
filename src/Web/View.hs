@@ -28,6 +28,8 @@ siteHead :: String -> Html
 siteHead path = docTypeHtml $ head $ do
   title "elfeck"
   meta ! charset "utf-8"
+  link ! href (appPath "static/css/lib/normalize.css") ! rel "stylesheet"
+    ! type_ "text/css"
   link ! href (appPath "static/css/index.css") ! rel "stylesheet"
     ! type_ "text/css"
   link ! href (appPath "static/css/site.css") ! rel "stylesheet"
@@ -164,8 +166,20 @@ drivelBody = do
   script "" ! src "static/js/lib/jquery-2.1.3.min.js"
   script "" ! src "static/js/drivel.js"
   div ! class_ "sitebody" $ do
-    div ! class_ "innerbody drivelcontent" $ ""
-    div ! id "drivelside" $ ""
+    div ! id "drivelbody" $ do
+      div ! class_ "drivelbuffercol" $ ""
+      div ! class_ "innerbody drivelcontent" $ ""
+      div ! class_ "drivelbuffercol" $ ""
+      div ! id "drivelside" $ do
+        div ! class_ "drivelpostonly" $ do
+          div ! class_ "drivelop drivelopOFF" $ "Full posts only"
+        div ! class_ "driveldescr" $ "Categories"
+      div ! class_ "drivelbuffercol" $ ""
+    div ! id "drivelpage" $ do
+      a ! id "drivelforward" $ "newer"
+      a ! id "drivelbackward" $ "older"
+    div ! id "driveltotopcont" $ do
+      a ! id "driveltotop" $ "back to top"
 
 site404 :: Html
 site404 = div "Sorry nothing to see here" ! class_ "errorbody"

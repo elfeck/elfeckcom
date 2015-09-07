@@ -3,7 +3,6 @@ div.button {
     text-align: center;
     border-style: solid;
     border-width: 1px;
-    cursor: pointer;
     line-height: 19px;
     font-size: 14px;
     font-family: 'Open Sans', sans-serif;
@@ -11,6 +10,7 @@ div.button {
     -khtml-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
+    cursor: pointer;
 }
 div.buttonidle {
     background-color: white;

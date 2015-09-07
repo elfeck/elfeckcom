@@ -124,12 +124,18 @@ queryPost pid = do
    Nothing -> return Nothing
    Just post -> return $ Just (toSqlKey $ fromIntegral pid, post)
 
-queryAllCategories :: Int -> SqlPersistM [T.Text]
-queryAllCategories access = do
+queryAllDrivelCategories :: Int -> SqlPersistM [T.Text]
+queryAllDrivelCategories access = do
   rows <- selectList [PostAccess <=. access, PostPtype >. 0] []
   let mcats = map (\r -> postCategories (entityVal r)) rows
   let cats = map fromJust $ filter isJust mcats
   return $ nub $ foldl (++) [] cats
+
+queryDrivelPostsRange :: Int -> (Int, Int) -> SqlPersistM [(PostId, Post)]
+queryDrivelPostsRange access (f, t) = do
+  rows <- selectList [PostAccess <=. access, PostPtype >. 0]
+          [Desc PostCrtDate, OffsetBy f, LimitTo (t - f + 1)]
+  return $ map (\r -> (entityKey r, entityVal r)) rows
 
 queryAllVisits :: SqlPersistM [(SystemVisitId, SystemVisit)]
 queryAllVisits = do

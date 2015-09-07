@@ -46,28 +46,24 @@ div.header {
 div.headercontainer {
     display: inline-block;
     width: auto;
+    border-color: #c4c4c4;
+    border-width: 0px;
+    border-bottom-width: 1px;
+    border-style: solid;
 }
 ul.headerleft {
     display: table;
     width: 300px;
     margin: 0px;
     padding: 0px;
-    padding-right: 25px;
-    border-color: #c4c4c4;
-    border-width: 0px;
-    border-bottom-width: 1px;
-    border-style: solid;
+    margin-right: 25px;
 }
 ul.headerright {
     display: table;
     width: 300px;
     margin: 0px;
     padding: 0px;
-    padding-left: 25px;
-    border-color: #c4c4c4;
-    border-width: 0px;
-    border-bottom-width: 1px;
-    border-style: solid;
+    margin-left: 25px;
 }
 li.headerentry {
     font-size: 23px;
