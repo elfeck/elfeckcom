@@ -35,6 +35,10 @@ Post json
   ptype Int
   access Int
   deriving Show
+PostToCategory
+  post PostId
+  category T.Text
+  deriving Show
 SystemVisit json
   name T.Text Maybe
   region T.Text

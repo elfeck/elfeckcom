@@ -42,11 +42,12 @@ handleDrivelPosts = post "drivel/posts" $ do
   dat <- params
   let mfrom = findParam dat "from"
   let mtill = findParam dat "till"
+  let mcats = findParam dat "cats"
   let access = if isNothing muser
                then 0
                else userAccess (snd $ fromJust muser)
-  case (mfrom, mtill) of
-   (Just tfrom, Just ttill) -> do
+  case (mfrom, mtill, mcats) of
+   (Just tfrom, Just ttill, Just cats) -> do
      let ifrom = textToInt tfrom
      let itill = textToInt ttill
      case (ifrom, itill) of

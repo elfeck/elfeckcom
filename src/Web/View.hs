@@ -171,13 +171,13 @@ drivelBody = do
       div ! class_ "innerbody drivelcontent" $ ""
       div ! class_ "drivelbuffercol" $ ""
       div ! id "drivelside" $ do
-        div ! class_ "drivelpostonly" $ do
-          div ! class_ "drivelop drivelopOFF" $ "Full posts only"
+        div ! class_ "drivelpostonlycont" $ do
+          div ! class_ "drivelpostonly drivelopOFF" $ "Full posts only"
         div ! class_ "driveldescr" $ "Categories"
       div ! class_ "drivelbuffercol" $ ""
     div ! id "drivelpage" $ do
-      a ! id "drivelforward" $ "newer"
-      a ! id "drivelbackward" $ "older"
+      a ! id "drivelbackward" ! class_ "drivelinactive" $ "older"
+      a ! id "drivelforward" ! class_ "drivelinactive" $ "newer"
     div ! id "driveltotopcont" $ do
       a ! id "driveltotop" $ "back to top"
 

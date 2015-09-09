@@ -1,7 +1,19 @@
 $(function() {
     sidepanel = $("#drivelside");
     currentPage = 0;
+    currentPostPostition = 0;
+    postsPerPage = 1;
+    posts = [];
+
+    postOnly = $(".drivelpostonly");
+    cats = [];
+
     getCategories();
+    getNextPosts(postsPerPage + 1);
+
+    $("#drivelforward").click(function(e) { changePage(1); });
+    $("#drivelbackward").click(function(e) { changePage(-1); });
+    $("#driveltotop").click(function(e) { window.scrollTo(0, 0); });
 });
 
 getCategories = function() {
@@ -15,13 +27,25 @@ getCategories = function() {
 	},
 	error: function() { console.log("json error while get categories"); }
     });
-    getPosts(0, 10);
 }
 
-getPosts = function(from, till) {
+// min: amount = 1
+getNextPosts = function(amount) {
+    lastReq = amount;
+    amount -= 1;
+    var activeCats = []
+    for(var i = 0; i < cats.length; i++) {
+	if($(cats[i]).attr("class").indexOf("drivelopON") > 0) {
+	    activeCats.push($(cats[i]).text());
+	}
+    }
+    var postOnly = $(".drivelpostonly").attr("class").
+	indexOf("drivelopON") > 0 ? 1 : 0;
     dataObj = {
-	from: from,
-	till: till
+	from: currentPostPostition,
+	till: currentPostPostition + amount,
+	cats: activeCats,
+	postsOnly: postOnly
     };
     $.ajax({
 	type: "POST",
@@ -29,48 +53,74 @@ getPosts = function(from, till) {
 	dataType: "json",
 	data: { dat: dataObj },
 	success: function(data) {
-	    console.log(data);
+	    processPosts(data);
 	},
 	error: function() { console.log("json error while get posts"); }
     });
 }
 
+processPosts = function(data) {
+    if(data.length == 0) {
+	console.log("no new posts");
+    } else {
+	togglePage($("#drivelforward"), data.length == lastReq);
+	currentPostPostition += data.length;
+	posts = posts.concat(data);
+	//console.log(currentPostPostition);
+	//console.log(posts);
+    }
+}
+
 initSidepanel = function(categories) {
     for(var i = 0; i < categories.length; i++) {
-	sidepanel.append('<div class="drivelcat">' +
-			 '<div class="drivelop drivelopOFF">' +
+	sidepanel.append('<div class="drivelcatcont">' +
+			 '<div class="drivelcat drivelopOFF">' +
 			 categories[i] + '</div></div>');
     }
     sidepanel.children().last().attr("id", "drivellastcat");
-    var ops = $(".drivelop");
-    for(var i = 0; i < ops.length; i++) {
-	registerSelect($(ops[i]), a, b);
+    cats = $(".drivelcat");
+    for(var i = 0; i < cats.length; i++) {
+	registerSelect($(cats[i]), a, a);
     }
+    registerSelect($(".drivelpostonly"), a, a);
 }
 
 a = function() {
-    console.log("select");
+
 }
 
-b = function() {
-    console.log("deselect");
+changePage = function(dir) {
+    currentPage += dir;
+    if(currentPage == 0) togglePage($("drivelbackward"), false);
+    if(currentPage == 1) togglePage($("drivelbackward"), true);
 }
 
-registerSelect = function(div, selectFun, deselectFun) {
-    div.on("mouseenter", function() {
-	div.addClass("drivelopHover");
+togglePage = function(ele, toOn) {
+    if(toOn) {
+	ele.removeClass("drivelinactive");
+	ele.addClass("drivelactive");
+    }
+    else {
+	ele.removeClass("drivelactive");
+	ele.addClass("drivelinactive");
+    }
+}
+
+registerSelect = function(ele, selectFun, deselectFun) {
+    ele.on("mouseenter", function() {
+	ele.addClass("drivelopHover");
     });
-    div.on("mouseout", function() {
-	div.removeClass("drivelopHover");
+    ele.on("mouseout", function() {
+	ele.removeClass("drivelopHover");
     });
-    div.on("mouseup", function() {
-	if(div.attr("class").indexOf("drivelopON") > 0) {
-	    div.removeClass("drivelopON");
-	    div.addClass("drivelopOFF");
+    ele.on("mouseup", function() {
+	if(ele.attr("class").indexOf("drivelopON") > 0) {
+	    ele.removeClass("drivelopON");
+	    ele.addClass("drivelopOFF");
 	    deselectFun();
 	} else {
-	    div.removeClass("drivelopOFF");
-	    div.addClass("drivelopON");
+	    ele.removeClass("drivelopOFF");
+	    ele.addClass("drivelopON");
 	    selectFun();
 	}
     });

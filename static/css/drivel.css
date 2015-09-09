@@ -17,14 +17,24 @@ div#drivelside {
 div.drivelbuffercol {
     width: 15px;
 }
-div.drivelop {
+div.drivelcat {
     padding-left: 5px;
     padding-right: 5px;
     border-radius: 3px;
     border-width: 1px;
     border-style: solid;
     display: inline-block;
-    line-height: 130%;
+    line-height: 140%;
+    cursor: pointer;
+}
+div.drivelpostonly {
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 3px;
+    border-width: 1px;
+    border-style: solid;
+    display: inline-block;
+    line-height: 140%;
     cursor: pointer;
 }
 div.drivelopON {
@@ -38,12 +48,12 @@ div.drivelopOFF {
 div.drivelopHover {
     border-color: #707070;
 }
-div.drivelpostonly {
+div.drivelpostonlycont {
     margin-top: 8px;
     margin-left: 10px;
     font-size: 15px;
 }
-div.drivelcat {
+div.drivelcatcont {
     margin-left: 18px;
     margin-bottom: 2px;
     font-size: 15px;
@@ -74,10 +84,23 @@ div#driveltotopcont {
     width: 150px;
     height: 30px;
     text-align: center;
+    line-height: 160%;
+}
+a#driveltotop {
+    color: #be4f31;
+    cursor: pointer;
 }
 a#drivelforward {
-    margin-right: 5px;
+    margin-left: 5px;
+    cursor: pointer;
 }
 a#drivelbackward {
-    margin-left: 5px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+a.drivelactive {
+    color: #be4f31;
+}
+a.drivelinactive {
+    color: #aaaaaa;
 }

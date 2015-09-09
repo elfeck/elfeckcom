@@ -45,7 +45,12 @@ insertUser (User name pass salt access) = do
 insertPost :: Post -> SqlPersistM T.Text
 insertPost post = do
   now <- liftIO $ getCurrentTime
-  insert $ adjustTimePost post now now
+  pid <- insert $ adjustTimePost post now now
+  if isJust (postCategories post)
+    then do let ptc = [PostToCategory pid c |
+                       c <- fromJust $ postCategories post]
+            mapM_ insert ptc
+    else return ()
   return "yey: created"
 
 insertSystemVisit :: SystemVisit -> SqlPersistM T.Text
@@ -56,11 +61,14 @@ insertSystemVisit sysVisit = do
 
 deletePost :: Int -> SqlPersistM T.Text
 deletePost pid = do
-  mpost <- get $ ((toSqlKey $ fromIntegral pid) :: PostId)
+  mpost <- get $ sqlpid
   case mpost of
    Nothing -> return "ney: unkwn pid"
-   Just _ -> do delete ((toSqlKey $ fromIntegral pid) :: PostId)
+   Just _ -> do delete sqlpid
+                ptc <- selectKeysList [PostToCategoryPost ==. sqlpid] []
+                mapM_ delete ptc
                 return "yey: deleted"
+  where sqlpid = (toSqlKey $ fromIntegral pid) :: PostId
 
 deleteSystemVisit :: Int -> SqlPersistM T.Text
 deleteSystemVisit eid = do
@@ -72,15 +80,22 @@ deleteSystemVisit eid = do
 
 updatePost :: Int -> Post -> SqlPersistM T.Text
 updatePost pid post = do
-  mpost <- get $ ((toSqlKey $ fromIntegral pid) :: PostId)
+  mpost <- get sqlpid
   case mpost of
    Nothing -> return "ney: unkwn pid"
    Just oldpost -> do
      let crtTime = postCrtDate oldpost
      now <- liftIO $ getCurrentTime
-     replace ((toSqlKey $ fromIntegral pid) :: PostId) $
-       adjustTimePost post crtTime now
+     replace sqlpid $ adjustTimePost post crtTime now
+     ptc <- selectKeysList [PostToCategoryPost ==. sqlpid] []
+     mapM_ delete ptc
+     if isJust $ postCategories post
+       then do let ptc = [PostToCategory sqlpid c |
+                          c <- fromJust $ postCategories post]
+               mapM_ insert ptc
+       else return ()
      return "yey: updated"
+  where sqlpid = (toSqlKey $ fromIntegral pid) :: PostId
 
 updateSystemVisit :: Int -> SystemVisit -> SqlPersistM T.Text
 updateSystemVisit eid visit = do
