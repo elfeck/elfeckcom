@@ -146,11 +146,26 @@ queryAllDrivelCategories access = do
   let cats = map fromJust $ filter isJust mcats
   return $ nub $ foldl (++) [] cats
 
-queryDrivelPostsRange :: Int -> (Int, Int) -> SqlPersistM [(PostId, Post)]
-queryDrivelPostsRange access (f, t) = do
-  rows <- selectList [PostAccess <=. access, PostPtype >. 0]
+queryDrivel :: Int -> (Int, Int) -> [T.Text] -> Bool ->
+               SqlPersistM [(PostId, Post)]
+-- no categories at all
+queryDrivel access (f, t) [] ponly = do
+  let ptype = if ponly then 1 else 2
+  rows <- selectList [PostAccess <=. access, PostPtype >. 0,
+                      PostPtype <=. ptype]
           [Desc PostCrtDate, OffsetBy f, LimitTo (t - f + 1)]
   return $ map (\r -> (entityKey r, entityVal r)) rows
+
+-- categories, postonly = false
+queryDrivel access (f, t) cats False = do
+  crows <- mapM (\cat -> selectList [PostToCategoryCategory ==. cat] []) cats
+  let postIds = map (map (\r -> postToCategoryPost (entityVal r))) crows
+  let filtIds = filtCat postIds (nub $ foldl (++) [] postIds)
+  prows <- mapM get filtIds
+  return []
+
+filtCat :: [[PostId]] -> [PostId] -> [PostId]
+filtCat postIds candi = [c | c <- candi, and (map (elem c) postIds)]
 
 queryAllVisits :: SqlPersistM [(SystemVisitId, SystemVisit)]
 queryAllVisits = do
