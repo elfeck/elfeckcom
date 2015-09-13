@@ -42,7 +42,7 @@ parseConfig t = SiteConfig rootDir db routes
         rootDir = foldl T.append "" $ map parseRootDir blocks
         db = foldl T.append "" $ map parseDatabase blocks
         rawRoutes = foldl (++) [] $ map parseRoutes blocks
-        routes = map (constructRoute . tuplify) rawRoutes
+        routes = map (constructRoute . tuplify3) rawRoutes
 
 parseRootDir ("[RootDir]" : ts) = head $ ts
 parseRootDir _ = ""
@@ -111,9 +111,15 @@ textToInt text = case decimal text of
                 Right (val, "") -> Just val
                 Right (_, _) -> Nothing
 
-tuplify (a : b : c : []) = (a, b, c)
-tuplify _ = undefined
+textToBool :: T.Text -> Maybe Bool
+textToBool "True" = Just True
+textToBool "False" = Just False
+textToBool _ = Nothing
 
+tuplify3 (a : b : c : []) = (a, b, c)
+tuplify3 _ = undefined
+
+-- first arg is what <- params returns, second the "targets"
 findParam :: [(T.Text, T.Text)] -> T.Text -> Maybe T.Text
 findParam [] _ = Nothing
 findParam ((n, c) : xs) name | n == name' = Just c

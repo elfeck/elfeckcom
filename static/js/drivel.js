@@ -39,13 +39,15 @@ getNextPosts = function(amount) {
 	    activeCats.push($(cats[i]).text());
 	}
     }
+    // haskell wants true and false upper case since its a type
     var postOnly = $(".drivelpostonly").attr("class").
-	indexOf("drivelopON") > 0 ? 1 : 0;
+	indexOf("drivelopON") > 0 ? "True" : "False";
+    var activeCats = activeCats.length == 0 ? "" : activeCats.toString()
     dataObj = {
 	from: currentPostPostition,
 	till: currentPostPostition + amount,
 	cats: activeCats,
-	postsOnly: postOnly
+	postOnly: postOnly
     };
     $.ajax({
 	type: "POST",
@@ -53,6 +55,7 @@ getNextPosts = function(amount) {
 	dataType: "json",
 	data: { dat: dataObj },
 	success: function(data) {
+	    console.log(data);
 	    processPosts(data);
 	},
 	error: function() { console.log("json error while get posts"); }
@@ -86,7 +89,9 @@ initSidepanel = function(categories) {
 }
 
 a = function() {
-
+    currentPage = 0;
+    currentPostPostition = 0;
+    getNextPosts(postsPerPage + 1);
 }
 
 changePage = function(dir) {

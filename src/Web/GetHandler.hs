@@ -43,7 +43,7 @@ handleStatic (DB from pid) = get (static $ T.unpack from) $ do
    Just post -> blaze $ do
      siteHead $ relPath from
      siteHeader $ relPath from
-     genericBody (procURL from) $ parsePost $ snd post
+     genericBody (procURL from) $ parsePost (snd post) 0
      siteFooter (fmap snd muser) (Just $ snd post)
   where procURL "/" = "index"
         procURL "whyiliketrees" = "wilt"
@@ -76,7 +76,7 @@ handleDrivelEntry = get ("drivel" <//> "post" <//> var) $ \pid -> do
        else blaze $ do
          siteHead "./../../"
          siteHeader "./../../"
-         siteBody $ parsePost $ snd post
+         siteBody $ parsePost (snd post) 1
          siteFooter (fmap snd muser) Nothing
 
 error404 user = blaze $ do siteHead $ "./../../"

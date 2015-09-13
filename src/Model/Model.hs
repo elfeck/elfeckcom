@@ -156,13 +156,15 @@ queryDrivel access (f, t) [] ponly = do
           [Desc PostCrtDate, OffsetBy f, LimitTo (t - f + 1)]
   return $ map (\r -> (entityKey r, entityVal r)) rows
 
--- categories, postonly = false
-queryDrivel access (f, t) cats False = do
+queryDrivel access (f, t) cats ponly = do
   crows <- mapM (\cat -> selectList [PostToCategoryCategory ==. cat] []) cats
+  let ptype = if ponly then 1 else 2
   let postIds = map (map (\r -> postToCategoryPost (entityVal r))) crows
   let filtIds = filtCat postIds (nub $ foldl (++) [] postIds)
-  prows <- mapM get filtIds
-  return []
+  prows <- selectList [PostAccess <=. access, PostPtype >. 0,
+                       PostPtype <=. ptype, PostId <-. filtIds]
+           [Desc PostCrtDate, OffsetBy f, LimitTo (t - f + 1)]
+  return $ map (\r -> (entityKey r, entityVal r)) prows
 
 filtCat :: [[PostId]] -> [PostId] -> [PostId]
 filtCat postIds candi = [c | c <- candi, and (map (elem c) postIds)]

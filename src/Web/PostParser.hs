@@ -14,19 +14,20 @@ import Text.Blaze.Html.Renderer.Text (renderHtml)
 import Model.Types
 import Web.BetterMdParser
 
-renderPost :: Post -> T.Text
-renderPost post = toStrict $ renderHtml $ parsePost post
+renderPost :: Post -> Int -> T.Text
+renderPost post renderType = toStrict $ renderHtml $ parsePost post renderType
 
-parsePost :: Post -> Html
-parsePost post = case postPtype post of
-  0 -> do
-    putHtml $ parseContent $ postContent post
-  _ -> do
+parsePost :: Post -> Int -> Html
+parsePost post 0 = putHtml $ parseContent $ postContent post -- static site
+parsePost post 1 = putHtml $ parseContent $ postContent post -- blog posts
+parsePost post 2 = undefined
+parsePost post _ = do -- other (preview)
     putHtml $ parseTitle $ postTitle post
     putHtml $ parseCategories $ postCategories post
     putHtml $ parseContent $ postContent post
-  where putHtml (Just h) = h
-        putHtml Nothing = return ()
+
+putHtml (Just h) = h
+putHtml Nothing = return ()
 
 parseTitle :: Maybe T.Text -> Maybe Html
 parseTitle Nothing = Nothing

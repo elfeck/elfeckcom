@@ -6,6 +6,7 @@ module Web.PostHandler where
 
 import qualified Data.Text as T
 import Web.Spock.Safe hiding (head, SessionId)
+import Control.Monad.IO.Class (liftIO)
 import Data.Maybe
 
 
@@ -39,8 +40,25 @@ handleDrivelCategories = post "drivel/categories" $ do
 handleDrivelPosts :: BlogApp
 handleDrivelPosts = post "drivel/posts" $ do
   muser <- loadUserSession
+  let access = if isNothing muser
+               then 0
+               else userAccess (snd $ fromJust muser)
   dat <- params
-  return ()
+  let mrawp = sequence $ findParams dat ["from", "till", "cats", "postOnly"]
+  case processParams mrawp of
+   Just (from, till, cats, ponly) -> do
+     posts <- runSQL $ queryDrivel access (from, till) cats ponly
+     getpostsResponse $ fmap snd posts
+   Nothing -> errorJson
+  where processParams Nothing = Nothing
+        processParams (Just [f, t, c, p]) =
+          case (textToInt f, textToInt t, textToBool p) of
+           (Just mf, Just mt, Just mp) -> Just (mf, mt, procCats c, mp)
+           _ -> Nothing
+           where procCats "" = []
+                 procCats cats = T.splitOn "," cats
+        processParams _ = Nothing
+
 
 handleEditPreview :: BlogApp
 handleEditPreview = post "edit/preview" $ do
@@ -143,9 +161,9 @@ submitEvexpl submitType eid visit = do
     _ -> return "ney: unkwn stype"
   submitResponse r
 
-getpostsResponse posts = json $ posts
+getpostsResponse posts = json $ map (\p -> renderPost p 2) posts
 
-previewResponse post = json $ renderPost post
+previewResponse post = json $ renderPost post 0
 
 loginResponse True =  json (("login success. yey" :: T.Text), True)
 loginResponse False =  json (("wrong login data, try again" :: T.Text), False)
