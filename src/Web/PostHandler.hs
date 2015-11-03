@@ -7,6 +7,7 @@ module Web.PostHandler where
 import qualified Data.Text as T
 import Web.Spock.Safe hiding (head, SessionId)
 import Control.Monad.IO.Class (liftIO)
+import Database.Persist.Sql (toSqlKey)
 import Data.Maybe
 
 
@@ -47,8 +48,9 @@ handleDrivelPosts = post "drivel/posts" $ do
   let mrawp = sequence $ findParams dat ["from", "till", "cats", "postOnly"]
   case processParams mrawp of
    Just (from, till, cats, ponly) -> do
+     --liftIO $ print (from, till, cats, ponly)
      posts <- runSQL $ queryDrivel access (from, till) cats ponly
-     getpostsResponse $ fmap snd posts
+     getpostsResponse posts
    Nothing -> errorJson
   where processParams Nothing = Nothing
         processParams (Just [f, t, c, p]) =
@@ -67,8 +69,9 @@ handleEditPreview = post "edit/preview" $ do
     dat <- params
     let mpost = jsonToPost dat
     case (mpost) of
-     Just post -> previewResponse post
-     Nothing -> errorJson
+      -- dummy sqlkey, to conform with renderPost (PostId, Post)
+      Just post -> previewResponse (toSqlKey 0, post)
+      Nothing -> errorJson
 
 handleEditSubmit :: BlogApp
 handleEditSubmit = post "edit/submit" $ do

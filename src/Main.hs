@@ -22,14 +22,22 @@ main = do
   let config = parseConfig $ T.pack configFile
   pool <- runNoLoggingT $ createSqlitePool (database config) 5
   runNoLoggingT $ runSqlPool (runMigration migrateCore) pool
-  runSpock 3000 $ spock sessConfig (PCPool pool) config (app config)
-    where sessConfig =
+  runSpock 3000 $ spock (spockConfig config pool) (app config)
+    where spockConfig config pool = SpockCfg {
+            spc_initialState = config
+            , spc_database = PCPool pool
+            , spc_sessionCfg = sessConfig
+            , spc_maxRequestSize = Just (5 * 1024 * 1024)
+            }
+          sessConfig =
             SessionCfg { sc_cookieName = "elfeckcom"
                        , sc_sessionTTL = 60 * 5 * 50
                        , sc_sessionExpandTTL = True
                        , sc_sessionIdEntropy = 40
                        , sc_emptySession = Nothing
                        , sc_persistCfg = Nothing
+                       , sc_housekeepingInterval = 60 * 10
+                       , sc_hooks = defaultSessionHooks
                        }
           findConfigFile [] = "config.txt"
           findConfigFile arg = head arg

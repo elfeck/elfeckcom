@@ -1,23 +1,46 @@
 div#drivelbody {
     display: table;
-    padding-top: 15px;
+    padding-top: 20px;
     padding-bottom: 5px;
+    --font-size: 0px;
 }
 div.drivelcontent {
     display: table-cell;
-    width: 596px;
-    padding: 10px;
-    background-color: #f0f0f2;
+    width: 605px;
+}
+div.drivelpost {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: #ededed;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #dbdbdb;
+}
+div.emptypost {
+    margin-top: 8px;
+    text-align: center;
+    height: 300px;
+}
+div.drivelspace {
+    height: 5px;
 }
 div#drivelside {
     display: table-cell;
     width: 150px;
-    background-color: #f0f0f2;
+    background-color: #ededed;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #dbdbdb;
 }
 div.drivelbuffercol {
     width: 15px;
 }
 div.drivelcat {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     padding-left: 5px;
     padding-right: 5px;
     border-radius: 3px;
@@ -28,6 +51,11 @@ div.drivelcat {
     cursor: pointer;
 }
 div.drivelpostonly {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     padding-left: 5px;
     padding-right: 5px;
     border-radius: 3px;
@@ -36,6 +64,7 @@ div.drivelpostonly {
     display: inline-block;
     line-height: 140%;
     cursor: pointer;
+    margin-bottom: 5px;
 }
 div.drivelopON {
     background-color: #c0c0c0;
@@ -48,20 +77,15 @@ div.drivelopOFF {
 div.drivelopHover {
     border-color: #707070;
 }
-div.drivelpostonlycont {
-    margin-top: 8px;
-    margin-left: 10px;
-    font-size: 15px;
-}
 div.drivelcatcont {
     margin-left: 18px;
     margin-bottom: 2px;
     font-size: 15px;
 }
 div.driveldescr {
-    margin-top: 10px;
+    margin-top: 0px;
     margin-left: 10px;
-    margin-bottom: 3px;
+    margin-bottom: 8px;
 }
 div#drivellastcat {
     margin-bottom: 7px;
@@ -70,37 +94,101 @@ div#drivelpage {
     display: inline-block;
     margin-left: 15px;
     margin-bottom: 15px;
-    background-color: #f0f0f2;
-    width: 605px;
+    width: 601px;
     height: 30px;
     text-align: center;
     line-height: 160%;
+    background-color: #ededed;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #dbdbdb;
 }
 div#driveltotopcont {
     display: inline-block;
     margin-left: 15px;
     margin-bottom: 15px;
-    background-color: #f0f0f2;
     width: 150px;
     height: 30px;
     text-align: center;
     line-height: 160%;
+    background-color: #ededed;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #dbdbdb;
 }
 a#driveltotop {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     color: #be4f31;
     cursor: pointer;
 }
 a#drivelforward {
-    margin-left: 5px;
-    cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    margin-right: 5px;
 }
 a#drivelbackward {
-    margin-right: 5px;
-    cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    margin-left: 5px;
 }
 a.drivelactive {
+    cursor: pointer;
     color: #be4f31;
 }
 a.drivelinactive {
     color: #aaaaaa;
+    pointer-events: none;
+    cursor: default;
+}
+div.posttitlebar {
+    margin-top: 5px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+div.posttitle {
+    display: inline-block;
+    font-size: 20px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+div.postcats {
+    display: inline-block;
+}
+div.postcat {
+    display: inline-block;
+    font-size: 15px;
+    padding-left: 2px;
+    padding-right: 2px;
+    border-radius: 3px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #bbbbbb;
+    line-height: 100%;
+    margin-right: 3px;
+    color: #777777;
+}
+div.postcrtdate {
+    display: inline-block;
+    font-size: 14px;
+    float: right;
+    margin-right: 10px;
+    margin-top: 5px;
+    color: #777777;
+}
+
+a.plink {
+    color: #be4f31;
 }

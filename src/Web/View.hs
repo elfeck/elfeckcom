@@ -57,14 +57,13 @@ inputHead = docTypeHtml $ head $ do
   link ! href "http://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
     ! rel "stylesheet" ! type_ "text/css"
 
-
 siteHeader :: String -> Html
 siteHeader path = do
   div ! class_ "header" $ do
     div ! class_ "headercontainer" $ ul ! class_ "headerleft" $ do
       headerEntry $ headerEle !! 0
       headerEntry $ headerEle !! 1
-    div ! class_ "headercontainer" $ img
+    div ! class_ "headerimagecontainer" $ img
       ! src (stringValue $ path ++ "static/img/header.svg")
     div ! class_ "headercontainer" $ ul ! class_ "headerright" $ do
       headerEntry $ headerEle !! 2
@@ -77,7 +76,7 @@ infBackHeader inf path = do
     div ! class_ "headercontainer" $ ul ! class_ "headerleft" $ do
       li ! class_ "headerentry" $ toHtml inf
       li ! class_ "headerentry" $ ""
-    div ! class_ "headercontainer" $ img !
+    div ! class_ "headerimagecontainer" $ img !
       src (stringValue $ path ++ "static/img/header.svg")
     div ! class_ "headercontainer" $ ul ! class_ "headerright" $ do
       li ! class_ "headerentry" $ ""
@@ -87,13 +86,13 @@ darkHeader :: String -> Html
 darkHeader path = do
   div ! class_ "header" $ do
     div ! class_ "headercontainer" $ ul ! class_ "headerleft" $ do
-      headerEntry "elfeck"
-      headerEntry "whyiliketrees"
+      headerEntry $ headerEle !! 0
+      headerEntry $ headerEle !! 1
     div ! class_ "headercontainer" $ img
       ! src (stringValue $ path ++ "static/img/header_dark.svg")
     div ! class_ "headercontainer" $ ul ! class_ "headerright" $ do
-      headerEntry "math and stuff"
-      headerEntry "drivel"
+      headerEntry $ headerEle !! 2
+      headerEntry $ headerEle !! 3
 
 headerEntry :: String -> Html
 headerEntry name =
@@ -171,13 +170,13 @@ drivelBody = do
       div ! class_ "innerbody drivelcontent" $ ""
       div ! class_ "drivelbuffercol" $ ""
       div ! id "drivelside" $ do
-        div ! class_ "drivelpostonlycont" $ do
+        div ! class_ "driveldescr" $ "Filters:"
+        div ! class_ "drivelcatcont" $
           div ! class_ "drivelpostonly drivelopOFF" $ "Full posts only"
-        div ! class_ "driveldescr" $ "Categories"
       div ! class_ "drivelbuffercol" $ ""
     div ! id "drivelpage" $ do
-      a ! id "drivelbackward" ! class_ "drivelinactive" $ "older"
       a ! id "drivelforward" ! class_ "drivelinactive" $ "newer"
+      a ! id "drivelbackward" ! class_ "drivelinactive" $ "older"
     div ! id "driveltotopcont" $ do
       a ! id "driveltotop" $ "back to top"
 

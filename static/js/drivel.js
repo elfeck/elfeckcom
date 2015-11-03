@@ -1,8 +1,11 @@
 $(function() {
     sidepanel = $("#drivelside");
+    body = $(".drivelcontent")
     currentPage = 0;
+    currentPageRendered = false;
+
     currentPostPostition = 0;
-    postsPerPage = 1;
+    postsPerPage = 2;
     posts = [];
 
     postOnly = $(".drivelpostonly");
@@ -11,8 +14,8 @@ $(function() {
     getCategories();
     getNextPosts(postsPerPage + 1);
 
-    $("#drivelforward").click(function(e) { changePage(1); });
-    $("#drivelbackward").click(function(e) { changePage(-1); });
+    $("#drivelforward").click(function(e) { changePage(-1); });
+    $("#drivelbackward").click(function(e) { changePage(1); });
     $("#driveltotop").click(function(e) { window.scrollTo(0, 0); });
 });
 
@@ -64,13 +67,21 @@ getNextPosts = function(amount) {
 
 processPosts = function(data) {
     if(data.length == 0) {
-	console.log("no new posts");
+	togglePage($("#drivelbackward"), false)
+	//case a combi does not exist at all render blank page
+	if(!currentPageRendered && currentPage == 0) {
+	    renderCurrentPage()
+	    return;
+	}
     } else {
-	togglePage($("#drivelforward"), data.length == lastReq);
+	togglePage($("#drivelbackward"), data.length == lastReq);
 	currentPostPostition += data.length;
 	posts = posts.concat(data);
 	//console.log(currentPostPostition);
 	//console.log(posts);
+    }
+    if(!currentPageRendered) {
+	renderCurrentPage()
     }
 }
 
@@ -83,21 +94,61 @@ initSidepanel = function(categories) {
     sidepanel.children().last().attr("id", "drivellastcat");
     cats = $(".drivelcat");
     for(var i = 0; i < cats.length; i++) {
-	registerSelect($(cats[i]), a, a);
+	registerSelect($(cats[i]), reset, reset);
     }
-    registerSelect($(".drivelpostonly"), a, a);
+    registerSelect($(".drivelpostonly"), reset, reset);
 }
 
-a = function() {
+reset = function() {
     currentPage = 0;
     currentPostPostition = 0;
+    posts = []
     getNextPosts(postsPerPage + 1);
+    currentPageRendered = false;
+}
+
+clearPage = function() {
+    body.empty();
 }
 
 changePage = function(dir) {
     currentPage += dir;
-    if(currentPage == 0) togglePage($("drivelbackward"), false);
-    if(currentPage == 1) togglePage($("drivelbackward"), true);
+    currentPageRendered = false;
+    if(dir > 0) {
+	//need new posts from DB
+	if(currentPostPostition < postsPerPage * (currentPage + 1)) {
+	    getNextPosts(postsPerPage + 1);
+	} else {
+	    if(currentPostPostition == postsPerPage * (currentPage + 1)) {
+		getNextPosts(1);
+	    }
+	}
+    } else {
+	togglePage($("#drivelbackward"), true);
+	renderCurrentPage();
+    }
+    if(currentPage == 0) togglePage($("#drivelforward"), false);
+    if(currentPage > 0) togglePage($("#drivelforward"), true);
+}
+
+renderCurrentPage = function() {
+    clearPage();
+    var index = currentPage * postsPerPage;
+    var end =  Math.min((currentPage + 1) * postsPerPage, posts.length)
+    if(end == 0) {
+	body.append('<div class="drivelpost"><div class="emptypost">' +
+		    '</br></br></br></br>Nothing with those categories yet' +
+		    ':(</br>Maybe some day!</div></div>');
+    }
+    for(var i = index; i < end; ++i){
+	body.append('<div class="drivelpost">' +
+		    posts[i] +
+		    '</div>');
+	if(i < end - 1) {
+	    body.append('<div class="drivelspace"></div>');
+	}
+    }
+    currentPageRendered = true;
 }
 
 togglePage = function(ele, toOn) {

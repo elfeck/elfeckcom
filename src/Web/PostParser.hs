@@ -5,6 +5,9 @@ module Web.PostParser where
 import Prelude hiding (div, id)
 import qualified Data.Text as T
 import Data.Text.Lazy (toStrict)
+import Data.Time
+import Data.Time.Format
+import Database.Persist.Sql (fromSqlKey)
 
 import Text.Blaze.Html (toHtml, toValue, textValue, preEscapedToHtml)
 import Text.Blaze.Html5 (Html, (!), div, img, ul, ol, li, a, i ,b, link, br)
@@ -14,29 +17,37 @@ import Text.Blaze.Html.Renderer.Text (renderHtml)
 import Model.Types
 import Web.BetterMdParser
 
-renderPost :: Post -> Int -> T.Text
-renderPost post renderType = toStrict $ renderHtml $ parsePost post renderType
+renderPost :: (PostId, Post) -> Int -> T.Text
+renderPost (pid, post) renderType =
+  toStrict $ renderHtml $ parsePost (pid, post) renderType
 
-parsePost :: Post -> Int -> Html
-parsePost post 0 = putHtml $ parseContent $ postContent post -- static site
-parsePost post 1 = putHtml $ parseContent $ postContent post -- blog posts
-parsePost post 2 = undefined
-parsePost post _ = do -- other (preview)
-    putHtml $ parseTitle $ postTitle post
-    putHtml $ parseCategories $ postCategories post
-    putHtml $ parseContent $ postContent post
+parsePost :: (PostId, Post) -> Int -> Html
+parsePost (_, post) 0 = putHtml $ parseContent $ postContent post -- static site
+parsePost (_, post) 1 = putHtml $ parseContent $ postContent post -- blog posts
+parsePost (pid, post) 2 = do
+  putHtml (drivelTitleLine (postTitle post) (postCategories post)
+           (postCrtDate post) (T.pack $ show $ fromSqlKey pid))
+  putHtml $ drivelContent $ postContent post
+parsePost post _ = ""
 
 putHtml (Just h) = h
 putHtml Nothing = return ()
 
-parseTitle :: Maybe T.Text -> Maybe Html
-parseTitle Nothing = Nothing
-parseTitle (Just title) = Just $ div ! class_ "title" $ (toHtml title)
+drivelTitleLine :: Maybe T.Text -> Maybe [T.Text] -> UTCTime -> T.Text
+                   -> Maybe Html
+drivelTitleLine (Just title) (Just cats) crt postId = Just $ do
+  div ! class_ "posttitlebar" $ do
+    div ! class_ "posttitle" $
+      (a ! href (textValue $ T.concat ["/drivel/post/", postId])
+       ! class_ "plink" $ (toHtml title))
+    div ! class_ "postcats" $ toHtml (map cToHtml cats)
+    div ! class_ "postcrtdate" $ (toHtml $ formatTime
+                                  defaultTimeLocale "%F" crt)
+      where cToHtml cat = div ! class_ "postcat" $ toHtml (T.concat [cat, " "])
+drivelTitleLine _ _ _ _ = undefined
 
-parseCategories :: Maybe [T.Text] -> Maybe Html
-parseCategories Nothing = Nothing
-parseCategories (Just cat) =
-  Just $ div ! class_ "categories" $ (toHtml $ T.intercalate ", " cat)
+drivelContent :: T.Text -> Maybe Html
+drivelContent cont = parseContent cont
 
 parseContent :: T.Text -> Maybe Html
 parseContent cont = fmap toHtml $ (docToHtml $ parseMd cont)

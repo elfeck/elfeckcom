@@ -11,6 +11,7 @@ html {
     background-repeat: no-repeat;
     background-position: center top;
     background-color: #eeeeee;
+    overflow-y: scroll;
 }
 body {
     margin: 0px;
@@ -50,6 +51,11 @@ div.headercontainer {
     border-width: 0px;
     border-bottom-width: 1px;
     border-style: solid;
+}
+div.headerimagecontainer {
+    display: inline-block;
+    width: auto;
+    border-bottom-width: 0px;
 }
 ul.headerleft {
     display: table;

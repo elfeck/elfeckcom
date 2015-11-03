@@ -22,14 +22,22 @@ ul.headerleft {
     width: 300px;
     margin: 0px;
     padding: 0px;
-    border-width: 0px
+    margin-right: 25px;
 }
 ul.headerright {
     display: table;
     width: 300px;
     margin: 0px;
     padding: 0px;
-    border-width: 0px
+    margin-left: 25px;
+}
+div.headercontainer {
+    display: inline-block;
+    width: auto;
+    border-color: #c4c4c4;
+    border-width: 0px;
+    border-bottom-width: 0px;
+    border-style: solid;
 }
 canvas#canvas {
     border-width: 1px;

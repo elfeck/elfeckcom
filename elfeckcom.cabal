@@ -18,9 +18,9 @@ executable elfeckcom
                        , blaze-html
                        , text
                        , transformers
-                       , persistent == 2.1.*
-                       , persistent-template == 2.1.*
-                       , persistent-sqlite == 2.1.*
+                       , persistent >= 2.1
+                       , persistent-template >= 2.1
+                       , persistent-sqlite >= 2.1
                        , time >= 1.5
                        , monad-logger
                        , resourcet
