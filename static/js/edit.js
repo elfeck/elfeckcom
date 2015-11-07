@@ -47,6 +47,7 @@ submitPreview = function() {
 	data: { dat: dataObj },
 	success: function(data) {
 	    preview.html(data);
+	    runKatex(preview[0]);
 	},
 	error: function() { jsonError("errorJson in submitPreview"); }
     });
@@ -73,7 +74,7 @@ submit = function() {
 	success: function(data) {
 	    respond(data);
 	    deletefield.val("");
-	    deletefield.removeClass("editdeldanger");
+	    deletefield.removeClass("delDanger");
 	},
 	error: function() { jsonError("errorJson in submit"); }
     });
@@ -171,4 +172,16 @@ clearAll = function() {
     title.val(""); categories.val(""); area.val("");
     type.val(""); access.val("");
     postid.val("");  postdate.val(""); responsefield.text("");
+}
+
+runKatex = function() {
+    renderMathInElement(
+        document.body,
+        {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false},
+            ]
+        }
+    );
 }

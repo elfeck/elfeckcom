@@ -43,7 +43,7 @@ handleStatic (DB from pid) = get (static $ T.unpack from) $ do
    Just post -> blaze $ do
      siteHead $ relPath from
      siteHeader $ relPath from
-     genericBody (procURL from) $ parsePost post 0
+     genericBody (procURL from) $ parsePost (snd post) 0
      siteFooter (fmap snd muser) (Just $ snd post)
   where procURL "/" = "index"
         procURL "whyiliketrees" = "wilt"
@@ -55,7 +55,7 @@ handleDrivel = get "drivel" $ do
   blaze $ do
     siteHead "./"
     siteHeader "./../"
-    drivelBody
+    drivelBody (fmap snd muser)
     siteFooter (fmap snd muser) Nothing
 
 handleDrivelEntry :: BlogApp
@@ -76,8 +76,9 @@ handleDrivelEntry = get ("drivel" <//> "post" <//> var) $ \pid -> do
        else blaze $ do
          siteHead "./../../"
          siteHeader "./../../"
-         siteBody $ parsePost post 1
-         siteFooter (fmap snd muser) Nothing
+         siteBody $ parsePost (snd post) (postPtype $ snd post)
+         katex
+         siteFooter (fmap snd muser) (Just $ snd post)
 
 error404 user = blaze $ do siteHead $ "./../../"
                            infBackHeader "invalid url" "./../../"

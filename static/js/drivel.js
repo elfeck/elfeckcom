@@ -5,7 +5,7 @@ $(function() {
     currentPageRendered = false;
 
     currentPostPostition = 0;
-    postsPerPage = 2;
+    postsPerPage = 5;
     posts = [];
 
     postOnly = $(".drivelpostonly");
@@ -17,6 +17,8 @@ $(function() {
     $("#drivelforward").click(function(e) { changePage(-1); });
     $("#drivelbackward").click(function(e) { changePage(1); });
     $("#driveltotop").click(function(e) { window.scrollTo(0, 0); });
+
+    if(typeof registerButton === "function") initQuickpost();
 });
 
 getCategories = function() {
@@ -87,12 +89,12 @@ processPosts = function(data) {
 
 initSidepanel = function(categories) {
     for(var i = 0; i < categories.length; i++) {
-	sidepanel.append('<div class="drivelcatcont">' +
-			 '<div class="drivelcat drivelopOFF">' +
+	sidepanel.append('<div class="drivelsbcatcont">' +
+			 '<div class="drivelsbcat drivelopOFF">' +
 			 categories[i] + '</div></div>');
     }
     sidepanel.children().last().attr("id", "drivellastcat");
-    cats = $(".drivelcat");
+    cats = $(".drivelsbcat");
     for(var i = 0; i < cats.length; i++) {
 	registerSelect($(cats[i]), reset, reset);
     }
@@ -148,7 +150,20 @@ renderCurrentPage = function() {
 	    body.append('<div class="drivelspace"></div>');
 	}
     }
+    runKatex();
     currentPageRendered = true;
+}
+
+runKatex = function() {
+    renderMathInElement(
+        document.body,
+        {
+            delimiters: [
+                {left: "$$", right: "$$", display: true},
+                {left: "$", right: "$", display: false},
+            ]
+        }
+    );
 }
 
 togglePage = function(ele, toOn) {
@@ -180,4 +195,116 @@ registerSelect = function(ele, selectFun, deselectFun) {
 	    selectFun();
 	}
     });
+}
+
+
+//
+// Quickpost
+//
+initQuickpost = function() {
+    qparea = $("#qpcontent");
+    qparea.val("Write something witty, would you?");
+    qpaccess = $("#qpaccess");
+    qpaccess.val("0");
+    qpbut = $("#qpsubmitbutton");
+    qpinittext = "Write something witty, would you?";
+
+    qpBlock = false;
+    qpClicked = false;
+
+    qparea.on("focus", function(e) {
+	showQP();
+    });
+    qpaccess.on("focus", function(e) {
+	showQP();
+    });
+    qparea.on("focusout", function(e) {
+	if(!qpBlock) hideQP();
+    });
+    qpaccess.on("focusout", function(e) {
+	if(!qpBlock) hideQP();
+    });
+    qpbut.on("focusout", function(e) {
+	if(!qpBlock) hideQP();
+    });
+    qpbut.on("mouseenter", function(e) {
+	qpBlock = true;
+    });
+    qpbut.on("mouseout", function(e) {
+	if(qpClicked) hideQP();
+	qpClicked = false;
+	qpBlock = false;
+    });
+    qpbut.on("click", function(e) {
+	qpClicked = true;
+    });
+    registerButton(qpbut, submitQP);
+}
+
+submitQP = function() {
+    if(qparea.val() == "" || !isInt(qpaccess.val())) {
+	qpFlash(false);
+	return;
+    }
+    var dataObj = {
+	title: "",
+	categories: "",
+	content: qparea.val(),
+	type: 2,
+	access: qpaccess.val(),
+	pid: 0,
+	submitType: 0
+    };
+    $.ajax({
+	type: "POST",
+	url: "/edit/submit",
+	dataType: "json",
+	data: { dat: dataObj },
+	success: function(data) {
+	    if(data.substring(0, 3) == "yey") {
+		qpFlash(true);
+		qparea.val("");
+		hideQP();
+		reset();
+	    } else {
+		qpFlash(false);
+	    }
+	},
+	error: function() { console.log("JSON error!"); }
+    });
+}
+
+qpFlash = function(success) {
+    var col = success ? "#aaffaa" : "#ffaaaa"
+    qparea.effect("highlight", {color: col}, 1000);
+}
+
+showQP = function() {
+    if(qparea.val() == qpinittext) qparea.val("");
+    qparea.css("height", "40px");
+    qparea.css("background-color", "white");
+    qparea.css("font-style", "normal");
+    qparea.css("color", "black");
+    qpaccess.css("background-color", "white");
+    qpaccess.css("color", "black");
+    qpbut.css("display", "block");
+}
+
+hideQP = function() {
+    qparea.css("height", "16px");
+    qparea.css("background-color", "#ededed");
+    qparea.css("color", "#aaaaaa");
+    qpaccess.css("background-color", "#ededed");
+    qpaccess.css("color", "#aaaaaa");
+    qpbut.css("display", "none");
+    if(qparea.val() == "" || qparea.val() == qpinittext) {
+	qparea.val(qpinittext);
+	qparea.css("font-style", "italic");
+    }
+}
+
+isInt = function(value) {
+    return !isNaN(value) &&
+	parseInt(Number(value)) == value &&
+	!isNaN(parseInt(value, 10));
 }

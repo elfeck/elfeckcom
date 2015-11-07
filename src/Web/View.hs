@@ -38,6 +38,11 @@ siteHead path = docTypeHtml $ head $ do
     ! type_ "image/png"
   link ! href "http://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
     ! rel "stylesheet" ! type_ "text/css"
+  -- TODO: Move out of general head
+  link ! href (appPath "static/css/lib/katex.min.css") ! rel "stylesheet"
+    ! type_ "text/css"
+  script "" ! src (appPath "static/js/lib/katex.min.js")
+  script "" ! src (appPath "static/js/lib/auto-render.min.js")
     where appPath p = stringValue (path ++ p)
 
 -- Missing root-path adjustment
@@ -56,6 +61,11 @@ inputHead = docTypeHtml $ head $ do
   link ! href "static/img/icon.png" ! rel "icon" ! type_ "image/png"
   link ! href "http://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
     ! rel "stylesheet" ! type_ "text/css"
+    -- TODO: Move out of general head
+  link ! href "static/css/lib/katex.min.css" ! rel "stylesheet"
+    ! type_ "text/css"
+  script "" ! src "static/js/lib/katex.min.js"
+  script "" ! src "static/js/lib/auto-render.min.js"
 
 siteHeader :: String -> Html
 siteHeader path = do
@@ -134,10 +144,10 @@ siteFooter muser mpost = do
     case mpost of
       Just post ->
         div ! class_ "postdate" $ toHtml
-        ("last updated: " ++ (frm $ postModDate post))
+        ("last edited: " ++ (frm $ postModDate post))
       _ -> return ()
 
-frm = formatTime defaultTimeLocale "%d %b %Y"
+frm = formatTime defaultTimeLocale "%d. %b. %Y"
 
 wrapContainer a = div ! class_ "footercont" $ a
 spacer = div "[" ! class_ "footerspacer"
@@ -148,30 +158,36 @@ spacer = div "[" ! class_ "footerspacer"
 siteBody :: Html -> Html
 siteBody h = div ! class_ "sitebody" $ (div ! class_ "innerbody" $ h)
 
-indexBody :: Html -> Html
-indexBody h = div ! class_ "sitebody" $ do
-  div ! class_ "innerbody indexBody" $ h
-  div ! class_ "sidepanel indexSP" $ ""
-
 genericBody :: String -> Html -> Html
-genericBody "" h = siteBody h
+genericBody "" h = siteBody $ h
 genericBody name h = div ! class_ "sitebody" $ do
   div ! class_ (stringValue $ "innerbody " ++ name ++ "Body") $ h
   div ! class_ (stringValue $ "sidepanel " ++ name ++ "SP") $ ""
+  katex
 
-drivelBody :: Html
-drivelBody = do
+katex :: Html
+katex = script $ toHtml $ T.pack $
+        "renderMathInElement(document.body, {" ++
+        "delimiters: [" ++
+        "{left: '$$', right: '$$', display: true}," ++
+        "{left: '$', right: '$', display: false}," ++
+        "]});"
+
+drivelBody :: Maybe User -> Html
+drivelBody muser = do
   link ! href "static/css/drivel.css" ! rel "stylesheet" ! type_ "text/css"
   script "" ! src "static/js/lib/jquery-2.1.3.min.js"
   script "" ! src "static/js/drivel.js"
   div ! class_ "sitebody" $ do
     div ! id "drivelbody" $ do
       div ! class_ "drivelbuffercol" $ ""
-      div ! class_ "innerbody drivelcontent" $ ""
+      div ! class_ "innerbody drivelouter" $ do
+        quickPost muser
+        div ! class_ "drivelcontent" $ ""
       div ! class_ "drivelbuffercol" $ ""
       div ! id "drivelside" $ do
         div ! class_ "driveldescr" $ "Filters:"
-        div ! class_ "drivelcatcont" $
+        div ! class_ "drivelsbcatcont" $
           div ! class_ "drivelpostonly drivelopOFF" $ "Full posts only"
       div ! class_ "drivelbuffercol" $ ""
     div ! id "drivelpage" $ do
@@ -179,6 +195,22 @@ drivelBody = do
       a ! id "drivelbackward" ! class_ "drivelinactive" $ "older"
     div ! id "driveltotopcont" $ do
       a ! id "driveltotop" $ "back to top"
+    katex
+        where quickPost Nothing = ""
+              quickPost (Just user) = case userAccess user of
+                5 -> do
+                  link ! href "static/css/input.css" ! rel "stylesheet"
+                    ! type_ "text/css"
+                  link ! href "static/css/lib/jquery-ui.min.css" !
+                    rel "stylesheet" ! type_ "text/css"
+                  script "" ! src "static/js/lib/jquery-ui.min.js"
+                  script "" ! src "static/js/button.js"
+                  textarea ! id "qpcontent" ! class_ "qptextarea" $ ""
+                  div ! class_ "qpside" $ do
+                    input ! id "qpaccess" ! class_ "stdinput"
+                    div ! id "qpsubmitbutton" ! class_ "button buttonidle" $
+                      "S"
+                _ -> ""
 
 site404 :: Html
 site404 = div "Sorry nothing to see here" ! class_ "errorbody"
@@ -221,6 +253,7 @@ siteEdit posts = do
       input ! class_ "stdinput" ! id "eDeletefield"
       div ! id "eSubmitbutton" ! class_ "button buttonidle" $ "S"
     div "" ! id "ePreview"
+    katex
 
 postToSelect :: (PostId, Post) -> Html
 postToSelect (pid, post) = case postTitle post of

@@ -9,6 +9,7 @@ import Web.Spock.Safe hiding (head, SessionId)
 import Control.Monad.IO.Class (liftIO)
 import Database.Persist.Sql (toSqlKey)
 import Data.Maybe
+import Data.Time
 
 
 import Web.Utils
@@ -41,6 +42,7 @@ handleDrivelCategories = post "drivel/categories" $ do
 handleDrivelPosts :: BlogApp
 handleDrivelPosts = post "drivel/posts" $ do
   muser <- loadUserSession
+  now <- liftIO getCurrentTime
   let access = if isNothing muser
                then 0
                else userAccess (snd $ fromJust muser)
@@ -50,7 +52,7 @@ handleDrivelPosts = post "drivel/posts" $ do
    Just (from, till, cats, ponly) -> do
      --liftIO $ print (from, till, cats, ponly)
      posts <- runSQL $ queryDrivel access (from, till) cats ponly
-     getpostsResponse posts
+     getpostsResponse posts now
    Nothing -> errorJson
   where processParams Nothing = Nothing
         processParams (Just [f, t, c, p]) =
@@ -70,7 +72,7 @@ handleEditPreview = post "edit/preview" $ do
     let mpost = jsonToPost dat
     case (mpost) of
       -- dummy sqlkey, to conform with renderPost (PostId, Post)
-      Just post -> previewResponse (toSqlKey 0, post)
+      Just post -> previewResponse post
       Nothing -> errorJson
 
 handleEditSubmit :: BlogApp
@@ -164,7 +166,7 @@ submitEvexpl submitType eid visit = do
     _ -> return "ney: unkwn stype"
   submitResponse r
 
-getpostsResponse posts = json $ map (\p -> renderPost p 2) posts
+getpostsResponse posts now = json $ map (\p -> renderDrivelPost p now) posts
 
 previewResponse post = json $ renderPost post 0
 
