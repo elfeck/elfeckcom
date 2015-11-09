@@ -25,7 +25,9 @@ renderDrivelPost :: (PostId, Post) -> UTCTime -> T.Text
 renderDrivelPost (pid, post) now = toStrict $ renderHtml $ do
   putHtml (drivelTitleLine (postTitle post) (postCategories post)
            (postCrtDate post) now (T.pack $ show $ fromSqlKey pid))
-  putHtml $ parseContent $ postContent post
+  case postPtype post of
+    1 -> do putHtml $ parseFirstPar $ postContent post
+    _ -> putHtml $ parseContent $ postContent post
 
 parsePost :: Post -> Int -> Html
 parsePost post 0 = putHtml $ parseContent $ postContent post -- stc site
@@ -114,3 +116,12 @@ eleToHtml (Italic t) = i $ toHtml t
 eleToHtml (Bold t) = b $ toHtml t
 eleToHtml (Link (d, l)) = a ! (href $ toValue l) ! class_ "link" $ toHtml d
 eleToHtml (Image (d, l)) = img ! (src $ toValue l) ! class_ "imag"
+
+parseFirstPar :: T.Text -> Maybe Html
+parseFirstPar cont = fmap toHtml (docFirstPar $ parseMd cont)
+
+docFirstPar :: Doc -> Maybe Html
+docFirstPar [] = Nothing
+docFirstPar ((Par bs) : _) = Just (div ! class_ "par" $ (toHtml $ fmap
+                                                         blockToHtml bs))
+docFirstPar (_ : doc) = docFirstPar doc

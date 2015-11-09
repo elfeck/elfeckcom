@@ -256,10 +256,13 @@ siteEdit posts = do
     katex
 
 postToSelect :: (PostId, Post) -> Html
-postToSelect (pid, post) = case postTitle post of
-  Nothing -> option ! id (keyToId pid) $
-             toHtml (T.concat ["[post from ", form (postModDate post), "]"])
-  Just title -> option ! id (keyToId pid) $ toHtml title
+postToSelect (pid, post)
+  -- filter out auto-save db entry
+  | fromSqlKey pid == 0 = ""
+  | otherwise = case postTitle post of
+    Nothing -> option ! id (keyToId pid) $
+               toHtml (T.concat ["[post from ", form (postModDate post), "]"])
+    Just title -> option ! id (keyToId pid) $ toHtml title
   where form date = T.pack $ formatTime defaultTimeLocale "%d. %b %R" date
         keyToId pid = stringValue (show $ fromSqlKey pid)
 

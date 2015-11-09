@@ -12,6 +12,8 @@ credits
 (*) The code is heavily based on: https://github.com/agrafix/funblog
 (*) Thanks to agrafix and the haskell irc
 
+(*) Frontend: jQuery, jQuery-UI, KaTeX, normalize.css
+
 
 content format
 ===============================================================================

@@ -36,10 +36,16 @@ $(function() {
 
     clearAll();
     list.focus();
+    loadPost();
 });
 
 submitPreview = function() {
     dataObj = packData();
+    if(getSelectedId() == 0) {
+	dataObj["type"] = 3;
+	dataObj["access"] = 10;
+	dataObj["pid"] = getSelectedId();
+    }
     $.ajax({
 	type: "POST",
 	url: "/edit/preview",
@@ -82,11 +88,6 @@ submit = function() {
 
 loadPost = function() {
     var selId = getSelectedId();
-    if(selId == 0) {
-	clearAll();
-	area.change();
-	return;
-    }
     var dataObj = { pid: selId }
     $.ajax({
 	type: "POST",

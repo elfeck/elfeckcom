@@ -70,9 +70,13 @@ handleEditPreview = post "edit/preview" $ do
   reqRight' muser 5 $ do
     dat <- params
     let mpost = jsonToPost dat
+    let mpid = findParam dat "pid"
     case (mpost) of
-      -- dummy sqlkey, to conform with renderPost (PostId, Post)
-      Just post -> previewResponse post
+      Just post -> do
+        if mpid == Just "0"
+          then runSQL $ updatePost 0 post
+          else return ""
+        previewResponse post
       Nothing -> errorJson
 
 handleEditSubmit :: BlogApp
@@ -142,6 +146,16 @@ submitEdit submitType pid post = do
   r <- case submitType of
         "0" -> do
           resp <- runSQL $ insertPost post
+          mpost <- runSQL $ queryPost 1
+          case mpost of
+            Just (pid, post) -> do let blank = (Post Nothing Nothing ""
+                                                (postCrtDate post)
+                                                dummyTime
+                                                (postPtype post)
+                                                (postAccess post))
+                                   resp <- runSQL $ updatePost 0 blank
+                                   return ()
+            _ -> return ()
           return resp
         "1" -> do
           resp <- runSQL $ updatePost pid post
