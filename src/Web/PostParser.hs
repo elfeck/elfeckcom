@@ -24,10 +24,14 @@ renderPost post renderType =
 renderDrivelPost :: (PostId, Post) -> UTCTime -> T.Text
 renderDrivelPost (pid, post) now = toStrict $ renderHtml $ do
   putHtml (drivelTitleLine (postTitle post) (postCategories post)
-           (postCrtDate post) now (T.pack $ show $ fromSqlKey pid))
+           (postCrtDate post) now tpid)
   case postPtype post of
     1 -> do putHtml $ parseFirstPar $ postContent post
+            div ! class_ "readmorecont" $ a ! class_ "readmorelink"
+              ! href (textValue $ T.concat ["/drivel/post/", tpid]) $
+              "Read the rest of this post »"
     _ -> putHtml $ parseContent $ postContent post
+  where tpid = T.pack $ show $ fromSqlKey pid
 
 parsePost :: Post -> Int -> Html
 parsePost post 0 = putHtml $ parseContent $ postContent post -- stc site
@@ -79,7 +83,7 @@ postTitleLine (Just title) (Just cats) crt = Just $ do
                                   defaultTimeLocale "%d. %b. %Y" crt)
 postTitleLine _ _ crt = Just $ do
   div ! class_ "posttitlebar" $ do
-    "Drivel entry from "
+    div ! class_ "postdriveltitle" $ "Drivel entry from "
     div ! class_ "postdrivelcrtdate" $ (toHtml $ formatTime
                                         defaultTimeLocale "%d. %b. %Y" crt)
     ":"

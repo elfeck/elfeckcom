@@ -60,7 +60,6 @@ getNextPosts = function(amount) {
 	dataType: "json",
 	data: { dat: dataObj },
 	success: function(data) {
-	    console.log(data);
 	    processPosts(data);
 	},
 	error: function() { console.log("json error while get posts"); }
@@ -143,9 +142,20 @@ renderCurrentPage = function() {
 		    ':(</br>Maybe some day!</div></div>');
     }
     for(var i = index; i < end; ++i){
+	var fadeEle = "";
+	if(posts[i].substring(0, 28) != '<div class="drivelemptybar">') {
+	    //fadeEle = '<div class="drivelpostfade"></div>'
+	}
 	body.append('<div class="drivelpost">' +
 		    posts[i] +
+		    fadeEle +
 		    '</div>');
+	var w = parseInt(body.find(".drivelpost").last().css("width"), 10);
+	var h = parseInt(body.find(".drivelpost").last().css("height"), 10);
+	h *= 0.5
+	body.find(".drivelpostfade").last().css("width", w + "px");
+	body.find(".drivelpostfade").last().css("height", h + "px");
+	//body.find(".link").last().addClass("readmorelink");
 	if(i < end - 1) {
 	    body.append('<div class="drivelspace"></div>');
 	}
