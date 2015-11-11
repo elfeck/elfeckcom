@@ -4,7 +4,7 @@ $(function() {
     currentPage = 0;
     currentPageRendered = false;
 
-    currentPostPostition = 0;
+    currentPostPosition = 0;
     postsPerPage = 5;
     posts = [];
 
@@ -12,11 +12,19 @@ $(function() {
     cats = [];
 
     getCategories();
-    getNextPosts(postsPerPage + 1);
 
     $("#drivelforward").click(function(e) { changePage(-1); });
     $("#drivelbackward").click(function(e) { changePage(1); });
     $("#driveltotop").click(function(e) { window.scrollTo(0, 0); });
+    $("#drivelreset").click(function(e) {
+	for(var i = 0; i < cats.length; i++) {
+	    $(cats[i]).removeClass("drivelopON");
+	    $(cats[i]).addClass("drivelopOFF");
+	}
+	postOnly.removeClass("drivelopON");
+	postOnly.addClass("drivelopOFF");
+	reset();
+    });
 
     if(typeof registerButton === "function") initQuickpost();
 });
@@ -29,6 +37,11 @@ getCategories = function() {
 	data: { },
 	success: function(data) {
 	    initSidepanel(data);
+	    if(loadState()) {
+		setPage(currentPage);
+	    } else {
+		reset();
+	    }
 	},
 	error: function() { console.log("json error while get categories"); }
     });
@@ -49,8 +62,8 @@ getNextPosts = function(amount) {
 	indexOf("drivelopON") > 0 ? "True" : "False";
     var activeCats = activeCats.length == 0 ? "" : activeCats.toString()
     dataObj = {
-	from: currentPostPostition,
-	till: currentPostPostition + amount,
+	from: currentPostPosition,
+	till: currentPostPosition + amount,
 	cats: activeCats,
 	postOnly: postOnly
     };
@@ -76,10 +89,8 @@ processPosts = function(data) {
 	}
     } else {
 	togglePage($("#drivelbackward"), data.length == lastReq);
-	currentPostPostition += data.length;
+	currentPostPosition += data.length;
 	posts = posts.concat(data);
-	//console.log(currentPostPostition);
-	//console.log(posts);
     }
     if(!currentPageRendered) {
 	renderCurrentPage()
@@ -102,10 +113,12 @@ initSidepanel = function(categories) {
 
 reset = function() {
     currentPage = 0;
-    currentPostPostition = 0;
+    currentPostPosition = 0;
     posts = []
+    togglePage($("#drivelforward"), false);
     getNextPosts(postsPerPage + 1);
     currentPageRendered = false;
+    saveState();
 }
 
 clearPage = function() {
@@ -117,17 +130,28 @@ changePage = function(dir) {
     currentPageRendered = false;
     if(dir > 0) {
 	//need new posts from DB
-	if(currentPostPostition < postsPerPage * (currentPage + 1)) {
+	if(currentPostPosition < postsPerPage * (currentPage + 1)) {
 	    getNextPosts(postsPerPage + 1);
 	} else {
-	    if(currentPostPostition == postsPerPage * (currentPage + 1)) {
+	    if(currentPostPosition == postsPerPage * (currentPage + 1)) {
 		getNextPosts(1);
+	    } else {
+		renderCurrentPage();
 	    }
 	}
     } else {
 	togglePage($("#drivelbackward"), true);
 	renderCurrentPage();
     }
+    if(currentPage == 0) togglePage($("#drivelforward"), false);
+    if(currentPage > 0) togglePage($("#drivelforward"), true);
+    saveState();
+}
+
+setPage = function(pagenum) {
+    currentPage = pagenum;
+    currentPageRendered = false;
+    getNextPosts(postsPerPage * (currentPage + 1) + 1);
     if(currentPage == 0) togglePage($("#drivelforward"), false);
     if(currentPage > 0) togglePage($("#drivelforward"), true);
 }
@@ -317,4 +341,53 @@ isInt = function(value) {
     return !isNaN(value) &&
 	parseInt(Number(value)) == value &&
 	!isNaN(parseInt(value, 10));
+}
+
+saveState = function() {
+    localStorage.setItem("currentPage", currentPage);
+    var activeCats = []
+    for(var i = 0; i < cats.length; i++) {
+	if($(cats[i]).attr("class").indexOf("drivelopON") > 0) {
+	    activeCats.push($(cats[i]).text());
+	}
+    }
+    var postsOnly = $(".drivelpostonly").attr("class").
+	indexOf("drivelopON") > 0;
+
+    localStorage.setItem("activeCats", JSON.stringify(activeCats));
+    localStorage.setItem("postsOnly", postsOnly);
+    var ts = new Date().getTime();
+    localStorage.setItem("timestamp", ts);
+}
+
+loadState = function() {
+    var timestamp = localStorage.getItem("timestamp");
+    if(timestamp == null) {
+	return false;
+    }
+    timestamp = parseInt(timestamp, 10);
+    var now = new Date().getTime();
+    var diff = now - timestamp;
+    // expire after 1 day
+    if(diff > 1 * 24 * 60 * 60 * 1000) {
+	return false;
+    }
+    currentPage = localStorage.getItem("currentPage");
+    currentPage = parseInt(currentPage, 10);
+    var activeCats = JSON.parse(localStorage.getItem("activeCats"));
+    var postsOnly = localStorage.getItem("postsOnly") == "true";
+    if(postsOnly) {
+	$(".drivelpostonly").removeClass("drivelopOFF");
+	$(".drivelpostonly").addClass("drivelopON");
+    }
+    for(var i = 0; i < cats.length; i++) {
+	for(var j = 0; j < activeCats.length; j++) {
+	    if(activeCats[j] == $(cats[i]).text()) {
+		$(cats[i]).removeClass("drivelopOFF");
+		$(cats[i]).addClass("drivelopON");
+	    }
+	}
+    }
+
+    return true;
 }

@@ -88,7 +88,7 @@ div.drivelpostonly {
     display: inline-block;
     line-height: 140%;
     cursor: pointer;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
 }
 div.drivelopON {
     background-color: #c8c8c8;
@@ -270,4 +270,18 @@ a.readmorelink {
     color: #777777;
     -color: #c8826f;
     font-size: 15px;
+}
+
+div#drivelreset {
+    float: right;
+    margin-right: 10px;
+    margin-top: 1px;
+    font-size: 14px;
+    color: #be4f31;
+    text-decoration: underline;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    cursor: pointer;
 }

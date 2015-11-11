@@ -186,7 +186,9 @@ drivelBody muser = do
         div ! class_ "drivelcontent" $ ""
       div ! class_ "drivelbuffercol" $ ""
       div ! id "drivelside" $ do
-        div ! class_ "driveldescr" $ "Filters:"
+        div ! class_ "driveldescr" $ do
+          "Filters:"
+          div ! id "drivelreset" $ "reset"
         div ! class_ "drivelsbcatcont" $
           div ! class_ "drivelpostonly drivelopOFF" $ "Full posts only"
       div ! class_ "drivelbuffercol" $ ""
