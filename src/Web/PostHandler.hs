@@ -26,8 +26,6 @@ handlePosts = do
   handleEditPreview
   handleEditSubmit
   handleEditLoad
-  handleEvexplSubmit
-  handleEvexplLoad
   handleLoginSubmit
 
 handleDrivelCategories :: BlogApp
@@ -103,30 +101,6 @@ handleEditLoad = post "edit/loadpost" $ do
        resp <- runSQL $ queryPost pid
        loadpostResponse resp
 
-handleEvexplSubmit :: BlogApp
-handleEvexplSubmit = post "evexpl/submit" $ do
-  muser <- loadUserSession
-  reqRight' muser 5 $ do
-    dat <- params
-    let msubmitType = findParam dat "submitType"
-    let meid = fmap textToInt $ findParam dat "eid"
-    let mvisit = jsonToSystemVisit (fmap snd muser) dat
-    case (msubmitType, meid, mvisit) of
-     (Just st, Just (Just (eid)), Just visit) -> submitEvexpl st eid visit
-     _ -> json $ (show mvisit)
-
-handleEvexplLoad :: BlogApp
-handleEvexplLoad = post "/evexpl/loadvisit" $ do
-  muser <- loadUserSession
-  reqRight' muser 5 $ do
-    dat <- params
-    let meid = fmap textToInt $ findParam dat "eid"
-    case meid of
-     Nothing -> errorJson
-     Just (Just eid) -> do
-       resp <- runSQL $ queryVisit eid
-       loadvisitResponse resp
-
 handleLoginSubmit :: BlogApp
 handleLoginSubmit = post "login/submit" $ do
   dat <- params
@@ -166,20 +140,6 @@ submitEdit submitType pid post = do
         _ -> return "ney: unkwn stype"
   submitResponse r
 
-submitEvexpl submitType eid visit = do
-  r <- case submitType of
-    "0" -> do
-      resp <- runSQL $ insertSystemVisit visit
-      return resp
-    "1" -> do
-      resp <- runSQL $ updateSystemVisit eid visit
-      return resp
-    "2" -> do
-      resp <- runSQL $ deleteSystemVisit eid
-      return resp
-    _ -> return "ney: unkwn stype"
-  submitResponse r
-
 getpostsResponse posts now = json $ map (\p -> renderDrivelPost p now) posts
 
 previewResponse post = json $ renderPost post 0
@@ -191,8 +151,5 @@ submitResponse resp = json resp
 
 loadpostResponse Nothing = json ("could not find post to id" :: T.Text)
 loadpostResponse (Just post) = json $ post
-
-loadvisitResponse Nothing = json ("could not find visit to id" :: T.Text)
-loadvisitResponse (Just visit) = json $ visit
 
 errorJson = json $ ("ney: json invld" :: T.Text)

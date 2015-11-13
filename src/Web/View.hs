@@ -135,10 +135,6 @@ siteFooter muser mpost = do
      Just user -> do
        wrapContainer $ a "edit" ! class_ "userlink" ! href "/edit"
        div ! class_ "usersep" $ "|"
-       wrapContainer $ a "users" ! class_ "userlink" ! href "/manage"
-       div ! class_ "usersep" $ "|"
-       wrapContainer $ a "evexpl" ! class_ "userlink" ! href "/evexpl"
-       div ! class_ "usersep" $ "|"
        wrapContainer $ a "logout" ! class_ "userlink" ! href "/logout"
        div ! class_ "userinfo" $ "]"
     case mpost of
@@ -267,42 +263,6 @@ postToSelect (pid, post)
     Just title -> option ! id (keyToId pid) $ toHtml title
   where form date = T.pack $ formatTime defaultTimeLocale "%d. %b %R" date
         keyToId pid = stringValue (show $ fromSqlKey pid)
-
-{-
- Evexpl Page
--}
-siteEvexpl :: [(SystemVisitId, SystemVisit)] -> Html
-siteEvexpl visits = do
-  script "" ! src "static/js/lib/jquery-2.1.3.min.js"
-  script "" ! src "static/js/lib/jquery-ui.min.js"
-  script "" ! src "static/js/button.js"
-  script "" ! src "static/js/evexpl.js"
-  script "" ! src "static/js/evexplval.js"
-  script "" ! src "static/js/evexpldata.js"
-  div ! class_ "colbody" $ do
-    div ! class_ "colleft" ! id "xContainer" $ do
-      input ! class_ "stdinput" ! id "xRegion" ! autocomplete "off"
-      div ! class_ "xSpacer" $ ""
-      input ! class_ "stdinput xSite" ! id "s_0" ! autocomplete "off"
-      input ! class_ "stdinput xType" ! id "t_0" ! autocomplete "off"
-    div ! class_ "colright" $ do
-      input ! class_ "stdinput" ! id "xEntryid" ! readonly "readonly"
-      input ! class_ "stdinput" ! id "xEntrydate" ! readonly "readonly"
-      select ! class_ "stdlist" ! multiple "multiple" ! id "xList"
-        ! autocomplete "off" $ do
-          option ! id "0" ! selected "selected" $ "[new entry]"
-          toHtml $ map visitToSelect visits
-      div ! id "xResponsefield" ! class_ "stdinput" $ ""
-      input ! class_ "stdinput" ! id "xDeletefield"
-      div ! id "xSubmitbutton" ! class_ "button buttonidle" $ "S"
-
-visitToSelect :: (SystemVisitId, SystemVisit) -> Html
-visitToSelect (eid, visit) =
-  option ! id (keyToId eid) ! class_ "listEntry" $
-  toHtml (T.concat ["[", systemVisitRegion visit, " at ",
-                    (form $ systemVisitCrtDate visit)])
-  where form date = T.pack $ formatTime defaultTimeLocale "%H:%M]" date
-        keyToId eid = stringValue (show $ fromSqlKey eid)
 
 {-
  Login Page

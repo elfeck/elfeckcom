@@ -26,7 +26,6 @@ handleGets staticRoutes rootDir = do
   handleLogin
   handleLogout
   handleEdit
-  handleEvexpl
   handleWhyiliketrees rootDir
   handleUnknown
 
@@ -115,16 +114,6 @@ handleLogout = get "logout" $ do
      runSQL $ logoutUser userId
      writeSession Nothing
      redirect "/"
-
-handleEvexpl :: BlogApp
-handleEvexpl = get "evexpl" $ do
-  muser <- loadUserSession
-  visits <- runSQL $ queryAllVisits
-  reqRight muser 5 $ blaze $ do
-    inputHead
-    infBackHeader "evexpl" "./"
-    siteEvexpl visits
-    siteFooter (fmap snd muser) Nothing
 
 handleWhyiliketrees :: String -> BlogApp
 handleWhyiliketrees rootDir = get "games/whyiliketrees" $ do
