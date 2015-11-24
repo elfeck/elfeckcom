@@ -38,12 +38,8 @@ siteHead path = docTypeHtml $ head $ do
     ! type_ "image/png"
   link ! href "http://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
     ! rel "stylesheet" ! type_ "text/css"
-  -- TODO: Move out of general head
-  link ! href (appPath "static/css/lib/katex.min.css") ! rel "stylesheet"
-    ! type_ "text/css"
-  script "" ! src (appPath "static/js/lib/katex.min.js")
-  script "" ! src (appPath "static/js/lib/auto-render.min.js")
-    where appPath p = stringValue (path ++ p)
+  script "" ! src (appPath "static/js/site.js")
+  where appPath p = stringValue (path ++ p)
 
 -- Missing root-path adjustment
 inputHead :: Html
@@ -54,18 +50,12 @@ inputHead = docTypeHtml $ head $ do
   link ! href "static/css/input.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "static/css/edit.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "static/css/login.css" ! rel "stylesheet" ! type_ "text/css"
-  link ! href "static/css/evexpl.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "static/css/site.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "static/css/lib/jquery-ui.min.css" ! rel "stylesheet"
     ! type_ "text/css"
   link ! href "static/img/icon.png" ! rel "icon" ! type_ "image/png"
   link ! href "http://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
     ! rel "stylesheet" ! type_ "text/css"
-    -- TODO: Move out of general head
-  link ! href "static/css/lib/katex.min.css" ! rel "stylesheet"
-    ! type_ "text/css"
-  script "" ! src "static/js/lib/katex.min.js"
-  script "" ! src "static/js/lib/auto-render.min.js"
 
 siteHeader :: String -> Html
 siteHeader path = do
@@ -135,7 +125,8 @@ siteFooter muser mpost = do
      Just user -> do
        wrapContainer $ a "edit" ! class_ "userlink" ! href "/edit"
        div ! class_ "usersep" $ "|"
-       wrapContainer $ a "logout" ! class_ "userlink" ! href "/logout"
+       wrapContainer $ a "logout" ! class_ "userlink" ! id "logoutlink" !
+         href "/logout"
        div ! class_ "userinfo" $ "]"
     case mpost of
       Just post ->
@@ -159,15 +150,20 @@ genericBody "" h = siteBody $ h
 genericBody name h = div ! class_ "sitebody" $ do
   div ! class_ (stringValue $ "innerbody " ++ name ++ "Body") $ h
   div ! class_ (stringValue $ "sidepanel " ++ name ++ "SP") $ ""
-  katex
 
-katex :: Html
-katex = script $ toHtml $ T.pack $
-        "renderMathInElement(document.body, {" ++
-        "delimiters: [" ++
-        "{left: '$$', right: '$$', display: true}," ++
-        "{left: '$', right: '$', display: false}," ++
-        "]});"
+katex :: String -> Html
+katex path = do
+  link ! href (appPath "static/css/lib/katex.min.css") ! rel "stylesheet"
+    ! type_ "text/css"
+  script "" ! src (appPath "static/js/lib/katex.min.js")
+  script "" ! src (appPath "static/js/lib/auto-render.min.js")
+  script $ toHtml $ T.pack $
+    "renderMathInElement(document.body, {" ++
+    "delimiters: [" ++
+    "{left: '$$', right: '$$', display: true}," ++
+    "{left: '$', right: '$', display: false}," ++
+    "]});"
+  where appPath p = stringValue (path ++ p)
 
 drivelBody :: Maybe User -> Html
 drivelBody muser = do
@@ -193,7 +189,7 @@ drivelBody muser = do
       a ! id "drivelbackward" ! class_ "drivelinactive" $ "older"
     div ! id "driveltotopcont" $ do
       a ! id "driveltotop" $ "back to top"
-    katex
+    katex "./"
         where quickPost Nothing = ""
               quickPost (Just user) = case userAccess user of
                 5 -> do
@@ -251,7 +247,7 @@ siteEdit posts = do
       input ! class_ "stdinput" ! id "eDeletefield"
       div ! id "eSubmitbutton" ! class_ "button buttonidle" $ "S"
     div "" ! id "ePreview"
-    katex
+    katex "./"
 
 postToSelect :: (PostId, Post) -> Html
 postToSelect (pid, post)

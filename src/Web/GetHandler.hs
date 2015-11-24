@@ -76,7 +76,7 @@ handleDrivelEntry = get ("drivel" <//> "post" <//> var) $ \pid -> do
          siteHead "./../../"
          siteHeader "./../../"
          siteBody $ parsePost (snd post) (postPtype $ snd post)
-         katex
+         katex "./../../"
          siteFooter (fmap snd muser) (Just $ snd post)
 
 error404 user = blaze $ do siteHead $ "./../../"

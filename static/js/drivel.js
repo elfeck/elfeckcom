@@ -162,8 +162,8 @@ renderCurrentPage = function() {
     var end =  Math.min((currentPage + 1) * postsPerPage, posts.length)
     if(end == 0) {
 	body.append('<div class="drivelpost"><div class="emptypost">' +
-		    '</br></br></br></br>Nothing with those categories yet' +
-		    ':(</br>Maybe some day!</div></div>');
+		    '</br></br></br></br>Nothing with this combination yet' +
+		    '</br>Maybe some day!</div></div>');
     }
     for(var i = index; i < end; ++i){
 	var fadeEle = "";

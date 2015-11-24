@@ -186,6 +186,13 @@ isEnumItem t = T.length t >= 2 && isDigit (T.head t) &&
     removeEmpty: remove empty Par
     procL4Ele: deal with inline ele. Not dependent on other RawEle
 -}
+{-
+testDoc_1 = T.pack "* First item  \n with second line\n* Snd Item\n* Thrd Item"
+testDoc_2 = T.pack "* First item\n* Snd Item  \nwith snd line\n* Thrd Item"
+testL3_1 = procL3' . procL2' . procL1 $ testDoc_1
+testL3_2 = procL3' . procL2' . procL1 $ testDoc_2
+-}
+
 procL4 :: [Level3] -> [Level4] -> [Level4]
 procL4 [] doc = removeEmpty' $ mergePar' $ procL4Col (reverse doc) []
 procL4 ((Headline (n, t)) : l3s) doc =
@@ -194,6 +201,8 @@ procL4 ((HtmlBlock ls) : l3s) doc =
   procL4 l3s ((Htm $ T.unlines $ map textFromLine ls) : doc)
 procL4 ((Paragraph ls) : l3s) doc =
   procL4 l3s ((Par $ groupAndMerge ls) : doc)
+
+procL4Test ((Paragraph ls) : []) = groupBy sameLineType ls
 
 groupAndMerge ls = map blockify $ groupBy sameLineType ls
 
@@ -243,12 +252,12 @@ textFromLine (ListLine t) = t
 textFromLine (EnumLine (n, t)) = t
 
 sameLineType (RawLine _) (RawLine _) = True
+
 sameLineType (ListLine _) (ListLine _) = True
-sameLineType (ListLine lt) (RawLine _) =
-  T.length lt < 3 || (T.length lt >= 3 && (T.take 2 $ T.reverse lt) /= "  ")
+sameLineType (ListLine _) (RawLine _) = True
 sameLineType (EnumLine _) (EnumLine _) = True
-sameLineType (EnumLine (_, le)) (RawLine _) =
-  T.length le < 3 || (T.length le >= 3 && (T.take 2 $ T.reverse le) /= "  ")
+sameLineType (EnumLine (_, _)) (RawLine _) = True
+
 sameLineType _ _ = False
 
 procL4Col [] doc = reverse doc
