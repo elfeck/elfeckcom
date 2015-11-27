@@ -7,7 +7,7 @@ module Web.PostHandler where
 import qualified Data.Text as T
 import Web.Spock.Safe hiding (head, SessionId)
 import Control.Monad.IO.Class (liftIO)
-import Database.Persist.Sql (toSqlKey)
+import Database.Persist.Sql (toSqlKey, fromSqlKey)
 import Data.Maybe
 import Data.Time
 
@@ -23,6 +23,7 @@ handlePosts :: BlogApp
 handlePosts = do
   handleDrivelCategories
   handleDrivelPosts
+  handleEditChoices
   handleEditPreview
   handleEditSubmit
   handleEditLoad
@@ -100,6 +101,18 @@ handleEditLoad = post "edit/loadpost" $ do
      Just (Just pid) -> do
        resp <- runSQL $ queryPost pid
        loadpostResponse resp
+
+handleEditChoices :: BlogApp
+handleEditChoices = post "edit/loadchoices" $ do
+  muser <- loadUserSession
+  reqRight' muser 5 $ do
+    allPosts <- runSQL $ queryAllPosts
+    let stripped = map stripPost allPosts
+    json stripped
+      where stripPost (pid, post) = (T.pack $ show $ fromSqlKey pid,
+                                     postTitle post,
+                                     T.pack $ formatTime defaultTimeLocale
+                                     "%d. %b %R" (postCrtDate post))
 
 handleLoginSubmit :: BlogApp
 handleLoginSubmit = post "login/submit" $ do

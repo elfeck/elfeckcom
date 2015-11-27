@@ -39,11 +39,4 @@ PostToCategory
   post PostId
   category T.Text
   deriving Show
-SystemVisit json
-  name T.Text Maybe
-  region T.Text
-  sites SystemSites
-  crtDate UTCTime
-  author T.Text
-  deriving Show
 |]

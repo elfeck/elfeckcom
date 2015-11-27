@@ -19,18 +19,6 @@ jsonToPost params = case chkp of
   where chkp = checkJson $ findParams params ["title", "categories",
                                               "content", "type", "access"]
 
--- Handles possible user error here. Should be somewhere else
--- DummyAuthor for not having to login while testing
-jsonToSystemVisit :: Maybe User -> [(T.Text, T.Text)] -> Maybe SystemVisit
-jsonToSystemVisit mauthor params = case (mauthor, chkp) of
-  (Just author, Just pars) ->
-    createSystemVisit (userName author) pars dummyTime
-  (Nothing, Just pars) -> createSystemVisit (dummyAuthor) pars dummyTime
-  _ -> Nothing
-  where chkp = checkJson $ findParams params ["name", "region", "sites",
-                                              "types"]
-        dummyAuthor = "seb"
-
 createPost :: [T.Text] -> UTCTime -> UTCTime -> Maybe Post
 createPost postParam crtTime modTime
   | isNothing ty || isNothing ac = Nothing
@@ -47,20 +35,6 @@ createPost postParam crtTime modTime
         procTitle text = Just text
         procCategories "" = Nothing
         procCategories text = Just $ T.splitOn ", " text
-
-createSystemVisit :: T.Text -> [T.Text] -> UTCTime -> Maybe SystemVisit
-createSystemVisit author visitParam crtTime
-  | isNothing reg || length sites /= length types = Nothing
-  | otherwise = Just $ SystemVisit name (fromJust reg) (zip sites types)
-                crtTime author
-  where name = procName (visitParam !! 0)
-        reg = procRegion (visitParam !! 1)
-        sites = T.splitOn "," (visitParam !! 2)
-        types = T.splitOn "," (visitParam !! 3)
-        procRegion "" = Nothing
-        procRegion text = Just text
-        procName "" = Nothing
-        procName text = Just text
 
 dummyTime :: UTCTime
 dummyTime = parseTimeOrError True defaultTimeLocale "%d.%m.%Y %H:%M"

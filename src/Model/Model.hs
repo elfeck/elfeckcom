@@ -53,12 +53,6 @@ insertPost post = do
     else return ()
   return "yey: created"
 
-insertSystemVisit :: SystemVisit -> SqlPersistM T.Text
-insertSystemVisit sysVisit = do
-  now <- liftIO $ getCurrentTime
-  insert $ adjustTimeSystemVisit sysVisit now
-  return "yey: created"
-
 deletePost :: Int -> SqlPersistM T.Text
 deletePost pid = do
   mpost <- get $ sqlpid
@@ -69,14 +63,6 @@ deletePost pid = do
                 mapM_ delete ptc
                 return "yey: deleted"
   where sqlpid = (toSqlKey $ fromIntegral pid) :: PostId
-
-deleteSystemVisit :: Int -> SqlPersistM T.Text
-deleteSystemVisit eid = do
-  mvisit <- get $ ((toSqlKey $ fromIntegral eid) :: SystemVisitId)
-  case mvisit of
-   Nothing -> return "ney: unkwn eid"
-   Just _ -> do delete ((toSqlKey $ fromIntegral eid) :: SystemVisitId)
-                return "yey: deleted"
 
 updatePost :: Int -> Post -> SqlPersistM T.Text
 updatePost pid post = do
@@ -97,23 +83,9 @@ updatePost pid post = do
      return "yey: updated"
   where sqlpid = (toSqlKey $ fromIntegral pid) :: PostId
 
-updateSystemVisit :: Int -> SystemVisit -> SqlPersistM T.Text
-updateSystemVisit eid visit = do
-  mvisit <- get $ ((toSqlKey $ fromIntegral eid) :: SystemVisitId)
-  case mvisit of
-   Nothing -> return "ney: unkwn eid"
-   Just oldvisit -> do
-     replace ((toSqlKey $ fromIntegral eid) :: SystemVisitId) $
-       adjustTimeSystemVisit visit (systemVisitCrtDate oldvisit)
-     return "yey: updated"
-
 adjustTimePost :: Post -> UTCTime -> UTCTime -> Post
 adjustTimePost (Post t ca co cr md ty ac) cr' md' =
   (Post t ca co cr' md' ty ac)
-
-adjustTimeSystemVisit :: SystemVisit -> UTCTime -> SystemVisit
-adjustTimeSystemVisit (SystemVisit n r s t a) t' =
-  (SystemVisit n r s t' a)
 
 queryUser :: SessionId -> SqlPersistM (Maybe (UserId, User))
 queryUser sessId = do
@@ -168,15 +140,3 @@ queryDrivel access (f, t) cats ponly = do
 
 filtCat :: [[PostId]] -> [PostId] -> [PostId]
 filtCat postIds candi = [c | c <- candi, and (map (elem c) postIds)]
-
-queryAllVisits :: SqlPersistM [(SystemVisitId, SystemVisit)]
-queryAllVisits = do
-  rows <- selectList [] [Desc SystemVisitCrtDate]
-  return $ map (\r -> (entityKey r, entityVal r)) rows
-
-queryVisit :: Int -> SqlPersistM (Maybe (SystemVisitId, SystemVisit))
-queryVisit eid = do
-  mvisit <- get $ toSqlKey $ fromIntegral eid
-  case mvisit of
-   Nothing -> return Nothing
-   Just visit -> return $ Just (toSqlKey $ fromIntegral eid, visit)

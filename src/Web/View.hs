@@ -240,25 +240,12 @@ siteEdit posts = do
       input ! class_ "stdinput" ! id "ePostid" ! readonly "readonly"
       input ! class_ "stdinput" ! id "ePostdate" ! readonly "readonly"
       select ! multiple "multiple" ! class_ "stdlist" ! id "eList"
-        ! autocomplete "off" $ do
-          option ! id "0" ! selected "selected" $ "[new post]"
-          toHtml $ map postToSelect posts
+        ! autocomplete "off" $ ""
       div ! id "eResponsefield" $ ""
       input ! class_ "stdinput" ! id "eDeletefield"
       div ! id "eSubmitbutton" ! class_ "button buttonidle" $ "S"
     div "" ! id "ePreview"
     katex "./"
-
-postToSelect :: (PostId, Post) -> Html
-postToSelect (pid, post)
-  -- filter out auto-save db entry
-  | fromSqlKey pid == 0 = ""
-  | otherwise = case postTitle post of
-    Nothing -> option ! id (keyToId pid) $
-               toHtml (T.concat ["[post from ", form (postModDate post), "]"])
-    Just title -> option ! id (keyToId pid) $ toHtml title
-  where form date = T.pack $ formatTime defaultTimeLocale "%d. %b %R" date
-        keyToId pid = stringValue (show $ fromSqlKey pid)
 
 {-
  Login Page

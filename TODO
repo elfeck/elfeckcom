@@ -1,11 +1,16 @@
-*) math-check before including katex
-
-
-*) ajax-pull the selection list in edit
-*) at mathjax as option, redo the inclusion
-
+TODO:
 *) file/Image upload in edit
 *) more markdown ie code, quote (for math)
 
 *) massive refactoring of bloated backend code
 *) massive refactoring of stupid js/css code
+
+
+~) math-check before including katex
+~) at mathjax as option, redo the inclusion
+
+
+
+
+DONE (recently):
++) ajax-pull the selection list in edit

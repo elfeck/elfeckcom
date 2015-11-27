@@ -58,10 +58,10 @@ li.li {
 }
 
 div.posttitlebar {
-    margin-top: 5px;
+    margin-top: 15px;
     display: block;
     padding-bottom: 3px;
-    margin-bottom: 8px;
+    margin-bottom: 15px;
     border-width: 0px;
     border-bottom-width: 1px;
     --border-top-width: 1px;
@@ -72,7 +72,7 @@ div.posttitlebar {
 
 div.posttitle {
     display: inline-block;
-    font-size: 23px;
+    font-size: 21px;
     margin-left: 10px;
     margin-right: 10px;
 }
@@ -97,7 +97,7 @@ div.postcrtdate {
     font-size: 14px;
     float: right;
     margin-right: 10px;
-    margin-top: 5px;
+    margin-top: 8px;
     color: #777777;
 }
 div.postdrivelcrtdate {

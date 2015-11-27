@@ -34,9 +34,9 @@ $(function() {
 
     submitbutton = $("#eSubmitbutton"); registerButton(submitbutton, submit);
 
+    selectedId = 0;
     clearAll();
-    list.focus();
-    loadPost();
+    loadChoices();
 });
 
 submitPreview = function() {
@@ -66,9 +66,18 @@ submit = function() {
     }
     selId = getSelectedId();
     t = -1;
-    if(selId == 0) t = 0;
-    if(selId != 0) t = 1;
-    if(selId != 0 && deletefield.val() == "DEL") t = 2;
+    if(selId == 0) {
+	t = 0;
+	selectedId = -1;
+    }
+    if(selId != 0) {
+	t = 1;
+	selectedId = selId;
+    }
+    if(selId != 0 && deletefield.val() == "DEL") {
+	t = 2;
+	selectedId = 0;
+    }
     dataObj = packData();
     dataObj["pid"] = selId;
     dataObj["submitType"] = t;
@@ -81,6 +90,8 @@ submit = function() {
 	    respond(data);
 	    deletefield.val("");
 	    deletefield.removeClass("delDanger");
+	    list.empty();
+	    loadChoices();
 	},
 	error: function() { jsonError("errorJson in submit"); }
     });
@@ -105,6 +116,49 @@ loadPost = function() {
 	    area.change();
 	},
 	error: function() { jsonError("errorJson in loadPost"); }
+    });
+}
+
+loadChoices = function() {
+    var dataObj = { }
+    $.ajax({
+	type: "POST",
+	url: "/edit/loadchoices",
+	dataType: "json",
+	data: { dat: dataObj },
+	success: function(data) {
+	    list.append($("<option>", {
+		id: 0,
+		text: "[New Post]"
+	    }));
+	    for(var i = 0; i < data.length; i++) {
+		var val = ""
+		if(data[i][0] == "0") continue;
+		if(data[i][1] != null) {
+		    val = data[i][1];
+		} else {
+		    val = "[Post from " + data[i][2] + "]"
+		}
+		list.append($("<option>", {
+		    id: data[i][0],
+		    text: val
+		}));
+	    }
+	    //console.log("loading choices with selectedId: " + selectedId)
+	    //new post got created
+	    if(selectedId < 0) {
+		$(list.children()[1]).attr("selected", "selected");
+		selectedId = data[1][0];
+	    }
+	    list.children().each(function() {
+		if(selectedId == $(this).attr("id")) {
+		    $(this).attr("selected", "selected");
+		}
+	    })
+	    list.focus();
+	    loadPost();
+	},
+	error: function() { jsonError("errorJson in loadChoices"); }
     });
 }
 
@@ -165,8 +219,11 @@ respond = function(m) {
 	responsefield.removeClass("responseYey");
 	responsefield.addClass("responseNey");
     }
-    console.log(m.substring(0, 3));
-    responsefield.html(m);
+    //console.log(m.substring(0, 3));
+    responsefield.text(m);
+    window.setTimeout(function() {
+	responsefield.text("");
+    }, 1000);
 }
 
 clearAll = function() {
