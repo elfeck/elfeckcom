@@ -50,7 +50,7 @@ drivelTitleLine :: Maybe T.Text -> Maybe [T.Text] -> UTCTime -> UTCTime
                 -> T.Text -> Maybe Html
 drivelTitleLine (Just title) (Just cats) crt _ postId = Just $ do
   div ! class_ "driveltitlebar" $ do
-    div ! class_ "driveltitle" $
+    div ! class_ "driveltitlecont" $ div ! class_ "driveltitle" $
       (a ! href (textValue $ T.concat ["/drivel/post/", postId])
        ! class_ "plink" $ (toHtml title))
     div ! class_ "drivelcats" $ toHtml (map cToHtml cats)
@@ -77,10 +77,11 @@ timediff now crt
 postTitleLine :: Maybe T.Text -> Maybe [T.Text] -> UTCTime -> Maybe Html
 postTitleLine (Just title) (Just cats) crt = Just $ do
   div ! class_ "posttitlebar" $ do
-    div ! class_ "posttitle" $ toHtml title
-    div ! class_ "postcats" $ toHtml (map cToHtml cats)
-    div ! class_ "postcrtdate" $ (toHtml $ formatTime
-                                  defaultTimeLocale "%d. %b. %Y" crt)
+    div ! class_ "posttitlebarbar" $ do
+      div ! class_ "posttitle" $ toHtml title
+      div ! class_ "postcats" $ toHtml (map cToHtml cats)
+      div ! class_ "postcrtdate" $ (toHtml $ formatTime
+                                    defaultTimeLocale "%d. %b. %Y" crt)
 postTitleLine _ _ crt = Just $ do
   div ! class_ "posttitlebar" $ do
     div ! class_ "postdriveltitle" $ "Drivel entry from "
@@ -96,14 +97,16 @@ parseContent cont = fmap toHtml $ (docToHtml $ parseMd cont)
 
 docToHtml :: Doc -> Maybe [Html]
 docToHtml [] = Nothing
-docToHtml doc = Just $ map secToHtml doc
+docToHtml doc = Just $ map secToHtml (zip doc ((tail doc) ++ [last doc]))
 
-secToHtml :: Sec -> Html
-secToHtml (Par bs) = div ! class_ "par" $ toHtml $ map blockToHtml bs
-secToHtml (Hdl (n, es)) =
+secToHtml :: (Sec, Sec) -> Html
+secToHtml ((Par bs), (Hdl (n, _))) =
+  div ! class_ (toValue ("par par" ++ show n)) $ toHtml $ map blockToHtml bs
+secToHtml ((Par bs), _) = div ! class_ "par" $ toHtml $ map blockToHtml bs
+secToHtml ((Hdl (n, es)), _) =
   div ! class_ (textValue (T.append "hdl" $ T.pack $ (show n))) $
   toHtml $ map eleToHtml es
-secToHtml (Htm t) = preEscapedToHtml t
+secToHtml ((Htm t), _) = preEscapedToHtml t
 
 blockToHtml :: Block -> Html
 blockToHtml (List els) = ul ! class_ "ul" $ toHtml $ map toListEle els

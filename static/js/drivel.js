@@ -166,24 +166,17 @@ renderCurrentPage = function() {
 		    '</br>Maybe some day!</div></div>');
     }
     for(var i = index; i < end; ++i){
-	var fadeEle = "";
-	if(posts[i].substring(0, 28) != '<div class="drivelemptybar">') {
-	    //fadeEle = '<div class="drivelpostfade"></div>'
+	if(posts[i].substring(0, 28) == '<div class="drivelemptybar">') {
+	    body.append('<div class="drivelpost smalldrivelpost">' +
+			posts[i] + '</div>');
+	} else {
+	    body.append('<div class="drivelpost">' + posts[i] + '</div>');
 	}
-	body.append('<div class="drivelpost">' +
-		    posts[i] +
-		    fadeEle +
-		    '</div>');
-	var w = parseInt(body.find(".drivelpost").last().css("width"), 10);
-	var h = parseInt(body.find(".drivelpost").last().css("height"), 10);
-	h *= 0.5
-	body.find(".drivelpostfade").last().css("width", w + "px");
-	body.find(".drivelpostfade").last().css("height", h + "px");
-	//body.find(".link").last().addClass("readmorelink");
 	if(i < end - 1) {
 	    body.append('<div class="drivelspace"></div>');
 	}
     }
+    body.find(".drivelpost").last().css("border-bottom-width", "1px");
     runKatex();
     currentPageRendered = true;
 }

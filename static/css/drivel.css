@@ -12,10 +12,16 @@ div.drivelpost {
     position: relative;
     padding-top: 5px;
     padding-bottom: 10px;
-    background-color: #ededed;
+    background-color: #ececeb;
     border-style: solid;
     border-width: 1px;
-    border-color: #dbdbdb;
+    border-color: #d5d5d5;
+    -border-top-width: 2px;
+    -border-top-style: dotted;
+    border-bottom-width: 0px;
+}
+div.smalldrivelpost {
+    padding-bottom: 1px;
 }
 div.drivelpostfade {
     pointer-events: none;
@@ -45,15 +51,15 @@ div.drivelemptybar {
     padding-bottom: 4px;
 }
 div.drivelspace {
-    height: 5px;
+    height: 0px;
 }
 div#drivelside {
     display: table-cell;
     width: 150px;
-    background-color: #ededed;
+    background-color: #ececeb;
     border-style: solid;
     border-width: 1px;
-    border-color: #dbdbdb;
+    border-color: #d5d5d5;
     vertical-align: top;
 }
 div.drivelbuffercol {
@@ -91,11 +97,11 @@ div.drivelpostonly {
     margin-bottom: 6px;
 }
 div.drivelopON {
-    background-color: #c8c8c8;
+    background-color: #cacaca;
     border-color: #a0a0a0;
 }
 div.drivelopOFF {
-    background-color: #e0e0e0;
+    background-color: #e3e3e3;
     border-color: #c0c0c0;
 }
 div.drivelopHover {
@@ -185,8 +191,15 @@ div.driveltitlebar {
 div.driveltitle {
     display: inline-block;
     font-size: 20px;
+}
+div.driveltitlecont {
+    position: relative;
     margin-left: 10px;
     margin-right: 10px;
+    display: inline-block;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: #be4f31;
 }
 div.drivelcats {
     display: inline-block;
@@ -212,9 +225,9 @@ div.drivelcrtdate {
     margin-top: 5px;
     color: #777777;
 }
-
 a.plink {
     color: #be4f31;
+    text-decoration: none;
 }
 
 textarea.qptextarea {
@@ -230,7 +243,7 @@ textarea.qptextarea {
     font-size: 12px;
     border-style: solid;
     border-width: 1px;
-    border-color: #dbdbdb;
+    border-color: #d5d5d5;
     background-color: #ededed;
     font-style: italic;
     color: #aaaaaa;
@@ -249,7 +262,7 @@ input#qpaccess {
     font-size: 13px;
     border-style: solid;
     border-width: 1px;
-    border-color: #dbdbdb;
+    border-color: #d5d5d5;
     background-color: #ededed;
     color: #aaaaaa;
 }
@@ -267,7 +280,7 @@ div.readmorecont {
 a.readmorelink {
     text-decoration: none;
     font-style: italic;
-    color: #777777;
+    color: #666666;
     -color: #c8826f;
     font-size: 15px;
 }

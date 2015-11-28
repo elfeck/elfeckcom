@@ -72,7 +72,7 @@ ul.headerright {
     margin-left: 25px;
 }
 li.headerentry {
-    font-size: 23px;
+    font-size: 25px;
     display: table-cell;
     width: 150px;
     text-align: center;
@@ -92,7 +92,7 @@ div.footer {
     line-height: 18px;
     margin-bottom: 10px;
     height: 20px;
-    background-color: #e8e8e6;
+    background-color: #eaeae9;
     text-align: center;
     font-size: 12px;
     color: #999999;
@@ -111,7 +111,7 @@ div.footerinfo {
     display: inline-block;
 }
 a.footerlink {
-    color: #db9481;
+    color: #be4f31;
     text-decoration: none;
 }
 div.footerspacer {
@@ -139,7 +139,7 @@ div.sitebody {
     position: relative;
     width: 800px;
     margin: 0px;
-    background-color: #e8e8e6;
+    background-color: #eaeae9;
     text-align: justify;
 }
 div.errorbody {

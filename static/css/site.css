@@ -1,35 +1,40 @@
 div.par {
-    margin-left: 20px;
-    margin-right: 20px;
+    margin-left: 23px;
+    margin-right: 25px;
     margin-bottom: 12px;
     font-size: 14px;
     font-family: "Open Sans";
-    line-height: 21px;
+    line-height: 1.55;
+}
+
+div.par1 {
+    margin-bottom: 25px;
+}
+
+div.par2 {
+    margin-bottom: 20px;
 }
 
 div.hdl1 {
     margin-top: 15px;
     margin-left: 10px;
     margin-bottom: 10px;
-    margin-right: 15px;
-    font-size: 21px;
+    margin-right: 10px;
+    font-size: 22px;
+    --text-decoration: underline;
+    border-bottom: 1px solid;
+    border-color: #aaaaaa;
 }
 
 div.hdl2 {
+    display: inline-block;
     margin-top: 5px;
     margin-bottom: 6px;
-    margin-right: 15px;
-    margin-left: 15px;
-    font-size: 19px;
-}
-
-div.hdl3 {
-    margin-top: 5px;
-    margin-bottom: 10px;
-    margin-right: 20px;
-    margin-left: 20px;
-    text-decoration: underline;
-    font-size: 17px;
+    margin-right: 12px;
+    margin-left: 12px;
+    font-size: 20px;
+    border-bottom: 1px solid;
+    border-color: #999999;
 }
 
 a.link {
@@ -60,7 +65,7 @@ li.li {
 div.posttitlebar {
     margin-top: 15px;
     display: block;
-    padding-bottom: 3px;
+    padding-bottom: 1px;
     margin-bottom: 15px;
     border-width: 0px;
     border-bottom-width: 1px;
@@ -70,9 +75,18 @@ div.posttitlebar {
     width: 780px;
 }
 
+div.posttitlebarbar {
+    -padding-bottom: 1px;
+    border-width: 0px;
+    border-bottom-width: 1px;
+    --border-top-width: 1px;
+    border-style: solid;
+    border-color: #aaaaaa;
+}
+
 div.posttitle {
     display: inline-block;
-    font-size: 21px;
+    font-size: 23px;
     margin-left: 10px;
     margin-right: 10px;
 }
@@ -97,7 +111,7 @@ div.postcrtdate {
     font-size: 14px;
     float: right;
     margin-right: 10px;
-    margin-top: 8px;
+    margin-top: 11px;
     color: #777777;
 }
 div.postdrivelcrtdate {
