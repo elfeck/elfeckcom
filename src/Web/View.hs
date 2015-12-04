@@ -274,6 +274,8 @@ whyiliketreesBody jsFiles = do
   toHtml $ map toScriptTag jsFiles
   link ! href "../static/css/whyiliketrees.css" ! rel "stylesheet"
     ! type_ "text/css"
+  link ! href "../static/css/indexdark.css" ! rel "stylesheet"
+    ! type_ "text/css"
   div ! id "main" $ do
     div "" ! class_ "inf inf1" ! id "info1"
     div "" ! class_ "inf inf2" ! id "info2"
@@ -287,6 +289,18 @@ whyiliketreesBody jsFiles = do
       "Controls: WASD, Space, Space+Shift, Arrow Keys"
       br
       "Toggle Debug: P, Toggle Mouse I"
+
+{-
+ LD 29
+-}
+ld29Body :: Html
+ld29Body = do
+  link ! href "../static/css/LD29.css" ! rel "stylesheet" ! type_ "text/css"
+  div ! id "main" $ do
+    canvas "" ! id "canvas"
+    div "" ! id "footer"
+    script "" ! type_ "application/dart" ! src "../static/games/LD29/LD29.dart"
+    script "" ! src "../static/games/LD29/packages/browser/dart.js"
 
 toScriptTag :: String -> Html
 toScriptTag file = script "" ! src

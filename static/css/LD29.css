@@ -1,0 +1,30 @@
+html {
+    display: table;
+    margin: auto;
+    background-repeat: none;
+    background-position: center top;
+    background-color: #222222;
+}
+
+body {
+    display: table-cell;
+    vertical-align: middle;
+    overflow: scroll;
+    width: 800px;
+    background-color: #222222;
+}
+
+div {
+    font-size: 10px;
+    font-family: sans serif;
+    text-align: center;
+    color: #ffffff;
+    margin: 0px;
+}
+
+canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}

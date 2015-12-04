@@ -27,6 +27,7 @@ handleGets staticRoutes rootDir = do
   handleLogout
   handleEdit
   handleWhyiliketrees rootDir
+  handleLD29
   handleUnknown
 
 handleStatic :: Route -> BlogApp
@@ -125,6 +126,16 @@ handleWhyiliketrees rootDir = get "games/whyiliketrees" $ do
     darkHeader "../"
     whyiliketreesBody (filter onlyJs gameFiles)
     siteFooter (fmap snd muser) Nothing
+
+handleLD29 :: BlogApp
+handleLD29 = do
+  get "games/LD29" $ do
+    blaze $ do
+      siteHead "../"
+      --darkHeader "../"
+      ld29Body
+      --siteFooter (fmap snd muser) Nothing
+  get "games/letterMap.png" $ redirect "/static/games/LD29/letterMap.png"
 
 handleUnknown :: BlogApp
 handleUnknown = hookAny GET $ \path -> do

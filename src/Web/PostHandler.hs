@@ -155,7 +155,7 @@ submitEdit submitType pid post = do
 
 getpostsResponse posts now = json $ map (\p -> renderDrivelPost p now) posts
 
-previewResponse post = json $ renderPost post 0
+previewResponse post = json $ renderPost post (postPtype post)
 
 loginResponse True =  json (("login success. yey" :: T.Text), True)
 loginResponse False =  json (("wrong login data, try again" :: T.Text), False)

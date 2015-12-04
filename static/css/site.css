@@ -15,7 +15,7 @@ div.par2 {
     margin-bottom: 20px;
 }
 
-div.hdl1 {
+h1.hdl1 {
     margin-top: 15px;
     margin-left: 10px;
     margin-bottom: 10px;
@@ -25,8 +25,12 @@ div.hdl1 {
     border-bottom: 1px solid;
     border-color: #aaaaaa;
 }
-
-div.hdl2 {
+h1 {
+    font-weight: normal;
+    margin: 0px;
+    padding: 0px;
+}
+h1.hdl2 {
     display: inline-block;
     margin-top: 5px;
     margin-bottom: 6px;
@@ -35,6 +39,16 @@ div.hdl2 {
     font-size: 20px;
     border-bottom: 1px solid;
     border-color: #999999;
+}
+h1.hdls1 {
+    margin-top: 15px;
+    margin-left: 10px;
+    margin-bottom: 5px;
+    margin-right: 10px;
+    font-size: 22px;
+    --text-decoration: underline;
+    --border-bottom: 1px solid;
+    border-color: #aaaaaa;
 }
 
 a.link {

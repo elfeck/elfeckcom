@@ -5,13 +5,15 @@ module Web.PostParser where
 import Prelude hiding (div, id)
 import qualified Data.Text as T
 import Data.Text.Lazy (toStrict)
+import Data.Char (isLetter, isNumber)
 import Data.Time
 import Data.Time.Format
 import Database.Persist.Sql (fromSqlKey)
 
 import Text.Blaze.Html (toHtml, toValue, textValue, preEscapedToHtml)
-import Text.Blaze.Html5 (Html, (!), div, img, ul, ol, li, a, i ,b, link, br)
-import Text.Blaze.Html5.Attributes (href, rel, src, type_, class_, id)
+import Text.Blaze.Html5 (Html, (!), div, img, ul, ol, li, a, i ,b, link,
+                         br, h1)
+import Text.Blaze.Html5.Attributes (href, rel, src, type_, class_, id, target)
 import Text.Blaze.Html.Renderer.Text (renderHtml)
 
 import Model.Types
@@ -30,18 +32,20 @@ renderDrivelPost (pid, post) now = toStrict $ renderHtml $ do
             div ! class_ "readmorecont" $ a ! class_ "readmorelink"
               ! href (textValue $ T.concat ["/drivel/post/", tpid]) $
               "Read the rest of this post »"
-    _ -> putHtml $ parseContent $ postContent post
+    _ -> putHtml $ parseContent 2 $ postContent post
   where tpid = T.pack $ show $ fromSqlKey pid
 
 parsePost :: Post -> Int -> Html
-parsePost post 0 = putHtml $ parseContent $ postContent post -- stc site
+parsePost post 0 = putHtml $ parseContent 0 (postContent post) -- stc site
+parsePost post 2 = do
+  putHtml $ postTitleLine Nothing Nothing (postCrtDate post)
+  putHtml $ parseContent 2 (postContent post)
 parsePost post 1 = do
   putHtml (postTitleLine (postTitle post) (postCategories post)
            (postCrtDate post))
-  putHtml $ parseContent $ postContent post
-parsePost post 2 = do
-  putHtml $ postTitleLine Nothing Nothing (postCrtDate post)
-  putHtml $ parseContent $ postContent post
+  putHtml $ parseContent 1 (postContent post)
+parsePost post _ = do
+  putHtml $ parseContent 3 (postContent post)
 
 putHtml (Just h) = h
 putHtml Nothing = return ()
@@ -92,21 +96,29 @@ postTitleLine _ _ crt = Just $ do
 
 cToHtml cat = div ! class_ "postcat" $ toHtml (T.concat [cat, " "])
 
-parseContent :: T.Text -> Maybe Html
-parseContent cont = fmap toHtml $ (docToHtml $ parseMd cont)
+parseContent :: Int -> T.Text -> Maybe Html
+parseContent tp cont = fmap toHtml $ (docToHtml tp (parseMd cont))
 
-docToHtml :: Doc -> Maybe [Html]
-docToHtml [] = Nothing
-docToHtml doc = Just $ map secToHtml (zip doc ((tail doc) ++ [last doc]))
+docToHtml :: Int -> Doc -> Maybe [Html]
+docToHtml _ [] = Nothing
+docToHtml tp doc = Just $ map (secToHtml tp)
+                   (zip doc ((tail doc) ++ [last doc]))
 
-secToHtml :: (Sec, Sec) -> Html
-secToHtml ((Par bs), (Hdl (n, _))) =
+secToHtml :: Int -> (Sec, Sec) -> Html
+secToHtml _ ((Par bs), (Hdl (n, _))) =
   div ! class_ (toValue ("par par" ++ show n)) $ toHtml $ map blockToHtml bs
-secToHtml ((Par bs), _) = div ! class_ "par" $ toHtml $ map blockToHtml bs
-secToHtml ((Hdl (n, es)), _) =
-  div ! class_ (textValue (T.append "hdl" $ T.pack $ (show n))) $
+secToHtml _ ((Par bs), _) = div ! class_ "par" $ toHtml $ map blockToHtml bs
+secToHtml 0 ((Hdl (n, es)), _) =
+  h1
+  ! class_ (textValue (T.append "hdls" $ T.pack $ (show n)))
+  ! id (textValue $ T.concat $ map eleToPlain es) $
   toHtml $ map eleToHtml es
-secToHtml ((Htm t), _) = preEscapedToHtml t
+secToHtml _ ((Hdl (n, es)), _) =
+  h1
+  ! class_ (textValue (T.append "hdl" $ T.pack $ (show n)))
+  ! id (textValue $ T.concat $ map eleToPlain es) $
+  toHtml $ map eleToHtml es
+secToHtml _ ((Htm t), _) = preEscapedToHtml t
 
 blockToHtml :: Block -> Html
 blockToHtml (List els) = ul ! class_ "ul" $ toHtml $ map toListEle els
@@ -121,8 +133,19 @@ eleToHtml Newline = br
 eleToHtml (Plain t) = toHtml t
 eleToHtml (Italic t) = i $ toHtml t
 eleToHtml (Bold t) = b $ toHtml t
-eleToHtml (Link (d, l)) = a ! (href $ toValue l) ! class_ "link" $ toHtml d
+eleToHtml (Link (d, l)) = a ! (href $ toValue l) ! class_ "link"
+                          ! target "blank" $ toHtml d
 eleToHtml (Image (d, l)) = img ! (src $ toValue l) ! class_ "imag"
+
+eleToPlain :: Ele -> T.Text
+eleToPlain Newline = ""
+eleToPlain (Plain t) = T.filter lon t
+eleToPlain (Italic t) = T.filter lon t
+eleToPlain (Bold t) = T.filter lon t
+eleToPlain (Link (d, l)) = T.filter lon d
+eleToPlain (Image (d, l)) = T.filter lon d
+
+lon c = isLetter c || isNumber c
 
 parseFirstPar :: T.Text -> Maybe Html
 parseFirstPar cont = fmap toHtml (docFirstPar $ parseMd cont)
