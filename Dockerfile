@@ -1,4 +1,4 @@
-FROM haskell:7.8.4
+FROM haskell:latest
 
 RUN cabal update && mkdir /var/elfeckcom && mkdir /var/elfeckcom/private && mkdir /var/elfeckcom/public
 
