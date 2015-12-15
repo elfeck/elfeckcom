@@ -50,9 +50,20 @@ h1.hdls1 {
     --border-bottom: 1px solid;
     border-color: #aaaaaa;
 }
+h1.hdls2 {
+    display: inline-block;
+    margin-top: 5px;
+    margin-bottom: 6px;
+    margin-right: 12px;
+    margin-left: 12px;
+    font-size: 20px;
+    --border-bottom: 1px solid;
+    border-color: #999999;
+}
 
 a.link {
     color: #a5452b;
+    --color: #E46B4D;
     --text-decoration: none;
 }
 
@@ -138,4 +149,8 @@ div.postdriveltitle {
     margin-left: 10px;
     margin-right: 3px;
     -font-size: 14px;
+}
+
+.katex {
+    font-size: 18px !important;
 }

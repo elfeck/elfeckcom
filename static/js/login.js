@@ -33,9 +33,7 @@ doLogin = function() {
       type: "POST",
       url: "/login/submit",
       dataType: "json",
-      data: {
-	dat: dataObj
-      },
+      data: dataObj,
       success: function(resp) {
 	responsefield.html(resp);
 	if(resp[1] == true)	{

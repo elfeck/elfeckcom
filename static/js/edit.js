@@ -50,7 +50,7 @@ submitPreview = function() {
     type: "POST",
     url: "/edit/preview",
     dataType: "json",
-    data: { dat: dataObj },
+    data: dataObj,
     success: function(data) {
       preview.html(data);
       runKatex(preview[0]);
@@ -85,7 +85,7 @@ submit = function() {
     type: "POST",
     url: "/edit/submit",
     dataType: "json",
-    data: { dat: dataObj },
+    data: dataObj,
     success: function(data) {
       respond(data);
       deletefield.val("");
@@ -104,7 +104,7 @@ loadPost = function() {
     type: "POST",
     url: "/edit/loadpost",
     dataType: "json",
-    data: { dat: dataObj },
+    data: dataObj,
     success: function(data) {
       postid.val(data[0]);
       postdate.val(procTime(data[1]["crtDate"]));
@@ -125,7 +125,7 @@ loadChoices = function() {
     type: "POST",
     url: "/edit/loadchoices",
     dataType: "json",
-    data: { dat: dataObj },
+    data: dataObj,
     success: function(data) {
       list.append($("<option>", {
 	id: 0,

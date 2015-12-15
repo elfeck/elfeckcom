@@ -1,49 +1,52 @@
-[elfeckcom]
-  (*) Source for http://elfeck.com
-  (*) This might be very horrible Haskell and even worse Javascript
+elfeckcom
+-------------------------------------------------------------------------------
+*) Source for http://elfeck.com
+*) This might be very horrible Haskell and even worse Javascript
 
-  (*) Please do not use the images from /static/img/ without asking me first
-
-
-[credits]
-  (*) The backend is built with Spock: https://github.com/agrafix/Spock
-  (*) The backend is heavily based on: https://github.com/agrafix/funblog
-
-  (*) The frontend uses: jQuery, jQuery-UI, KaTeX, MathJax, normalize.css
+*) Please do not use the images from /static/img/ without asking me first
 
 
-[content format]
-  (*) Post Layout
-      > Title
-      > Categories
-      > Content
-      > Creation Time Stamp
-      > Modify Time Stamp
-      > Access level
-      > Type
+credits
+-------------------------------------------------------------------------------
+*) The backend is built with Spock: https://github.com/agrafix/Spock
+*) The backend is heavily based on: https://github.com/agrafix/funblog
 
-  (*) Post Types
+*) The frontend uses: jQuery, jQuery-UI, KaTeX, normalize.css
+
+
+content format
+-------------------------------------------------------------------------------
+*) Post Layout
+      Title
+      Categories
+      Content
+      Creation Time Stamp
+      Modify Time Stamp
+      Access level
+      Type
+
+*) Post Types
       0: Website Main Post
       1: Blog Post
       2: Twitter-like Snippet
       3: autosave (internal)
 
-  (*) Submit Types (json/ajax)
+*) Submit Types (json/ajax)
       0: Inset
       1: Update
       2: Delete
 
 
-[MD to html parsing]
-  > Headline		==
-  > Headline		#, ##, ...
-  > Html		<html>\n ... \n</html>
-  > Linebreaks		double space \n
-  > New paragraph	empty line
-  > i	  		* *
-  > b			** **
-  > link		[name](url)
-  > img			![name](url)
-
-  > itemize		*
-  > enumerate		1. 2. 3.
+MD to html parsing
+-------------------------------------------------------------------------------
+  Headline		==
+  Headline		#, ##
+  Html			<html>\n ... \n</html>
+  Linebreaks		double space \n
+  New paragraph		empty line
+  i	  		* *
+  b			** **
+  link			[name](url)
+  img			![name](url)
+  itemize		*
+  enumerate		1. 2. 3.

@@ -10,23 +10,25 @@ import Control.Monad.IO.Class (liftIO)
 import Database.Persist.Sql (toSqlKey, fromSqlKey)
 import Data.Maybe
 import Data.Time
-
+import qualified Data.HashMap.Strict as HM
 
 import Web.Utils
 import Web.PostParser
 import Web.JsonParser
+import Web.FileHandler
 import Model.Model
 import Model.Types
 
 
-handlePosts :: BlogApp
-handlePosts = do
+handlePosts :: String -> BlogApp
+handlePosts filesDir = do
   handleDrivelCategories
   handleDrivelPosts
   handleEditChoices
   handleEditPreview
   handleEditSubmit
   handleEditLoad
+  handleUploadSubmit filesDir
   handleLoginSubmit
 
 handleDrivelCategories :: BlogApp
@@ -114,10 +116,25 @@ handleEditChoices = post "edit/loadchoices" $ do
                                      T.pack $ formatTime defaultTimeLocale
                                      "%d. %b %R" (postCrtDate post))
 
+handleUploadSubmit :: String -> BlogApp
+handleUploadSubmit filesDir = post "upload/submit" $ do
+  muser <- loadUserSession
+  --reqRight' muser 5 $ do
+  do
+    dat <- params
+    fileMap <- files
+    let mparams = sequence $ findParams dat ["filename", "access"]
+    let mFile = (HM.lookup "file" fileMap)
+    case (mFile, fmap (\[a, b] -> (a, textToInt b)) mparams) of
+      (Just ufile, Just (filename, Just access)) -> do
+        (s, m) <- liftIO $ saveFile ufile (T.pack filesDir) filename access
+        uploadResponse s m
+      _ -> errorJson
+
 handleLoginSubmit :: BlogApp
 handleLoginSubmit = post "login/submit" $ do
   dat <- params
-  let chkp = checkJson $ findParams dat ["name", "pass"]
+  let chkp = sequence $ findParams dat ["name", "pass"]
   case chkp of
    Nothing -> errorJson
    Just par -> do
@@ -157,12 +174,16 @@ getpostsResponse posts now = json $ map (\p -> renderDrivelPost p now) posts
 
 previewResponse post = json $ renderPost post (postPtype post)
 
-loginResponse True =  json (("login success. yey" :: T.Text), True)
-loginResponse False =  json (("wrong login data, try again" :: T.Text), False)
+loginResponse True =  json (("yey: login success" :: T.Text), True)
+loginResponse False =  json (("ney: wrong login data, try again" :: T.Text),
+                             False)
 
 submitResponse resp = json resp
 
-loadpostResponse Nothing = json ("could not find post to id" :: T.Text)
+loadpostResponse Nothing = json ("ney: could not find post to id" :: T.Text)
 loadpostResponse (Just post) = json $ post
+
+uploadResponse True msg = json (("yey: " ++ msg) :: String)
+uploadResponse False msg = json (("ney: " ++ msg) :: String)
 
 errorJson = json $ ("ney: json invld" :: T.Text)

@@ -57,6 +57,12 @@ div.headerimagecontainer {
     width: auto;
     border-bottom-width: 0px;
 }
+div.emptyimage {
+    width: 150px;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-color: #c4c4c4;
+}
 ul.headerleft {
     display: table;
     width: 300px;
@@ -79,6 +85,7 @@ li.headerentry {
 }
 a.headerlink {
     color: #be4f31;
+    --color: #E46B4D;
     text-decoration: none;
 }
 div.userinfo {

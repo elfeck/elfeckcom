@@ -26,6 +26,7 @@ handleGets staticRoutes rootDir = do
   handleLogin
   handleLogout
   handleEdit
+  handleUpload
   handleWhyiliketrees rootDir
   handleLD29
   handleUnknown
@@ -96,8 +97,18 @@ handleEdit = get "edit" $ do
   posts <- runSQL $ queryAllPosts
   reqRight muser 5 $ blaze $ do
     inputHead
-    infBackHeader "edit" "./"
+    minimalHeader "edit" "./"
     siteEdit posts
+    siteFooter (fmap snd muser) Nothing
+
+handleUpload :: BlogApp
+handleUpload = get "upload" $ do
+  muser <- loadUserSession
+  --reqRight muser 5 $ blaze $ do
+  blaze $ do
+    inputHead
+    infBackHeader "upload" "./"
+    siteUpload
     siteFooter (fmap snd muser) Nothing
 
 handleLogin :: BlogApp

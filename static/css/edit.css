@@ -47,16 +47,16 @@ textarea#eArea {
 }
 div#ePreview {
     width: 800px;
-    height: auto;
-    min-height: 100px;
+    height: 280px;
     margin: 0px;
     margin-top: 10px;
     border-width: 0px;
     border-top-width: 1px;
     border-bottom-width: 1px;
     border-color: grey;
-    border-style: dashed;
+    border-style: solid;
     word-wrap:break-word;
+    overflow-y: auto;
 }
 div#eSubmitbutton {
     margin-top: 5px;

@@ -71,7 +71,7 @@ getNextPosts = function(amount) {
     type: "POST",
     url: "/drivel/posts",
     dataType: "json",
-    data: { dat: dataObj },
+    data: dataObj,
     success: function(data) {
       processPosts(data);
     },
@@ -286,7 +286,7 @@ submitQP = function() {
     type: "POST",
     url: "/edit/submit",
     dataType: "json",
-    data: { dat: dataObj },
+    data: dataObj,
     success: function(data) {
       if(data.substring(0, 3) == "yey") {
 	qpFlash(true);

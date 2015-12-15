@@ -30,6 +30,7 @@ type BlogAction a = SpockAction SqlBackend SessionVal SiteConfig a
 data Route = DB T.Text Int | Redirect T.Text T.Text deriving Show
 data SiteConfig = SiteConfig { rootDir :: T.Text
                              , database :: T.Text
+                             , filesDir :: T.Text
                              , routes :: [Route] }
               deriving Show
 
@@ -37,10 +38,11 @@ data SiteConfig = SiteConfig { rootDir :: T.Text
  Config parsing
 -}
 parseConfig :: T.Text -> SiteConfig
-parseConfig t = SiteConfig rootDir db routes
+parseConfig t = SiteConfig rootDir db files routes
   where blocks = map T.lines $ T.splitOn "\n\n" t
         rootDir = foldl T.append "" $ map parseRootDir blocks
         db = foldl T.append "" $ map parseDatabase blocks
+        files = foldl T.append "" $ map parseFilesDir blocks
         rawRoutes = foldl (++) [] $ map parseRoutes blocks
         routes = map (constructRoute . tuplify3) rawRoutes
 
@@ -49,6 +51,9 @@ parseRootDir _ = ""
 
 parseDatabase ("[Database]" : ts) = head $ ts
 parseDatabase _ = ""
+
+parseFilesDir ("[Files]" : ts) = head $ ts
+parseFilesDir _ = ""
 
 parseRoutes ("[Routes]" : ts) = map T.words ts
 parseRoutes _ = []
@@ -122,9 +127,8 @@ tuplify3 _ = undefined
 -- first arg is what <- params returns, second the "targets"
 findParam :: [(T.Text, T.Text)] -> T.Text -> Maybe T.Text
 findParam [] _ = Nothing
-findParam ((n, c) : xs) name | n == name' = Just c
+findParam ((n, c) : xs) name | n == name = Just c
                              | otherwise = findParam xs name
-  where name' = T.append (T.append "dat[" name) "]"
 
 findParams :: [(T.Text, T.Text)] -> [T.Text] -> [Maybe T.Text]
 findParams xs names = map (findParam xs) names

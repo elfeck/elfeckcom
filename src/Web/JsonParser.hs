@@ -12,6 +12,7 @@ import Model.Types
 checkJson :: [Maybe T.Text] -> Maybe [T.Text]
 checkJson xs | null $ filter isNothing xs = Just (map fromJust xs)
              | otherwise = Nothing
+
 jsonToPost :: [(T.Text, T.Text)] -> Maybe Post
 jsonToPost params = case chkp of
   Nothing -> Nothing

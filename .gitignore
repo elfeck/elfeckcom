@@ -8,5 +8,5 @@ cabal.sandbox.config
 config.txt
 /external
 /static/games
-/db
+/db/*
 /docker/dockerversion.txt

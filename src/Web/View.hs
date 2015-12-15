@@ -13,7 +13,7 @@ import Text.Blaze.Html5 (Html, (!), docTypeHtml, head, meta, title, link,
                          script, div, img, ul, li, a, textarea, input, span,
                          i, select, option, br, canvas)
 import Text.Blaze.Html5.Attributes (charset, href, rel, src, type_, class_,
-                                    id, multiple, readonly, selected,
+                                    id, multiple, readonly, selected, style,
                                     autocomplete)
 
 import Model.Types
@@ -48,8 +48,6 @@ inputHead = docTypeHtml $ head $ do
   meta ! charset "utf-8"
   link ! href "static/css/index.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "static/css/input.css" ! rel "stylesheet" ! type_ "text/css"
-  link ! href "static/css/edit.css" ! rel "stylesheet" ! type_ "text/css"
-  link ! href "static/css/login.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "static/css/site.css" ! rel "stylesheet" ! type_ "text/css"
   link ! href "static/css/lib/jquery-ui.min.css" ! rel "stylesheet"
     ! type_ "text/css"
@@ -94,6 +92,18 @@ darkHeader path = do
       headerEntry $ headerEle !! 2
       headerEntry $ headerEle !! 3
 
+minimalHeader :: String -> String -> Html
+minimalHeader inf path = do
+  div ! class_ "header" ! style "height: 33px;" $ do
+    div ! class_ "headercontainer" $ ul ! class_ "headerleft" $ do
+      li ! class_ "headerentry" $ toHtml inf
+      li ! class_ "headerentry" $ ""
+    div ! class_ "headerimagecontainer emptyimage" $ ""
+    div ! class_ "headercontainer" $ ul ! class_ "headerright" $ do
+      li ! class_ "headerentry" $ ""
+      li ! class_ "headerentry" $ a "home" ! href "/" ! class_ "headerlink"
+
+
 headerEntry :: String -> Html
 headerEntry name =
   li ! class_ "headerentry" $
@@ -124,6 +134,8 @@ siteFooter muser mpost = do
      Nothing -> return ()
      Just user -> do
        wrapContainer $ a "edit" ! class_ "userlink" ! href "/edit"
+       div ! class_ "usersep" $ "|"
+       wrapContainer $ a "upload" ! class_ "userlink" ! href "/upload"
        div ! class_ "usersep" $ "|"
        wrapContainer $ a "logout" ! class_ "userlink" ! id "logoutlink" !
          href "/logout"
@@ -226,6 +238,7 @@ siteInvPid = div ! class_ "errorbody" $ do
 -}
 siteEdit :: [(PostId, Post)] -> Html
 siteEdit posts = do
+  link ! href "static/css/edit.css" ! rel "stylesheet" ! type_ "text/css"
   script "" ! src "static/js/lib/jquery-2.1.3.min.js"
   script "" ! src "static/js/button.js"
   script "" ! src "static/js/edit.js"
@@ -248,10 +261,36 @@ siteEdit posts = do
     katex "./"
 
 {-
+ Upload Page
+-}
+siteUpload :: Html
+siteUpload = do
+  link ! href "static/css/upload.css" ! rel "stylesheet" ! type_ "text/css"
+  link ! href "static/css/edit.css" ! rel "stylesheet" ! type_ "text/css"
+  script "" ! src "static/js/lib/jquery-2.1.3.min.js"
+  script "" ! src "static/js/button.js"
+  script "" ! src "static/js/upload.js"
+  div ! class_ "colbody" $ do
+    div ! class_ "colleft" $ do
+      div ! id "filedescr" $ "Choose a file to upload:"
+      input ! type_ "file" ! id "fileinput"
+      div ! id "filenamedescr" $ "Filename for server:"
+      div ! id "accessdescr" $ "Access:"
+      input ! class_ "stdinput" ! id "filename"
+      input ! class_ "stdinput" ! id "access"
+      div ! id "responsefield" $ ""
+      input ! class_ "stdinput" ! id "deletefield"
+      div ! id "submitbutton" ! class_ "button buttonidle" $ "S"
+    div ! class_ "colright" $ do
+      select ! multiple "multiple" ! class_ "stdlist" ! id "filelist"
+        ! autocomplete "off" $ ""
+
+{-
  Login Page
 -}
 siteLogin :: Html
 siteLogin = do
+  link ! href "static/css/login.css" ! rel "stylesheet" ! type_ "text/css"
   script "" ! src "static/js/lib/jquery-2.1.3.min.js"
   script "" ! src "static/js/button.js"
   script "" ! src "static/js/login.js"
@@ -299,7 +338,8 @@ ld29Body = do
   div ! id "main" $ do
     canvas "" ! id "canvas"
     div "" ! id "footer"
-    script "" ! type_ "application/dart" ! src "../static/games/LD29/LD29.dart"
+    script "" ! type_ "application/dart" !
+      src "../static/games/LD29/LD29.dart"
     script "" ! src "../static/games/LD29/packages/browser/dart.js"
 
 toScriptTag :: String -> Html

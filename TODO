@@ -1,16 +1,16 @@
 TODO:
+*) more markdown ie code, quote (for math -> proofs)
 *) file/Image upload in edit
-*) more markdown ie code, quote (for math)
 
-*) massive refactoring of bloated backend code
-*) massive refactoring of stupid js/css code
-
+*) Fix that js files get served even if not logged in
+*) Drivel only selection
+*) Drivel modify browser bar instead of local storage?
 
 ~) math-check before including katex
-~) at mathjax as option, redo the inclusion
-
+~) Font-fix für Crimson. Too small letters compared to San Serif text
 
 
 
 DONE (recently):
 +) ajax-pull the selection list in edit
++) Edit-scroll and more space to make editing easier
