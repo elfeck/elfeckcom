@@ -29,6 +29,7 @@ handlePosts filesDir = do
   handleEditSubmit
   handleEditLoad
   handleUploadSubmit filesDir
+  handleUploadChoices filesDir
   handleLoginSubmit
 
 handleDrivelCategories :: BlogApp
@@ -68,7 +69,7 @@ handleDrivelPosts = post "drivel/posts" $ do
 handleEditPreview :: BlogApp
 handleEditPreview = post "edit/preview" $ do
   muser <- loadUserSession
-  reqRight' muser 5 $ do
+  reqRightPOST muser 5 $ do
     dat <- params
     let mpost = jsonToPost dat
     let mpid = findParam dat "pid"
@@ -83,7 +84,7 @@ handleEditPreview = post "edit/preview" $ do
 handleEditSubmit :: BlogApp
 handleEditSubmit = post "edit/submit" $ do
   muser <- loadUserSession
-  reqRight' muser 5 $ do
+  reqRightPOST muser 5 $ do
     dat <- params
     let msubmitType = findParam dat "submitType"
     let mpid = fmap textToInt $ findParam dat "pid"
@@ -95,7 +96,7 @@ handleEditSubmit = post "edit/submit" $ do
 handleEditLoad :: BlogApp
 handleEditLoad = post "edit/loadpost" $ do
   muser <- loadUserSession
-  reqRight' muser 5 $ do
+  reqRightPOST muser 5 $ do
     dat <- params
     let mpid = fmap textToInt $ findParam dat "pid"
     case mpid of
@@ -107,7 +108,7 @@ handleEditLoad = post "edit/loadpost" $ do
 handleEditChoices :: BlogApp
 handleEditChoices = post "edit/loadchoices" $ do
   muser <- loadUserSession
-  reqRight' muser 5 $ do
+  reqRightPOST muser 5 $ do
     allPosts <- runSQL $ queryAllPosts
     let stripped = map stripPost allPosts
     json stripped
@@ -119,7 +120,7 @@ handleEditChoices = post "edit/loadchoices" $ do
 handleUploadSubmit :: String -> BlogApp
 handleUploadSubmit filesDir = post "upload/submit" $ do
   muser <- loadUserSession
-  --reqRight' muser 5 $ do
+  --reqRightPOST muser 5 $ do
   do
     dat <- params
     fileMap <- files
@@ -127,9 +128,18 @@ handleUploadSubmit filesDir = post "upload/submit" $ do
     let mFile = (HM.lookup "file" fileMap)
     case (mFile, fmap (\[a, b] -> (a, textToInt b)) mparams) of
       (Just ufile, Just (filename, Just access)) -> do
-        (s, m) <- liftIO $ saveFile ufile (T.pack filesDir) filename access
+        (s, m) <- liftIO (saveUploadedFile
+                          ufile (T.pack filesDir) filename access)
         uploadResponse s m
       _ -> errorJson
+
+handleUploadChoices :: String -> BlogApp
+handleUploadChoices filesDir = post "upload/loadchoices" $ do
+  muser <- loadUserSession
+  --reqRightPOST muser 5 $ do
+  do
+    filePaths <- liftIO $ getUploadedFileList filesDir
+    json filePaths
 
 handleLoginSubmit :: BlogApp
 handleLoginSubmit = post "login/submit" $ do

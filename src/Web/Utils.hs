@@ -80,20 +80,28 @@ reqLogin Nothing _ = redirect "/login"
 reqLogin _ action = action
 
 -- Redirects to access denied (for GET)
-reqRight :: Maybe (UserId, User) -> Int -> BlogAction a -> BlogAction a
-reqRight Nothing _ _ = redirect "/login"
-reqRight (Just (_, user)) reqAccess action =
+reqRightPage :: Maybe (UserId, User) -> Int -> BlogAction a -> BlogAction a
+reqRightPage Nothing _ _ = redirect "/login"
+reqRightPage (Just (_, user)) reqAccess action =
   if checkUserRight user reqAccess
   then action
   else redirect "/accessDenied"
 
 -- sends json error message (for POST)
-reqRight' :: Maybe (UserId, User) -> Int -> BlogAction a -> BlogAction a
-reqRight' Nothing _ _ = json ("post error: user not logged in" :: T.Text)
-reqRight' (Just (_, user)) reqAccess action =
+reqRightPOST :: Maybe (UserId, User) -> Int -> BlogAction a -> BlogAction a
+reqRightPOST Nothing _ _ = json ("post error: user not logged in" :: T.Text)
+reqRightPOST (Just (_, user)) reqAccess action =
   if checkUserRight user reqAccess
   then action
   else json ("post error: user access denied" :: T.Text)
+
+reqRightFile :: Maybe (UserId, User) -> Int -> BlogAction a -> BlogAction a
+reqRightFile _ 0 action = action
+reqRightFile (Just (_, user)) reqAccess action =
+  if checkUserRight user reqAccess
+  then action
+  else text "Insufficient permission for file"
+reqRightFile _ _ _ = text "Insufficient permission for file"
 
 checkUserRight :: User -> Int -> Bool
 checkUserRight user reqAccess = userAccess user >= reqAccess

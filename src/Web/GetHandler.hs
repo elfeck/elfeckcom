@@ -14,13 +14,15 @@ import Control.Monad.IO.Class (liftIO)
 import Web.View
 import Web.Utils
 import Web.PostParser
+import Web.FileHandler
 import Model.Types
 import Model.Model
 
 
-handleGets :: [Route] -> String -> BlogApp
-handleGets staticRoutes rootDir = do
-  sequence_ $ map handleStatic staticRoutes
+handleGets :: [Route] -> String -> String -> BlogApp
+handleGets staticRoutes rootDir filesDir = do
+  handleUploads filesDir
+  sequence_ $ map handleStaticSite staticRoutes
   handleDrivel
   handleDrivelEntry
   handleLogin
@@ -31,9 +33,22 @@ handleGets staticRoutes rootDir = do
   handleLD29
   handleUnknown
 
-handleStatic :: Route -> BlogApp
-handleStatic (Redirect from to) = get (static $ T.unpack from) $ redirect to
-handleStatic (DB from pid) = get (static $ T.unpack from) $ do
+-- TODO: Content Type!!
+handleUploads :: String -> BlogApp
+handleUploads filesDir = subcomponent "uploads" $ do
+  get (var <//> var) $ \perm fileName -> do
+    muser <- loadUserSession
+    reqRightFile muser perm $ do
+      let filePath = concat ["/upload/access/", show perm, "/", fileName]
+      mfilep <- liftIO $ checkFile filesDir filePath
+      case mfilep of
+        Just path -> do file "" path
+        Nothing -> do text "requested file not found"
+
+handleStaticSite :: Route -> BlogApp
+handleStaticSite (Redirect from to) = get (static $ T.unpack from) $
+                                      redirect to
+handleStaticSite (DB from pid) = get (static $ T.unpack from) $ do
   muser <- loadUserSession
   mpost <- runSQL $ queryPost pid
   case mpost of
@@ -95,7 +110,7 @@ handleEdit :: BlogApp
 handleEdit = get "edit" $ do
   muser <- loadUserSession
   posts <- runSQL $ queryAllPosts
-  reqRight muser 5 $ blaze $ do
+  reqRightPage muser 5 $ blaze $ do
     inputHead
     minimalHeader "edit" "./"
     siteEdit posts
@@ -104,7 +119,7 @@ handleEdit = get "edit" $ do
 handleUpload :: BlogApp
 handleUpload = get "upload" $ do
   muser <- loadUserSession
-  --reqRight muser 5 $ blaze $ do
+  --reqRightPage muser 5 $ blaze $ do
   blaze $ do
     inputHead
     infBackHeader "upload" "./"

@@ -1,6 +1,7 @@
 TODO:
+*) fix content type for serving restricted files
+
 *) more markdown ie code, quote (for math -> proofs)
-*) file/Image upload in edit
 
 *) Fix that js files get served even if not logged in
 *) Drivel only selection
@@ -12,5 +13,7 @@ TODO:
 
 
 DONE (recently):
++) file/Image upload in edit
+
 +) ajax-pull the selection list in edit
 +) Edit-scroll and more space to make editing easier

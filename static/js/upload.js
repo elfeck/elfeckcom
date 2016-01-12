@@ -4,6 +4,8 @@ $(function() {
   responsefield = $("#responsefiled");
   access = $("#access");
 
+  fileList = $("#filelist");
+
   deletefield = $("#deletefield");
   deletefield.on("keyup", function() {
     if(deletefield.val() == "DEL") {
@@ -15,6 +17,8 @@ $(function() {
 
   submitbutton = $("#submitbutton");
   registerButton(submitbutton, submit);
+
+  loadChoices();
 });
 
 
@@ -51,6 +55,27 @@ submit = function() {
     processData: false
   });
 };
+
+loadChoices = function() {
+  var dataObj = { }
+  $.ajax({
+    type: "POST",
+    url: "upload/loadchoices",
+    dataType: "json",
+    data: dataObj,
+    success: function(data) {
+      for(var i = 0; i < data.length; i++) {
+	console.log(data[i]);
+	fileList.append($("<option>", {
+	  text: data[i]
+	}))
+      }
+    },
+    error: function() {
+      respond("ney: errorJson");
+    }
+  });
+}
 
 respond = function(m) {
   if(m.substring(0, 3) == "yey") {
