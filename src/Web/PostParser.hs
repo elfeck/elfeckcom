@@ -37,13 +37,13 @@ renderDrivelPost (pid, post) now = toStrict $ renderHtml $ do
 
 parsePost :: Post -> Int -> Html
 parsePost post 0 = putHtml $ parseContent 0 (postContent post) -- stc site
-parsePost post 2 = do
-  putHtml $ postTitleLine Nothing Nothing (postCrtDate post)
-  putHtml $ parseContent 2 (postContent post)
 parsePost post 1 = do
   putHtml (postTitleLine (postTitle post) (postCategories post)
            (postCrtDate post))
   putHtml $ parseContent 1 (postContent post)
+parsePost post 2 = do
+  putHtml $ postTitleLine Nothing Nothing (postCrtDate post)
+  putHtml $ parseContent 2 (postContent post)
 parsePost post _ = do
   putHtml $ parseContent 3 (postContent post)
 
@@ -123,10 +123,19 @@ secToHtml _ ((Htm t), _) = preEscapedToHtml t
 blockToHtml :: Block -> Html
 blockToHtml (List els) = ul ! class_ "ul" $ toHtml $ map toListEle els
 blockToHtml (Enum (n, els)) = ol ! class_ "ol" $ toHtml $ map toListEle els
-blockToHtml (Norm els) = toHtml $ map eleToHtml els
+blockToHtml (Norm els) = toHtml $ mapElesToHtml els
 
 toListEle :: [Ele] -> Html
 toListEle els = li ! class_ "li" $ toHtml $ map eleToHtml els
+
+mapElesToHtml :: [Ele] -> [Html]
+mapElesToHtml [] = []
+mapElesToHtml ((Plain t) : (Image (d, l)) : es) =
+  [eleToHtml (Plain t)
+  , br
+  , img ! (src $ toValue l) ! class_ "imag"
+  ] ++ mapElesToHtml es
+mapElesToHtml (e : es) = [eleToHtml e] ++ mapElesToHtml es
 
 eleToHtml :: Ele -> Html
 eleToHtml Newline = br
@@ -135,7 +144,8 @@ eleToHtml (Italic t) = i $ toHtml t
 eleToHtml (Bold t) = b $ toHtml t
 eleToHtml (Link (d, l)) = a ! (href $ toValue l) ! class_ "link"
                           ! target "blank" $ toHtml d
-eleToHtml (Image (d, l)) = img ! (src $ toValue l) ! class_ "imag"
+eleToHtml (Image (d, l)) = do
+  img ! (src $ toValue l) ! class_ "imag_nomargin"
 
 eleToPlain :: Ele -> T.Text
 eleToPlain Newline = ""

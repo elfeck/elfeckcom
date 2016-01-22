@@ -1,14 +1,16 @@
 TODO:
 *) fix content type for serving restricted files
+*) fix posts being parsed as drivel (ptype = 2) if title or cat missing
+*) fix image margins after headlines (if necessary)
 
 *) more markdown ie code, quote (for math -> proofs)
 
-*) Fix that js files get served even if not logged in
-*) Drivel only selection
-*) Drivel modify browser bar instead of local storage?
+*) fix that js files get served even if not logged in
+*) drivel only selection
+*) drivel modify browser bar instead of local storage?
 
 ~) math-check before including katex
-~) Font-fix für Crimson. Too small letters compared to San Serif text
+~) font-fix für Crimson. Too small letters compared to San Serif text
 
 
 
@@ -16,4 +18,4 @@ DONE (recently):
 +) file/Image upload in edit
 
 +) ajax-pull the selection list in edit
-+) Edit-scroll and more space to make editing easier
++) dit-scroll and more space to make editing easier

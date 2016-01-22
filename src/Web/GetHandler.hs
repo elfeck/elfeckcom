@@ -34,16 +34,26 @@ handleGets staticRoutes rootDir filesDir = do
   handleUnknown
 
 -- TODO: Content Type!!
+-- TODO: send 404 error and also in Utils ~ send access HTML error
+-- TODO: SUPER UGLY
 handleUploads :: String -> BlogApp
 handleUploads filesDir = subcomponent "uploads" $ do
-  get (var <//> var) $ \perm fileName -> do
-    muser <- loadUserSession
-    reqRightFile muser perm $ do
-      let filePath = concat ["/upload/access/", show perm, "/", fileName]
-      mfilep <- liftIO $ checkFile filesDir filePath
-      case mfilep of
-        Just path -> do file "" path
-        Nothing -> do text "requested file not found"
+  get (var <//> var) $ \perm fileName -> handl perm fileName
+  get (var <//> var <//> var) $ \perm fn1 fn2 -> handl perm
+                                                 (fn1 ++ "/" ++ fn2)
+  get (var <//> var <//> var <//> var) $ \perm fn1 fn2 fn3 -> handl perm
+                                                              (fn1 ++ "/" ++
+                                                               fn2 ++ "/" ++
+                                                               fn3)
+    where handl perm fileName = do
+            muser <- loadUserSession
+            reqRightFile muser perm $ do
+              let filePath = concat ["/upload/access/",
+                                     show perm, "/", fileName]
+              mfilep <- liftIO $ checkFile filesDir filePath
+              case mfilep of
+                Just path -> do file "" path
+                Nothing -> do text "requested file not found"
 
 handleStaticSite :: Route -> BlogApp
 handleStaticSite (Redirect from to) = get (static $ T.unpack from) $
@@ -83,7 +93,8 @@ handleDrivelEntry = get ("drivel" <//> "post" <//> var) $ \pid -> do
                else userAccess $ snd $ fromJust muser
   case mpost of
    Nothing -> error404 (fmap snd muser)
-   Just post ->
+   Just post -> do
+     -- prevent serving statically handled sites (should never happen but ok)
      if postPtype (snd post) < 1
      then error404 (fmap snd muser)
      else

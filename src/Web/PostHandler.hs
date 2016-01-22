@@ -124,13 +124,24 @@ handleUploadSubmit filesDir = post "upload/submit" $ do
   do
     dat <- params
     fileMap <- files
-    let mparams = sequence $ findParams dat ["filename", "access"]
-    let mFile = (HM.lookup "file" fileMap)
-    case (mFile, fmap (\[a, b] -> (a, textToInt b)) mparams) of
-      (Just ufile, Just (filename, Just access)) -> do
-        (s, m) <- liftIO (saveUploadedFile
-                          ufile (T.pack filesDir) filename access)
-        uploadResponse s m
+    let submitType = findParam dat "submitType"
+    case submitType of
+      Just "1" -> do
+        let mparams = sequence $ findParams dat ["filename", "access"]
+        let mFile = (HM.lookup "file" fileMap)
+        case (mFile, fmap (\[a, b] -> (a, textToInt b)) mparams) of
+          (Just ufile, Just (filename, Just access)) -> do
+            (s, m) <- liftIO (saveUploadedFile
+                              ufile filesDir (T.unpack filename) access)
+            uploadResponse s m
+          _ -> errorJson
+      Just "2" -> do
+        let mfilename = findParam dat "filename"
+        case mfilename of
+          Just filename -> do
+            (s, m) <- liftIO (trashFile filesDir (T.unpack filename))
+            uploadResponse s m
+          _ -> errorJson
       _ -> errorJson
 
 handleUploadChoices :: String -> BlogApp

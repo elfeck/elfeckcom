@@ -154,3 +154,24 @@ div.postdriveltitle {
 .katex {
     font-size: 18px !important;
 }
+
+img.imag {
+    max-width: 732px;
+    height: auto;
+    display: block;
+    margin: 0px;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+}
+
+img.imag_nomargin {
+    max-width: 732px;
+    height: auto;
+    display: block;
+    margin: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+}

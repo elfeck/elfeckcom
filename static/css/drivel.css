@@ -298,3 +298,25 @@ div#drivelreset {
     -ms-user-select: none;
     cursor: pointer;
 }
+
+
+img.imag {
+    max-width: 552px;
+    height: auto;
+    display: block;
+    margin: 0px;
+    margin-top: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+}
+
+img.imag_nomargin {
+    max-width: 552px;
+    height: auto;
+    display: block;
+    margin: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+}

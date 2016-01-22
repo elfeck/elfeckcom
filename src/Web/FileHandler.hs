@@ -12,23 +12,19 @@ import Web.Spock.Safe hiding (head, SessionId)
 
 
 -- Does not check for correct file extension
-saveUploadedFile :: UploadedFile -> T.Text -> T.Text -> Int
+saveUploadedFile :: UploadedFile -> String -> String -> Int
                     -> IO (Bool, String)
 saveUploadedFile (UploadedFile _ _ upath) filesDir fileName access = do
-  let fullPath = T.unpack $ T.concat [filesDir
-                                     , "/upload/access/"
-                                     , T.pack $ show access
-                                     , "/"
-                                     , fst $ splitName fileName]
-  fileExists <- doesFileExist $ (fullPath ++
-                                 (T.unpack $ snd $ splitName fileName))
+  let fullPath = filesDir ++ "/upload/access/" ++ show access ++
+                 "/" ++ fst (splitName fileName)
+  fileExists <- doesFileExist (fullPath ++ snd (splitName fileName))
   if fileExists
     then return (False, "file exts")
     else do createDirectoryIfMissing True fullPath
-            copyFile upath (fullPath ++ (T.unpack $ snd $ splitName fileName))
+            copyFile upath (fullPath ++ snd (splitName fileName))
             return (True, "file saved")
-  where splitName fn = (T.reverse $ T.dropWhile (/= '/') (T.reverse fn),
-                        T.reverse $ T.takeWhile (/= '/') (T.reverse fn))
+  where splitName fn = (reverse $ dropWhile (/= '/') (reverse fn),
+                        reverse $ takeWhile (/= '/') (reverse fn))
 
 
 checkFile :: String -> String -> IO (Maybe FilePath)
@@ -38,11 +34,24 @@ checkFile filesDir filePath = do
     True -> return $ Just (filesDir ++ filePath)
     False -> return Nothing
 
+trashFile :: String -> String -> IO (Bool, String)
+trashFile filesDir filePath = do
+  let fullPath = filesDir ++ "/upload/access" ++ filePath
+  fileExists <- doesFileExist fullPath
+  if fileExists
+    then do renameFile fullPath (filesDir ++ "/upload/trash/" ++
+                                 nameOnly filePath)
+            return (True, "file deled")
+    else return (False, "intl error")
+  where nameOnly p = reverse $ takeWhile (/= '/') (reverse p)
+
 getUploadedFileList :: String -> IO [String]
 getUploadedFileList filesDir = do
   fls <- getRecursiveFiles basePath
-  let strippedFls = map (stripPrefix basePath) fls
-  return $ catMaybes strippedFls
+  modDates <- mapM getModificationTime fls
+  let sortedFls = map fst (sortOn snd (zip fls modDates))
+  let strippedFls = map (stripPrefix basePath) sortedFls
+  return $ reverse $ catMaybes strippedFls
   where basePath = filesDir ++ "/upload/access"
 
 
