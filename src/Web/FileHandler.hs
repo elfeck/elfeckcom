@@ -4,6 +4,7 @@ module Web.FileHandler where
 
 import qualified Data.Text as T
 import System.Directory
+import System.Posix.Files
 import Control.Monad
 import Data.List
 import Data.Maybe
@@ -22,10 +23,15 @@ saveUploadedFile (UploadedFile _ _ upath) filesDir fileName access = do
     then return (False, "file exts")
     else do createDirectoryIfMissing True fullPath
             copyFile upath (fullPath ++ snd (splitName fileName))
+            makeReadable (fullPath ++ snd (splitName fileName))
             return (True, "file saved")
   where splitName fn = (reverse $ dropWhile (/= '/') (reverse fn),
                         reverse $ takeWhile (/= '/') (reverse fn))
-
+        makeReadable f = setFileMode f (foldl unionFileModes nullFileMode
+                                        [ownerReadMode
+                                        , ownerWriteMode
+                                        , groupReadMode
+                                        , otherReadMode])
 
 checkFile :: String -> String -> IO (Maybe FilePath)
 checkFile filesDir filePath = do

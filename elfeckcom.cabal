@@ -32,6 +32,7 @@ executable elfeckcom
                        , bytestring
                        , base16-bytestring
                        , directory
+                       , unix
                        , unordered-containers
   hs-source-dirs:      src
   default-language:    Haskell2010
