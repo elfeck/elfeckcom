@@ -52,7 +52,6 @@ handleDrivelPosts = post "drivel/posts" $ do
   let mrawp = sequence $ findParams dat ["from", "till", "cats", "postOnly"]
   case processParams mrawp of
    Just (from, till, cats, ponly) -> do
-     --liftIO $ print (from, till, cats, ponly)
      posts <- runSQL $ queryDrivel access (from, till) cats ponly
      getpostsResponse posts now
    Nothing -> errorJson
@@ -120,8 +119,7 @@ handleEditChoices = post "edit/loadchoices" $ do
 handleUploadSubmit :: String -> BlogApp
 handleUploadSubmit filesDir = post "upload/submit" $ do
   muser <- loadUserSession
-  --reqRightPOST muser 5 $ do
-  do
+  reqRightPOST muser 5 $ do
     dat <- params
     fileMap <- files
     let submitType = findParam dat "submitType"
@@ -147,8 +145,7 @@ handleUploadSubmit filesDir = post "upload/submit" $ do
 handleUploadChoices :: String -> BlogApp
 handleUploadChoices filesDir = post "upload/loadchoices" $ do
   muser <- loadUserSession
-  --reqRightPOST muser 5 $ do
-  do
+  reqRightPOST muser 5 $ do
     filePaths <- liftIO $ getUploadedFileList filesDir
     json filePaths
 

@@ -130,8 +130,7 @@ handleEdit = get "edit" $ do
 handleUpload :: BlogApp
 handleUpload = get "upload" $ do
   muser <- loadUserSession
-  --reqRightPage muser 5 $ blaze $ do
-  blaze $ do
+  reqRightPage muser 5 $ blaze $ do
     inputHead
     infBackHeader "upload" "./"
     siteUpload

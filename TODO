@@ -3,14 +3,16 @@ TODO:
 *) fix posts being parsed as drivel (ptype = 2) if title or cat missing
 *) fix image margins after headlines (if necessary)
 
-*) more markdown ie code, quote (for math -> proofs)
+*) more markdown ie code, quote (for math -> proofs), small text, italic links
 
 *) fix that js files get served even if not logged in
+*) fix that errorjson gets displayed in upload list if not logged in
 *) drivel only selection
+*) choose how many posts per page in drivel
 *) drivel modify browser bar instead of local storage?
 
 ~) math-check before including katex
-~) font-fix für Crimson. Too small letters compared to San Serif text
+~) font-fix for Crimson. Too small letters compared to San Serif text
 
 
 
