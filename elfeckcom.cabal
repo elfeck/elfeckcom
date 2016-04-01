@@ -34,6 +34,7 @@ executable elfeckcom
                        , directory
                        , unix
                        , unordered-containers
+                       , hslogger
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options: -Wall

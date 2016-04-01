@@ -11,6 +11,7 @@ import Database.Persist.Sql (toSqlKey, fromSqlKey)
 import Data.Maybe
 import Data.Time
 import qualified Data.HashMap.Strict as HM
+import System.Log.Logger
 
 import Web.Utils
 import Web.PostParser
@@ -158,10 +159,13 @@ handleLoginSubmit = post "login/submit" $ do
    Just par -> do
      login <- runSQL $ loginUser (par !! 0) (par !! 1)
      case login of
-      Nothing -> loginResponse False
+      Nothing -> do
+        liftIO $ logAuth False 0 Nothing "login attempt"
+        loginResponse False
       Just userId -> do
         sessId <- runSQL $ insertSession userId
         writeSession (Just sessId)
+        liftIO $ logAuth True 0 Nothing "login attempt"
         loginResponse True
 
 submitEdit submitType pid post = do

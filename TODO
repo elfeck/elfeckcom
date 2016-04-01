@@ -1,4 +1,6 @@
 TODO:
+*) Logging: auth for Get
+
 *) fix content type for serving restricted files
 *) fix posts being parsed as drivel (ptype = 2) if title or cat missing
 *) fix image margins after headlines (if necessary)
@@ -10,6 +12,8 @@ TODO:
 *) drivel only selection
 *) choose how many posts per page in drivel
 *) drivel modify browser bar instead of local storage?
+
+*) figure out a way to make file owner seb and not root from docker container
 
 ~) math-check before including katex
 ~) font-fix for Crimson. Too small letters compared to San Serif text

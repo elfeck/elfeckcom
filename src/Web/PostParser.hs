@@ -7,7 +7,7 @@ import qualified Data.Text as T
 import Data.Text.Lazy (toStrict)
 import Data.Char (isLetter, isNumber)
 import Data.Time
-import Data.Time.Format
+
 import Database.Persist.Sql (fromSqlKey)
 
 import Text.Blaze.Html (toHtml, toValue, textValue, preEscapedToHtml)

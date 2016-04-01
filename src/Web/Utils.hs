@@ -15,6 +15,7 @@ import Text.Blaze.Html.Renderer.Text (renderHtml)
 import Data.Text.Read
 import Data.Maybe
 import Database.Persist.Sqlite hiding (get)
+import System.Log.Logger
 
 import Model.Types
 import Model.Model
@@ -31,18 +32,21 @@ data Route = DB T.Text Int | Redirect T.Text T.Text deriving Show
 data SiteConfig = SiteConfig { rootDir :: T.Text
                              , database :: T.Text
                              , filesDir :: T.Text
-                             , routes :: [Route] }
+                             , logDir :: T.Text
+                             , routes :: [Route]
+                             }
               deriving Show
 
 {-
  Config parsing
 -}
 parseConfig :: T.Text -> SiteConfig
-parseConfig t = SiteConfig rootDir db files routes
+parseConfig t = SiteConfig rootDir db files logs routes
   where blocks = map T.lines $ T.splitOn "\n\n" t
         rootDir = foldl T.append "" $ map parseRootDir blocks
         db = foldl T.append "" $ map parseDatabase blocks
         files = foldl T.append "" $ map parseFilesDir blocks
+        logs = foldl T.append "" $ map parseLogDir blocks
         rawRoutes = foldl (++) [] $ map parseRoutes blocks
         routes = map (constructRoute . tuplify3) rawRoutes
 
@@ -54,6 +58,9 @@ parseDatabase _ = ""
 
 parseFilesDir ("[Files]" : ts) = head $ ts
 parseFilesDir _ = ""
+
+parseLogDir ("[Log]" : ts) = head $ ts
+parseLogDir _ = ""
 
 parseRoutes ("[Routes]" : ts) = map T.words ts
 parseRoutes _ = []
@@ -81,31 +88,48 @@ reqLogin _ action = action
 
 -- Redirects to access denied (for GET)
 reqRightPage :: Maybe (UserId, User) -> Int -> BlogAction a -> BlogAction a
-reqRightPage Nothing _ _ = redirect "/login"
+reqRightPage Nothing reqAccess _ = do
+  liftIO $ logAuth False reqAccess Nothing "page request"
+  redirect "/login"
 reqRightPage (Just (_, user)) reqAccess action =
   if checkUserRight user reqAccess
-  then action
-  else redirect "/accessDenied"
+  then do
+    liftIO $ logAuth True reqAccess (Just user) "page request"
+    action
+  else do
+    liftIO $ logAuth False reqAccess (Just user) "page request"
+    redirect "/accessDenied"
 
 -- sends json error message (for POST)
 reqRightPOST :: Maybe (UserId, User) -> Int -> BlogAction a -> BlogAction a
-reqRightPOST Nothing _ _ = json ("post error: user not logged in" :: T.Text)
+reqRightPOST Nothing reqAccess _ = do
+  liftIO $ logAuth False reqAccess (Nothing) "POST"
+  json ("post error: user not logged in" :: T.Text)
 reqRightPOST (Just (_, user)) reqAccess action =
   if checkUserRight user reqAccess
-  then action
-  else json ("post error: user access denied" :: T.Text)
+  then do
+    liftIO $ logAuth True reqAccess (Just user) "POST"
+    action
+  else do
+    liftIO $ logAuth False reqAccess (Just user) "POST"
+    json ("post error: user access denied" :: T.Text)
 
 reqRightFile :: Maybe (UserId, User) -> Int -> BlogAction a -> BlogAction a
 reqRightFile _ 0 action = action
 reqRightFile (Just (_, user)) reqAccess action =
   if checkUserRight user reqAccess
-  then action
-  else text "Insufficient permission for file"
-reqRightFile _ _ _ = text "Insufficient permission for file"
+  then do
+    liftIO $ logAuth True reqAccess (Just user) "file request"
+    action
+  else do
+    liftIO $ logAuth False reqAccess (Just user) "file request"
+    text "Insufficient permission for file"
+reqRightFile Nothing reqAccess _ = do
+  liftIO $ logAuth False reqAccess (Nothing) "file request"
+  text "Insufficient permission for file"
 
 checkUserRight :: User -> Int -> Bool
 checkUserRight user reqAccess = userAccess user >= reqAccess
-
 
 loadUserSession :: BlogAction (Maybe (UserId, User))
 loadUserSession = do
@@ -140,3 +164,14 @@ findParam ((n, c) : xs) name | n == name = Just c
 
 findParams :: [(T.Text, T.Text)] -> [T.Text] -> [Maybe T.Text]
 findParams xs names = map (findParam xs) names
+
+logAuth :: Bool -> Int -> Maybe User -> String -> IO ()
+logAuth False reqAccess muser action =
+  warningM "auth" ("INVALID " ++ action ++  " at level=" ++
+                   show reqAccess ++ " for " ++ convUser muser)
+logAuth True reqAccess muser action =
+  infoM "auth" ("Valid " ++ action ++ " at level=" ++
+                show reqAccess ++ " for " ++ convUser muser)
+
+convUser Nothing = "user=UNAUTH"
+convUser (Just user) = "user=" ++ T.unpack (userName user)

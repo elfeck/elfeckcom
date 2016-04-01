@@ -2,12 +2,13 @@
 
 module Web.FileHandler where
 
-import qualified Data.Text as T
+
 import System.Directory
 import System.Posix.Files
 import Control.Monad
 import Data.List
 import Data.Maybe
+import System.Log.Logger
 
 import Web.Spock.Safe hiding (head, SessionId)
 
@@ -24,6 +25,7 @@ saveUploadedFile (UploadedFile _ _ upath) filesDir fileName access = do
     else do createDirectoryIfMissing True fullPath
             copyFile upath (fullPath ++ snd (splitName fileName))
             makeReadable (fullPath ++ snd (splitName fileName))
+            logFile True ("Saved file=" ++ fileName)
             return (True, "file saved")
   where splitName fn = (reverse $ dropWhile (/= '/') (reverse fn),
                         reverse $ takeWhile (/= '/') (reverse fn))
@@ -47,6 +49,7 @@ trashFile filesDir filePath = do
   if fileExists
     then do renameFile fullPath (filesDir ++ "/upload/trash/" ++
                                  nameOnly filePath)
+            logFile True ("Deleted file=" ++ (nameOnly filePath))
             return (True, "file deled")
     else return (False, "intl error")
   where nameOnly p = reverse $ takeWhile (/= '/') (reverse p)
@@ -72,3 +75,8 @@ getRecursiveFiles path = do
     then return fls
     else do rfls <- mapM getRecursiveFiles dirs
             return $ fls ++ (foldl (++) [] rfls)
+
+
+logFile :: Bool -> String -> IO ()
+logFile False action = warningM "db" ("FILE ACCESS: " ++ action)
+logFile True action = infoM "db" ("File access: " ++ action)

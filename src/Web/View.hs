@@ -7,7 +7,7 @@ import Prelude hiding (div, head, id, span)
 import Data.Maybe
 import Data.Time.Format
 import qualified Data.Text as T
-import Database.Persist.Sql (fromSqlKey)
+
 import Text.Blaze.Html (stringValue, toHtml)
 import Text.Blaze.Html5 (Html, (!), docTypeHtml, head, meta, title, link,
                          script, div, img, ul, li, a, textarea, input, span,

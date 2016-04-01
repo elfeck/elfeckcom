@@ -5,7 +5,6 @@ module Web.GetHandler where
 
 import qualified Data.Text as T
 import Web.Spock.Safe hiding (head, SessionId)
-
 import Data.List
 import Data.Maybe
 import System.Directory (getDirectoryContents)
@@ -30,6 +29,7 @@ handleGets staticRoutes rootDir filesDir = do
   handleEdit
   handleUpload
   handleWhyiliketrees rootDir
+  handleWhyiliketreesBare rootDir
   handleLD29
   handleUnknown
 
@@ -147,9 +147,10 @@ handleLogout = get "logout" $ do
   muser <- loadUserSession
   case muser of
    Nothing -> redirect "/whyiliketrees/"
-   Just (userId, _) -> do
+   Just (userId, user) -> do
      runSQL $ logoutUser userId
      writeSession Nothing
+     liftIO $ logAuth True 0 (Just user) "logout"
      redirect "/"
 
 handleWhyiliketrees :: String -> BlogApp
@@ -162,6 +163,15 @@ handleWhyiliketrees rootDir = get "games/whyiliketrees" $ do
     darkHeader "../"
     whyiliketreesBody (filter onlyJs gameFiles)
     siteFooter (fmap snd muser) Nothing
+
+handleWhyiliketreesBare :: String -> BlogApp
+handleWhyiliketreesBare rootDir = get "games/whyiliketrees_bare" $ do
+  gameFiles <- liftIO $ getDirectoryContents
+               (rootDir ++ "/static/games/whyiliketrees/")
+  muser <- loadUserSession
+  blaze $ do
+    siteHead "../"
+    whyiliketreesBody (filter onlyJs gameFiles)
 
 handleLD29 :: BlogApp
 handleLD29 = do

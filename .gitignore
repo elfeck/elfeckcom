@@ -10,3 +10,4 @@ config.txt
 /static/games
 /db/*
 /docker/dockerversion.txt
+/log

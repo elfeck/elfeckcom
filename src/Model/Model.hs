@@ -8,6 +8,7 @@ import Data.List (nub)
 import qualified Data.Text as T
 import Data.Time
 import Database.Persist.Sql
+import System.Log.Logger
 
 import Model.Types
 import Model.CryptoUtils
@@ -34,12 +35,13 @@ insertSession userId = do
   insert (Session (addUTCTime (5 * 3600) now) userId)
 
 insertUser :: User -> SqlPersistM T.Text
-insertUser (User name pass salt access) = do
-  mName <- getBy (UniqueUsername name)
+insertUser user = do
+  mName <- getBy (UniqueUsername (userName user))
   case mName of
    Just _ -> return "ney: username taken"
    Nothing -> do
-     insert (User name pass salt access)
+     insert user
+     liftIO $ logDB False "Insert user"
      return "yey: user created"
 
 insertPost :: Post -> SqlPersistM T.Text
@@ -51,6 +53,9 @@ insertPost post = do
                        c <- fromJust $ postCategories post]
             mapM_ insert ptc
     else return ()
+  if fromSqlKey pid /= 0
+    then liftIO $ logDB True ("Insert post=" ++ show (fromSqlKey pid))
+    else return ()
   return "yey: created"
 
 deletePost :: Int -> SqlPersistM T.Text
@@ -61,6 +66,7 @@ deletePost pid = do
    Just _ -> do delete sqlpid
                 ptc <- selectKeysList [PostToCategoryPost ==. sqlpid] []
                 mapM_ delete ptc
+                liftIO $ logDB True ("Delete post=" ++ show pid)
                 return "yey: deleted"
   where sqlpid = (toSqlKey $ fromIntegral pid) :: PostId
 
@@ -79,6 +85,9 @@ updatePost pid post = do
        then do let ptc = [PostToCategory sqlpid c |
                           c <- fromJust $ postCategories post]
                mapM_ insert ptc
+       else return ()
+     if pid /= 0
+       then liftIO $ logDB True ("Update post=" ++ show pid)
        else return ()
      return "yey: updated"
   where sqlpid = (toSqlKey $ fromIntegral pid) :: PostId
@@ -140,3 +149,8 @@ queryDrivel access (f, t) cats ponly = do
 
 filtCat :: [[PostId]] -> [PostId] -> [PostId]
 filtCat postIds candi = [c | c <- candi, and (map (elem c) postIds)]
+
+
+logDB :: Bool -> String -> IO ()
+logDB False action = warningM "db" ("DB ACCESS: " ++ action)
+logDB True action = infoM "db" ("DB access: " ++ action)
