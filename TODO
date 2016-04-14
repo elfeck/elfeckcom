@@ -1,6 +1,4 @@
 TODO:
-*) Logging: auth for Get
-
 *) fix content type for serving restricted files
 *) fix posts being parsed as drivel (ptype = 2) if title or cat missing
 *) fix image margins after headlines (if necessary)
@@ -18,6 +16,7 @@ TODO:
 ~) math-check before including katex
 ~) font-fix for Crimson. Too small letters compared to San Serif text
 
+~) Make sure everything that should - is logging
 
 
 DONE (recently):

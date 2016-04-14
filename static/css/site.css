@@ -87,6 +87,12 @@ li.li {
     margin-bottom: 3px;
 }
 
+li.tli {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    line-height: 1.5;
+}
+
 div.posttitlebar {
     margin-top: 15px;
     display: block;

@@ -142,6 +142,8 @@ eleToHtml Newline = br
 eleToHtml (Plain t) = toHtml t
 eleToHtml (Italic t) = i $ toHtml t
 eleToHtml (Bold t) = b $ toHtml t
+eleToHtml (Latex1 t) = toHtml $ T.concat ["$", t, "$"]
+eleToHtml (Latex2 t) = toHtml $ T.concat ["$$", t, "$$"]
 eleToHtml (Link (d, l)) = a ! (href $ toValue l) ! class_ "link"
                           ! target "blank" $ toHtml d
 eleToHtml (Image (d, l)) = do
@@ -152,6 +154,8 @@ eleToPlain Newline = ""
 eleToPlain (Plain t) = T.filter lon t
 eleToPlain (Italic t) = T.filter lon t
 eleToPlain (Bold t) = T.filter lon t
+eleToPlain (Latex1 t) = T.concat ["$", T.filter lon t, "$"]
+eleToPlain (Latex2 t) = T.concat ["$$", T.filter lon t, "$$"]
 eleToPlain (Link (d, l)) = T.filter lon d
 eleToPlain (Image (d, l)) = T.filter lon d
 
