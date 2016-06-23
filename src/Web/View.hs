@@ -36,7 +36,7 @@ siteHead path = docTypeHtml $ head $ do
     ! type_ "text/css"
   link ! href (appPath "static/img/icon.png") ! rel "icon"
     ! type_ "image/png"
-  link ! href "http://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
+  link ! href "https://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
     ! rel "stylesheet" ! type_ "text/css"
   script "" ! src (appPath "static/js/site.js")
   where appPath p = stringValue (path ++ p)
@@ -52,7 +52,7 @@ inputHead = docTypeHtml $ head $ do
   link ! href "static/css/lib/jquery-ui.min.css" ! rel "stylesheet"
     ! type_ "text/css"
   link ! href "static/img/icon.png" ! rel "icon" ! type_ "image/png"
-  link ! href "http://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
+  link ! href "https://fonts.googleapis.com/css?family=Open+Sans|Crimson+Text"
     ! rel "stylesheet" ! type_ "text/css"
 
 siteHeader :: String -> Html
